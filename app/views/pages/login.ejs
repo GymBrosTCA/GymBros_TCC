@@ -1,0 +1,42 @@
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/css/forms.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+<body>
+    <section class="wrapper">
+        <form id="loginForm">
+            <h1>Login</h1>
+            <section class="input-box">
+                <input type="text" id="username" placeholder="Usuário" required minlength="4">
+                <i class='bx bxs-user'></i>
+                <span class="error-message" id="username-error"></span>
+            </section>
+            <section class="input-box">
+                <input type="password" id="password" placeholder="Senha" required minlength="6">
+                <i class='bx bxs-lock-alt'></i>
+                <span class="error-message" id="password-error"></span>
+            </section>
+
+            <section class="remember-forgot">
+                <label><input type="checkbox" id="remember"> Lembre de mim</label>
+                <a href="#">Esqueceu a senha?</a>
+            </section>
+            <a href="/">
+            <button type="submit" class="btn">Login</button></a>
+
+            <section class="register-link">
+                <p>Não tem uma conta? <a href="/register">Registrar</a></p>
+            </section>
+        </form>
+        <a href="/">
+        <img src="/images/logo-form.png" class="logo">
+        </a>
+    </section>
+
+    <script src="/js/forms.js" type="module"></script>
+</body>
+</html>

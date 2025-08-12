@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymBros</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/footer.css">
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+
+    <section class="side-menu" id="sideMenu">
+    <span class="close-menu" id="closeMenu"><i class="fas fa-times"></i></span>
+    <ul class="menu-items">
+        <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="/academias"><i class="fas fa-dumbbell"></i> Academias</a></li>
+        <li><a href="#"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
+        <li><a href="/planos"><i class="fas fa-tags"></i> Planos e Preços</a></li>
+    </ul>
+</section>
+
+    <section class="menu-overlay" id="menuOverlay"></section>
+
+    <main>
+    <section class="banner-home">
+        <img src="/images/banner.png" alt="">
+    </section>
+    <section class="banner2">
+        <img src="/images/banner2.png" alt="">
+        <section class="text-banner">
+            <h1>POR QUE <br>SE INSCREVER?</h1>
+            <p>
+                Atualmente, a rotina de exercícios físicos <br>deixou de ser apenas uma questão de estética para tornar-se <br>sinônimo de saúde e qualidade de vida.
+                <br>Entretanto, alguns experientes dificuldades para encontrar o espaço ou, <br>até mesmo, a disposição adequada de exercitá-lo. <br>
+                Nessas situações, o GymBros é a melhor alternativa para quem deseja <br>inverter seu paradigma com o exercício. 
+            </p>
+            <a href="#" class="btn-veja-mais">VEJA MAIS</a>
+        </section>
+    </section>   
+    
+    <section class="img-modalidades">
+    <section class="modalidade">
+        <img src="/images/aerobico.png" alt="">
+        <span>AERÓBICO</span>
+    </section>
+    <section class="modalidade">
+        <img src="/images/musculacao.png" alt="">
+        <span>MUSCULAÇÃO</span>
+    </section>
+    <section class="modalidade">
+        <img src="/images/natacao.png" alt="">
+        <span>NATAÇÃO</span>
+    </section>
+</section>
+
+<section class="img-modalidades">
+    <section class="modalidade">
+        <img src="/images/marciais.png" alt="">
+        <span>ARTES MARCIAIS</span>
+    </section>
+    <section class="modalidade">
+        <img src="/images/fitdance.png" alt="">
+        <span>FITDANCE</span>
+    </section>
+    <section class="modalidade">
+        <img src="/images/meditacao.png" alt="">
+        <span>MEDITAÇÃO</span>
+    </section>
+</section>
+
+    <section class="parceiros">
+        <h2>Academias Parceiras</h2>
+        <section class="carrossel-wrapper">
+          <section class="carrossel" id="carrossel">
+            <img src="/images/parceiro1.png" alt="Parceiro 1">
+            <img src="/images/parceiro2.png" alt="Parceiro 2">
+            <img src="/images/parceiro3.png" alt="Parceiro 3">
+            <img src="/images/parceiro4.png" alt="Parceiro 4">
+            <img src="/images/parceiro5.png" alt="Parceiro 5">
+            <img src="/images/parceiro6.png" alt="Parceiro 6">
+            <img src="/images/parceiro7.png" alt="Parceiro 7">
+            <img src="/images/parceiro8.png" alt="Parceiro 8">
+            <img src="/images/parceiro9.png" alt="Parceiro 9">
+            <img src="/images/parceiro10.png" alt="Parceiro 10">
+          </section>
+        </section>
+      </section>      
+      
+    <section class="planos">
+        
+        <img src="/images/biceps-logo.png" class="corner-left">
+        <img src="/images/biceps-logo2.png" class="corner-right">
+
+        <h2>UM PLANO. VÁRIAS ACADEMIAS. TREINOS DO SEU JEITO.</h2>
+        <p>
+            Com o GymBros Pass, você escolhe como e onde quer treinar, sem se prender a uma única academia.<br> 
+            A gente cuida da flexibilidade, você cuida do foco.<br>
+            Conheça nossos planos e encontre o que combina com sua rotina
+        </p>
+        <a href="/planos">
+        <h2 class="btn-veja-mais">VER PLANOS</h2>
+        </a>
+    </section>
+
+
+        
+    </main>
+    <%- include('../partials/footer') %>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="/js/menu.js"></script>
+    <script src="/js/header.js"></script>
+    <script src="/js/carrossel.js"></script>
+</body>
+
+</html>

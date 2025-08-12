@@ -1,0 +1,236 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 75%;
+    height: 100%;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    color: #FFFFFF;
+    overflow-x: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+h1 {
+    font-size: 2.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+}
+
+p {
+    font-size: 1.1rem;
+}
+
+a {
+    font-size: 1rem;
+}
+
+.plans-hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/banner-forms.png');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+    margin-bottom: 50px;
+}
+
+.plans-hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.plans-hero p {
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.plans-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    padding: 0 20px;
+    max-width: 1200px;
+    margin: 0 auto 80px;
+}
+
+.plan-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 300px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.plan-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.plan-card.starter {
+    border-top: 5px solid #cfcfcf;
+}
+
+.plan-card.gymbro {
+    border-top: 5px solid #C5A349;
+}
+
+.plan-card.blaok {
+    border-top: 5px solid #000;
+}
+
+.plan-name {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+.plan-price {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 20px 0;
+    color: #333;
+    text-align: center;
+}
+
+.plan-price span {
+    font-size: 1rem;
+    color: #666;
+    font-weight: normal;
+}
+
+.plan-features {
+    padding: 0;
+    margin: 20px 0;
+    min-height: 120px;
+}
+
+.plan-features li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    color: #555;
+    position: relative;
+    padding-left: 25px;
+}
+
+.plan-features li:before {
+    content: "•";
+    color: #cfcfcf;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+    position: absolute;
+    left: 0;
+}
+
+.starter .plan-features li:before {
+    color: #cfcfcf;
+}
+
+.gymbro .plan-features li:before {
+    color: #C5A349;
+}
+
+.blaok .plan-features li:before {
+    color: #000;
+}
+
+.plan-button {
+    display: block;
+    padding: 12px 30px;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+}
+
+.plan-button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+.starter .plan-button {
+    background: #cfcfcf;
+}
+
+.gymbro .plan-button {
+    background: #C5A349;
+}
+
+.blaok .plan-button {
+    background: #000;
+}
+
+@media (max-width: 768px) {
+    .plans-hero {
+        padding: 60px 20px;
+    }
+    
+    .plans-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .plans-hero p {
+        font-size: 1rem;
+    }
+    
+    .plans-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .plan-card {
+        width: 90%;
+        max-width: 350px;
+    }
+}
+
+.plan-card.gymbro {
+    position: relative;
+}
+
+.plan-card.gymbro:after {
+    content: "MAIS POPULAR";
+    position: absolute;
+    top: 10px;
+    right: -30px;
+    background: #2196F3;
+    color: white;
+    padding: 5px 30px;
+    transform: rotate(45deg);
+    font-size: 0.8rem;
+    font-weight: bold;
+}

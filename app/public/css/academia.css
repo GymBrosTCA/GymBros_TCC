@@ -1,0 +1,212 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+.academias-container {
+    max-width: 1200px;
+    margin: 2rem auto 4rem;
+    padding: 0 20px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.academias-title {
+    text-align: center;
+    margin: 3rem 0 2.5rem;
+    color: #2c3e50;
+    font-size: 2.5rem;
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.academias-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 5px;
+    background: linear-gradient(to right, #3498db, #2ecc71);
+    border-radius: 3px;
+}
+
+.academias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2.5rem;
+    margin: 3rem 0;
+}
+
+.academia-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.academia-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.academia-imagem {
+    width: 100%;
+    height: 220px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+    display: block;
+    padding: 1rem;
+    background: #f8f9fa;
+}
+
+.academia-card:hover .academia-imagem {
+    transform: scale(1.04);
+}
+
+.academia-info {
+    padding: 2rem;
+    display: block;
+}
+
+.academia-nome {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.presencial-badge {
+    display: inline-block;
+    background: linear-gradient(to right, #3498db, #2ecc71);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    margin-bottom: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+}
+
+.academia-horario {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: #7f8c8d;
+    font-size: 1rem;
+}
+
+.academia-horario i {
+    margin-right: 0.8rem;
+    color: #3498db;
+    font-size: 1.1rem;
+}
+
+.academia-modalidade {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #ecf0f1;
+    display: block;
+}
+
+.academia-modalidade h3 {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.academia-modalidade p {
+    color: #7f8c8d;
+    line-height: 1.6;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Efeito de destaque no hover */
+.academia-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(to right, #3498db, #2ecc71);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.academia-card:hover::before {
+    transform: scaleX(1);
+}
+
+footer {
+    margin-top: auto;
+    width: 100%;
+}
+
+@media (max-width: 1200px) {
+    .academias-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .academias-title {
+        font-size: 2.2rem;
+        margin: 2.5rem 0 2rem;
+    }
+    
+    .academias-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .academia-card {
+        max-width: 450px;
+        margin: 0 auto 1.5rem;
+    }
+
+    .academia-imagem {
+        height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .academias-title {
+        font-size: 2rem;
+        padding-bottom: 1rem;
+    }
+    
+    .academias-container {
+        padding: 0 15px;
+    }
+    
+    .academia-info {
+        padding: 1.5rem;
+    }
+
+    .academia-nome {
+        font-size: 1.4rem;
+    }
+
+    .academia-imagem {
+        height: 180px;
+    }
+}

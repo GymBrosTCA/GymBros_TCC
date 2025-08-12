@@ -1,0 +1,37 @@
+const express = require('express');
+const router = express.Router();
+const path = require('path');
+
+// Rotas principais
+router.get('/', (req, res) => {
+    res.render('pages/index');
+});
+
+router.get('/login', (req, res) => {
+    res.render('pages/login');
+});
+
+router.get('/register', (req, res) => {
+    res.render('pages/register');
+});
+
+router.get('/planos', (req, res) => {
+    res.render('pages/planos');
+});
+
+router.get('/academias', (req, res) => {
+    res.render('pages/academias');
+});
+
+
+// Rotas para arquivos estáticos 
+router.get('/js/carrossel.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/js/carrossel.js'));
+});
+
+router.get('/js/header.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/js/header.js'));
+});
+
+
+module.exports = router;

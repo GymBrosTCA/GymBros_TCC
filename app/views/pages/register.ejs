@@ -1,0 +1,48 @@
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign-in</title>
+    <link rel="stylesheet" href="/css/forms.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+<body>
+    <section class="wrapper">
+        <form id="registerForm">
+            <h1>Sign-in</h1>
+            <section class="input-box">
+                <input type="text" id="nome" placeholder="Nome" required minlength="3">
+                <i class='bx bxs-user'></i>
+            </section>
+            <section class="input-box">
+                <input type="text" id="cpf" placeholder="CPF">
+                <i class='bx bxs-lock-alt'></i>
+            </section>
+            <section class="input-box">
+                <input type="email" id="email" placeholder="E-mail">
+                <i class='bx bxs-lock-alt'></i>
+            </section>
+            <section class="input-box">
+                <input type="text" id="cep" placeholder="CEP">
+                <i class='bx bxs-lock-alt'></i>
+            </section>
+            <section class="input-box">
+                <input type="password" id="password" placeholder="Senha" required minlength="6">
+                <i class='bx bxs-lock-alt'></i>
+            </section>
+            <section class="input-box">
+                <input type="password" id="password" placeholder="Confirme a senha" required minlength="6">
+                <i class='bx bxs-lock-alt'></i>
+            </section>
+
+            <a href="/login">
+            <button type="submit" class="btn">Registra</button></a>
+        </form>
+        <a href="/">
+        <img src="/images/logo-form.png" class="logo">
+        </a>
+    </section>
+
+    <script src="/js/forms.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planos</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/planos.css">
+    <link rel="stylesheet" href="/css/footer.css">
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+
+    <section class="side-menu" id="sideMenu">
+        <span class="close-menu" id="closeMenu"><i class="fas fa-times"></i></span>
+        <ul class="menu-items">
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/academias"><i class="fas fa-dumbbell"></i> Academias</a></li>
+            <li><a href="#"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
+            <li><a href="/planos"><i class="fas fa-tags"></i> Planos e Preços</a></li>
+        </ul>
+    </section>
+
+    <section class="menu-overlay" id="menuOverlay"></section>
+
+    <main>
+        <section class="plans-hero">
+            <h1>PLANOS E PREÇOS DO GYMBROS</h1>
+            <p>O maior site de saúde e bem-estar do mundo, com melhores preços acessíveis para todos</p>
+        </section>
+
+        <section class="plans-container">
+            <section class="plan-card starter">
+                <h2 class="plan-name">STARTER</h2>
+                <ul class="plan-features">
+                    <li>Sem informações para dados e informas</li>
+                    <li>Os trabalhos gerais são realizados</li>
+                </ul>
+                <p class="plan-price">R$ 34,90<span>/mês</span></p>
+                <a href="#" class="plan-button">Assinar agora</a>
+            </section>
+
+            <section class="plan-card gymbro">
+                <h2 class="plan-name">GYMBRO</h2>
+                <ul class="plan-features">
+                    <li>Os trabalhos gerais são realizados</li>
+                    <li>Acesso a academias premium</li>
+                </ul>
+                <p class="plan-price">R$ 85,60<span>/mês</span></p>
+                <a href="#" class="plan-button">Assinar agora</a>
+            </section>
+
+            <section class="plan-card blaok">
+                <h2 class="plan-name">BLACK</h2>
+                <ul class="plan-features">
+                    <li>Desenvolvimento e outros e informos são</li>
+                    <li>Publicamente gerais no web docile</li>
+                    <li>Acesso ilimitado a todas as academias</li>
+                </ul>
+                <p class="plan-price">R$ 145,90<span>/mês</span></p>
+                <a href="#" class="plan-button">Assinar agora</a>
+            </section>
+        </section>
+    </main>
+    <%- include('../partials/footer') %>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="/js/menu.js"></script>
+    <script src="/js/header.js"></script>
+    <script src="/js/carrossel.js"></script>
+</body>
+
+</html>
