@@ -1,0 +1,211 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 56.25%;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    color: #FFFFFF;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+h1 {
+    font-size: 2rem;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.8rem;
+    text-align: center;
+}
+
+p, a {
+    font-size: 1rem;
+    line-height: 1.4;
+    text-align: center;
+}
+
+/* Hero */
+.plans-hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/banner-forms.png');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    padding: 60px 10px;
+    margin-bottom: 40px;
+}
+
+.plans-hero h1 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.plans-hero p {
+    font-size: 1rem;
+    max-width: 90%;
+    margin: 0 auto;
+    line-height: 1.4;
+}
+
+/* Container de planos */
+.plans-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 0 10px;
+    margin: 0 auto 40px;
+}
+
+/* Cards */
+.plan-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 20px;
+    width: 90%;
+    max-width: 350px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+/* Tipos de planos */
+.plan-card.starter {
+    border-top: 5px solid #cfcfcf;
+}
+
+.plan-card.gymbro {
+    border-top: 5px solid #C5A349;
+}
+
+.plan-card.blaok {
+    border-top: 5px solid #000;
+}
+
+/* Conteúdo do card */
+.plan-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+    text-align: center;
+}
+
+.plan-price {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 15px 0;
+    color: #333;
+    text-align: center;
+}
+
+.plan-price span {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: normal;
+}
+
+.plan-features {
+    padding: 0;
+    margin: 15px 0;
+    min-height: auto;
+}
+
+.plan-features li {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+    color: #555;
+    position: relative;
+    padding-left: 20px;
+}
+
+.plan-features li:before {
+    content: "•";
+    color: #cfcfcf;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+    position: absolute;
+    left: 0;
+}
+
+.starter .plan-features li:before {
+    color: #cfcfcf;
+}
+
+.gymbro .plan-features li:before {
+    color: #C5A349;
+}
+
+.blaok .plan-features li:before {
+    color: #000;
+}
+
+/* Botões */
+.plan-button {
+    display: block;
+    padding: 10px 20px;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+}
+
+.plan-button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+.starter .plan-button {
+    background: #cfcfcf;
+}
+
+.gymbro .plan-button {
+    background: #C5A349;
+}
+
+.blaok .plan-button {
+    background: #000;
+}
+
+/* Badge "Mais Popular" */
+.plan-card.gymbro:after {
+    content: "MAIS POPULAR";
+    position: absolute;
+    top: 10px;
+    right: -20px;
+    background: #2196F3;
+    color: white;
+    padding: 4px 20px;
+    transform: rotate(45deg);
+    font-size: 0.7rem;
+    font-weight: bold;
+}
