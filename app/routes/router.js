@@ -23,6 +23,17 @@ router.get('/academias', (req, res) => {
     res.render('pages/academias');
 });
 
+router.get('/compra', (req, res) => {
+    res.render('pages/compra');
+});
+
+router.get('/compra2', (req, res) => {
+    res.render('pages/compra2');
+});
+
+router.get('/compra3', (req, res) => {
+    res.render('pages/compra3');
+});
 
 // Rotas para arquivos estáticos 
 router.get('/js/carrossel.js', (req, res) => {

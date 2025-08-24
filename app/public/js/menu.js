@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         menuOverlay.classList.remove('open');
     });
 
-    // Efeito de scroll no header (mantido do original)
+    // Efeito de scroll no header 
     window.addEventListener('scroll', function() {
         const header = document.querySelector('.gymbros-header');
         if (window.scrollY > 50) {

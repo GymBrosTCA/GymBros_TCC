@@ -1,0 +1,220 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    color: #000;
+    background-color: #FFF;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1rem;
+}
+
+.compra-container {
+    position: relative;
+    max-width: 60rem;
+    width: 100%;
+    padding: 3rem;
+    background: #1a1a1a;
+    border-radius: 1.5rem;
+    box-shadow: 0 1rem 2rem rgba(0,0,0,0.5);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.btn-voltar {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    font-size: 3rem;
+    color: #fff; 
+    text-decoration: none;
+    transition: transform 0.3s ease, color 0.3s ease;
+    z-index: 10;
+}
+
+.btn-voltar:hover {
+    transform: translateX(-0.3rem) scale(1.1);
+    color: #888;
+}
+
+.btn-voltar i {
+    color: #888 !important; 
+    font-weight: 900; 
+}
+
+.compra-container h1 {
+    font-size: 3.2rem;
+    color: #fff;
+    margin-bottom: 2rem;
+}
+
+.plano-selecionado {
+    width: 100%;
+    padding: 2.5rem;
+    border: 0.2rem solid #333;
+    border-radius: 1.2rem;
+    background: #111;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.5);
+    position: relative;
+}
+
+.badge {
+    position: absolute;
+    top: -1rem;
+    right: -1rem;
+    background: #333;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+    border-radius: 0.8rem;
+    font-size: 1.4rem;
+}
+
+.plano-selecionado h2 {
+    font-size: 2.8rem;
+    color: #fff;
+}
+
+.plano-selecionado p {
+    font-size: 1.6rem;
+    color: #ddd;
+    line-height: 1.5;
+}
+
+.plano-selecionado strong {
+    font-size: 2.4rem;
+    color: #FFD700;
+    font-weight: 700;
+    margin: 1rem 0;
+    display: block;
+}
+
+.btn-confirmar {
+    display: inline-block;
+    padding: 1.4rem 3.6rem;
+    margin-top: 2rem;
+    font-size: 2rem;
+    font-weight: bold;
+    text-decoration: none;
+    background: #333;
+    color: #fff;
+    border: 0.3rem solid #333;
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.btn-confirmar:hover {
+    transform: scale(1.05);
+    background: #555;
+    border-color: #555;
+    color: #fff;
+}
+
+.feedback {
+    display: none;
+    position: fixed;
+    top: 50%; 
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.75);
+    border-radius: 1rem;
+    text-align: center;
+    z-index: 9999;
+    pointer-events: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 2rem 3rem;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.feedback.active {
+    display: flex;
+    pointer-events: auto;
+    opacity: 1;
+}
+
+.feedback .icon {
+    width: 10rem;
+    height: 10rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    animation: pop 0.4s ease;
+}
+
+.feedback.success .icon {
+    background: #27ae60;
+    color: #fff;
+}
+
+.feedback.error .icon {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.feedback p {
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+@keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .compra-container {
+        padding: 2rem;
+    }
+
+    .plano-selecionado {
+        padding: 2rem;
+    }
+
+    .btn-confirmar {
+        width: 100%;
+        font-size: 1.6rem;
+        padding: 1rem 0;
+    }
+
+    .feedback {
+        width: 90%;
+        padding: 2rem;
+    }
+}
