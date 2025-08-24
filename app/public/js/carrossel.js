@@ -1,6 +1,6 @@
 const carrossel = document.getElementById('carrossel');
 const img = carrossel.querySelector('img');
-const imgWidth = img.offsetWidth + 20; // largura da imagem + gap (20px)
+const imgWidth = img.offsetWidth + 20; 
 
 let isDragging = false;
 let startX;

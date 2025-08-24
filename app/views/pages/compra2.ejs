@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finalizar Compra - GymBros</title>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/plano-gymbro.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <main>
+    <section class="compra-container">
+      <a href="/planos" class="btn-voltar"><i class="fas fa-arrow-left"></i></a>
+      <h1>Finalizar Compra</h1>
+
+      <section class="plano-selecionado">
+        <div class="badge">Mais Popular</div>
+        <h2>GYMBRO</h2>
+        <p>3560+ Academias e estúdios</p>
+        <p>Treinos online ao vivo</p>
+        <p>Leve 4 amigos por mês</p>
+        <p>Personal trainer online</p>
+        <p><strong>R$ 85,60/mês</strong></p>
+        <button id="confirmarCompra" class="btn-confirmar">Confirmar Compra</button>
+      </section>
+    </section>
+
+    <section class="feedback" id="feedback">
+      <section class="icon" id="feedbackIcon"></section>
+      <p id="feedbackMsg"></p>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+  <script src="/js/compra.js"></script>
+</body>
+</html>
