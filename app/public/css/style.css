@@ -288,6 +288,14 @@ a {
 }
 
 /* Responsivo */
+
+@media only screen and (max-width: 768px) {
+  .banner-home img {
+    content: url("/images/banner-mobile.png");
+  }
+}
+
+
 @media (max-width: 768px) {
     html {
         font-size: 56.25%; 

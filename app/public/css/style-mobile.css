@@ -39,6 +39,10 @@ p, a {
     display: block;
 }
 
+.banner-home img {
+  content: url("/images/banner-mobile.png");
+}
+
 /* Banner 2 */
 .banner2 {
     display: flex;
