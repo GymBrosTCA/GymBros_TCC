@@ -1,0 +1,92 @@
+/* sobre-mobile.css */
+
+/* Reset específico para mobile */
+body {
+    font-size: 16px;
+}
+
+/* Banner principal */
+.banner-home img {
+    height: auto;
+}
+
+/* História */
+.sobre-historia {
+    margin: 40px 15px;
+}
+
+.sobre-historia h1 {
+    font-size: 1.8rem;
+}
+
+.sobre-historia p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Missão, Visão e Valores */
+.sobre-missao-valores {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin: 40px 15px;
+}
+
+.sobre-box {
+    padding: 20px;
+}
+
+/* Equipe */
+.sobre-equipe {
+    margin: 40px 15px;
+}
+
+.sobre-equipe h2 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+}
+
+/* Modalidades/Equipe */
+.img-modalidades {
+    flex-direction: column;
+    gap: 30px;
+}
+
+.modalidade img {
+    width: 120px;
+    height: 120px;
+}
+
+.modalidade span {
+    font-size: 1rem;
+}
+
+/* Call-to-action */
+.planos {
+    padding: 50px 15px;
+    border-radius: 15px;
+}
+
+.planos h2 {
+    font-size: 1.8rem;
+}
+
+.planos p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+.btn-veja-mais {
+    padding: 12px 25px;
+    font-size: 0.95rem;
+}
+
+/* Cantos decorativos */
+.corner-left, .corner-right {
+    width: 50px;
+}
+
+/* Ajuste geral de margens */
+section {
+    margin-bottom: 30px;
+}
