@@ -1,56 +1,96 @@
-async function handleFormSubmit(formId, route) {
-  const form = document.getElementById(formId);
-  if (!form) return;
+// forms.js
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
 
-  let successSpan = form.querySelector(".success-message");
-  if (!successSpan) {
-    successSpan = document.createElement("span");
-    successSpan.className = "success-message";
-    form.prepend(successSpan);
-  }
+// ----------- LOGIN -----------
+if (loginForm) {
+    loginForm.addEventListener('submit', async e => {
+        e.preventDefault();
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+        // limpa erros
+        loginForm.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+        const successEl = loginForm.querySelector('.success-message');
+        successEl.textContent = '';
 
-    document.querySelectorAll(".error-message").forEach(span => span.textContent = "");
-    successSpan.textContent = "";
-    successSpan.style.color = "#4CAF50";
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
 
-    const formData = Object.fromEntries(new FormData(form).entries());
+        try {
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ username, password })
+            });
+            const data = await res.json();
 
-    try {
-      const res = await fetch(route, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
-      const result = await res.json();
+            if (res.status !== 200) {
+                data.erros.forEach(err => {
+                    const el = document.getElementById(`${err.param}-error`);
+                    if (el) el.textContent = err.msg;
+                });
+                return;
+            }
 
-      if (!res.ok) {
-        result.erros.forEach(err => {
-          const span = document.getElementById(`${err.param}-error`);
-          if (span) span.textContent = err.msg;
-        });
-      } else {
-        successSpan.textContent = result.mensagem;
-        setTimeout(() => {
-          if (route === "/register") window.location.href = "/login";
-          else if (route === "/login" && result.redirect) window.location.href = result.redirect;
-        }, 1200);
-      }
+            // sucesso
+            successEl.textContent = data.mensagem;
 
-    } catch (err) {
-      console.error(err);
-      successSpan.textContent = "Erro ao enviar formulário.";
-      successSpan.style.color = "#ff4d4d";
-    }
-  });
+            setTimeout(() => {
+                window.location.href = '/area-aluno';
+            }, 1000);
+
+        } catch (err) {
+            console.error(err);
+            successEl.textContent = 'Erro inesperado. Tente novamente.';
+        }
+    });
 }
 
-handleFormSubmit("registerForm", "/register");
-handleFormSubmit("loginForm", "/login");
+// ----------- REGISTER -----------
+if (registerForm) {
+    registerForm.addEventListener('submit', async e => {
+        e.preventDefault();
 
-document.addEventListener("input", e => {
-  const span = document.getElementById(`${e.target.id}-error`);
-  if (span) span.textContent = "";
-});
+        // limpa erros
+        registerForm.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+        const successEl = registerForm.querySelector('.success-message');
+        successEl.textContent = '';
+
+        const formData = {
+            nome: document.getElementById('nome').value.trim(),
+            cpf: document.getElementById('cpf').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            cep: document.getElementById('cep').value.trim(),
+            password: document.getElementById('password').value,
+            confirmPassword: document.getElementById('confirmPassword').value,
+            terms: document.getElementById('terms').checked ? 'on' : ''
+        };
+
+        try {
+            const res = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(formData)
+            });
+            const data = await res.json();
+
+            if (res.status !== 200) {
+                data.erros.forEach(err => {
+                    const el = document.getElementById(`${err.param}-error`);
+                    if (el) el.textContent = err.msg;
+                });
+                return;
+            }
+
+            // sucesso
+            successEl.textContent = data.mensagem;
+
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 1500);
+
+        } catch (err) {
+            console.error(err);
+            successEl.textContent = 'Erro inesperado. Tente novamente.';
+        }
+    });
+}
