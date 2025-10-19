@@ -1,54 +1,103 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Área do Aluno - GymBros</title>
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/footer.css">
-    <link rel="stylesheet" href="/css/area-aluno.css">
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Área do Aluno - GymBros</title>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
 </head>
 <body>
-    <%- include('../partials/header') %>
 
-    <section class="section-container aluno-dashboard">
-        <!-- Menu Lateral -->
-        <section class="side-menu-aluno">
+<%- include('../partials/header') %>
+
+<section class="aluno-dashboard">
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img src="/images/avatar-placeholder.png" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p>Aluno GymBros</p>
+        </section>
+        <ul class="aluno-menu">
+            <li><a href="#"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
+            <li><a href="#"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="#"><i class="fas fa-chart-line"></i> Evolução</a></li>
+            <li><a href="#"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="#"><i class="fas fa-cog"></i> Configurações</a></li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+
+        <!-- TOPO DASHBOARD -->
+        <section class="dashboard-top">
+            <h1>Bem-vindo, <%= user.nome %>!</h1>
+            <p>Acompanhe seu progresso, treinos e planos</p>
+        </section>
+
+        <!-- CARDS -->
+        <section class="cards-container">
+            <section class="card card-blue">
+                <h3>Meus Treinos</h3>
+                <span class="card-value">70%</span>
+                <a href="#" class="btn-card">Ver Treinos</a>
+            </section>
+
+            <section class="card card-orange">
+                <h3>Evolução</h3>
+                <canvas class="line-graph" width="200" height="120"></canvas>
+                <a href="#" class="btn-card">Ver Evolução</a>
+            </section>
+
+            <section class="card card-green">
+                <h3>Meu Plano</h3>
+                <section class="progress-bar">
+                    <section class="progress-fill" style="width: 80%;"></section>
+                </section>
+                <span class="card-value">80%</span>
+                <a href="#" class="btn-card">Editar Plano</a>
+            </section>
+        </section>
+
+        <!-- ATIVIDADES RECENTES -->
+        <section class="recent-activities">
+            <h2>Atividades Recentes</h2>
             <ul>
-                <li><a href="#"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
-                <li><a href="#"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
-                <li><a href="#"><i class="fas fa-chart-line"></i> Evolução</a></li>
-                <li><a href="#"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
-                <li><a href="#"><i class="fas fa-cog"></i> Configurações</a></li>
+                <li><i class="fas fa-dumbbell"></i> Treino de Peito <span>Ontem</span></li>
+                <li><i class="fas fa-dumbbell"></i> Treino de Pernas <span>2 dias atrás</span></li>
+                <li><i class="fas fa-leaf"></i> Yoga leve <span>3 dias atrás</span></li>
             </ul>
         </section>
 
-        <!-- Conteúdo Principal -->
-        <section class="main-content-aluno">
-            <section class="card-aluno">
-                <h3>Bem-vindo, <%= user.nome %>!</h3>
-                <p>Aqui você encontra seu progresso, treinos e informações do plano.</p>
-                <a href="#" class="btn-aluno">Ver treinos</a>
+        <!-- BADGES & METAS -->
+        <section class="goals-badges">
+            <h2>Metas & Conquistas</h2>
+            <section class="goal">
+                <p>Meta semanal: 5 treinos</p>
+                <section class="progress-bar">
+                    <section class="progress-fill" style="width: 60%;"></section>
+                </section>
             </section>
-
-            <section class="card-aluno">
-                <h3>Meu Plano</h3>
-                <p>Detalhes do seu plano atual e próximos passos.</p>
-                <a href="#" class="btn-aluno">Editar plano</a>
-            </section>
-
-            <section class="card-aluno">
-                <h3>Evolução</h3>
-                <p>Acompanhe seu desempenho ao longo do tempo.</p>
-                <a href="#" class="btn-aluno">Ver evolução</a>
+            <section class="badges">
+                <span class="badge">🏆 1ª Meta Semana</span>
+                <span class="badge">💪 Consistência 3 dias</span>
             </section>
         </section>
+
     </section>
 
-    <%- include('../partials/footer') %>
+</section>
 
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<%- include('../partials/footer') %>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="/js/area-aluno.js"></script>
 </body>
 </html>

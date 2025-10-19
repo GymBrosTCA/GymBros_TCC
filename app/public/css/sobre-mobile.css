@@ -82,8 +82,9 @@ body {
 }
 
 /* Cantos decorativos */
-.corner-left, .corner-right {
-    width: 50px;
+.corner-left, 
+.corner-right {
+    display: none !important; 
 }
 
 /* Ajuste geral de margens */

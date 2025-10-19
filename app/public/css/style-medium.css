@@ -117,10 +117,23 @@ html {
   .planos p {
     font-size: 1.6rem;
   }
+    
+@media (min-width: 769px) and (max-width: 1440px) {
+    
+    .corner-left, .corner-right {
+        display: block !important;
+        width: 20vw !important; 
+        min-width: 150px; 
+        max-width: 250px; 
+        opacity: 0.6;
+        transform: translate(-50%, -50%); 
+    }
+    
+    .corner-right {
+        transform: translate(50%, -50%);
+    }
 
-  .corner-left, .corner-right {
-    width: 250px;
-  }
+}
 
   .carrossel img {
     width: 9rem;
