@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área do Aluno - GymBros</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/area-aluno.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+
+    <section class="section-container aluno-dashboard">
+        <!-- Menu Lateral -->
+        <section class="side-menu-aluno">
+            <ul>
+                <li><a href="#"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
+                <li><a href="#"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+                <li><a href="#"><i class="fas fa-chart-line"></i> Evolução</a></li>
+                <li><a href="#"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> Configurações</a></li>
+            </ul>
+        </section>
+
+        <!-- Conteúdo Principal -->
+        <section class="main-content-aluno">
+            <section class="card-aluno">
+                <h3>Bem-vindo, <%= user.nome %>!</h3>
+                <p>Aqui você encontra seu progresso, treinos e informações do plano.</p>
+                <a href="#" class="btn-aluno">Ver treinos</a>
+            </section>
+
+            <section class="card-aluno">
+                <h3>Meu Plano</h3>
+                <p>Detalhes do seu plano atual e próximos passos.</p>
+                <a href="#" class="btn-aluno">Editar plano</a>
+            </section>
+
+            <section class="card-aluno">
+                <h3>Evolução</h3>
+                <p>Acompanhe seu desempenho ao longo do tempo.</p>
+                <a href="#" class="btn-aluno">Ver evolução</a>
+            </section>
+        </section>
+    </section>
+
+    <%- include('../partials/footer') %>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>

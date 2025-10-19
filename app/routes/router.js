@@ -1,3 +1,4 @@
+// router.js
 const express = require('express');
 const router = express.Router();
 const path = require('path');
@@ -6,7 +7,7 @@ const { body, validationResult } = require('express-validator');
 // "Banco" temporário
 const usuarios = [];
 
-// Função simples pra validar CPF (só pra demo, não é 100% completa)
+// Função simples pra validar CPF (só pra demo)
 function validarCPF(cpf) {
   cpf = cpf.replace(/\D/g, '');
   if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
@@ -23,7 +24,11 @@ function validarCPF(cpf) {
   return true;
 }
 
-// ===== ROTAS GET =====
+// ====================
+// ROTAS GET
+// ====================
+
+// Páginas públicas
 router.get('/', (req, res) => res.render('pages/index'));
 router.get('/login', (req, res) => res.render('pages/login'));
 router.get('/register', (req, res) => res.render('pages/register'));
@@ -34,7 +39,23 @@ router.get('/compra2', (req, res) => res.render('pages/compra2'));
 router.get('/compra3', (req, res) => res.render('pages/compra3'));
 router.get('/about', (req, res) => res.render('pages/about'));
 
-// ===== ROTAS POST =====
+// Área do Aluno (protegida)
+router.get('/area-aluno', (req, res) => {
+    if (!req.session.user) return res.redirect('/login'); // se não logado, volta pro login
+    res.render('pages/area-aluno', { user: req.session.user });
+});
+
+// Logout
+router.get('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) console.error(err);
+        res.redirect('/login');
+    });
+});
+
+// ====================
+// ROTAS POST
+// ====================
 
 // Registro
 router.post('/register',
@@ -101,13 +122,20 @@ router.post('/login',
       return res.status(401).json({ erros: [{ param: 'password', msg: 'Usuário ou senha incorretos.' }] });
     }
 
+    // salva usuário na sessão
+    req.session.user = user;
+
     console.log("Login bem-sucedido:", username);
-    return res.status(200).json({ mensagem: 'Login realizado com sucesso! Redirecionando...', redirect: '/' });
+    return res.status(200).json({ mensagem: 'Login realizado com sucesso! Redirecionando...', redirect: '/area-aluno' });
   }
 );
 
-// ===== ARQUIVOS ESTÁTICOS =====
+// ====================
+// ARQUIVOS ESTÁTICOS
+// ====================
 router.get('/js/carrossel.js', (req, res) => res.sendFile(path.join(__dirname, '../public/js/carrossel.js')));
 router.get('/js/header.js', (req, res) => res.sendFile(path.join(__dirname, '../public/js/header.js')));
+router.get('/js/forms.js', (req, res) => res.sendFile(path.join(__dirname, '../public/js/forms.js')));
+router.get('/js/area-aluno.js', (req, res) => res.sendFile(path.join(__dirname, '../public/js/area-aluno.js')));
 
 module.exports = router;
