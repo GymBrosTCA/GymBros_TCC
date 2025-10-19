@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre Nós - GymBros</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/sobre.css">
+    <link rel="stylesheet" href="/css/sobre-mobile.css" media="only screen and (max-width: 768px)">
+    <link rel="stylesheet" href="/css/footer.css">
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+
+    <section class="side-menu" id="sideMenu">
+        <span class="close-menu" id="closeMenu"><i class="fas fa-times"></i></span>
+        <ul class="menu-items">
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/academias"><i class="fas fa-dumbbell"></i> Academias</a></li>
+            <li><a href="/sobre"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
+            <li><a href="/planos"><i class="fas fa-tags"></i> Planos e Preços</a></li>
+        </ul>
+    </section>
+
+    <section class="menu-overlay" id="menuOverlay"></section>
+
+    <main>
+        <!-- Banner da página -->
+        <section class="banner-home">
+            <img src="/images/banner-sobre.png" alt="Sobre nós GymBros">
+        </section>
+
+        <!-- História da GymBros -->
+        <section class="sobre-historia">
+            <h1>Nossa História</h1>
+            <p>
+                Fundada com o objetivo de transformar a forma como as pessoas encaram o exercício físico, 
+                a GymBros nasceu da ideia de unir qualidade, flexibilidade e comunidade. 
+                Queremos que cada treino seja uma experiência única, que inspire nossos alunos a cuidar da saúde e se superar todos os dias.
+            </p>
+        </section>
+
+        <!-- Missão, Visão e Valores -->
+        <section class="sobre-missao-valores">
+            <div class="sobre-box">
+                <h2>Missão</h2>
+                <p>Proporcionar aos nossos alunos acesso a academias de qualidade, promovendo saúde, bem-estar e motivação contínua.</p>
+            </div>
+            <div class="sobre-box">
+                <h2>Visão</h2>
+                <p>Ser referência em academias flexíveis e inovadoras, conectando pessoas e fortalecendo uma comunidade saudável.</p>
+            </div>
+            <div class="sobre-box">
+                <h2>Valores</h2>
+                <p>Compromisso, Flexibilidade, Inovação, Respeito e Paixão pelo exercício físico.</p>
+            </div>
+        </section>
+
+        <!-- Equipe -->
+        <section class="sobre-equipe">
+            <h2>Conheça nossa equipe</h2>
+            <section class="img-modalidades">
+                <section class="modalidade">
+                    <img src="/images/treinador1.png" alt="Treinador 1">
+                    <span>Lucas</span>
+                </section>
+                <section class="modalidade">
+                    <img src="/images/treinador2.png" alt="Treinador 2">
+                    <span>Mariana</span>
+                </section>
+                <section class="modalidade">
+                    <img src="/images/treinador3.png" alt="Treinador 3">
+                    <span>Rafael</span>
+                </section>
+            </section>
+        </section>
+
+        <!-- Chamada para planos -->
+        <section class="planos">
+            <h2>Venha treinar com a gente!</h2>
+            <p>
+                Descubra como é fácil manter a disciplina e a motivação quando você tem suporte, comunidade e flexibilidade.
+            </p>
+            <a href="/planos">
+                <h2 class="btn-veja-mais">VEJA NOSSOS PLANOS</h2>
+            </a>
+        </section>
+    </main>
+
+    <%- include('../partials/footer') %>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="/js/menu.js"></script>
+    <script src="/js/header.js"></script>
+</body>
+
+</html>

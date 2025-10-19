@@ -1,42 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE-edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="/css/forms.css">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - GymBros</title>
+  <link rel="stylesheet" href="/css/forms.css">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <style>
+    .error-message { color: #ff4d4d; font-size: 0.9rem; margin-top: 4px; display:block; }
+    .success-message { color: #4CAF50; font-size: 1rem; margin-bottom: 10px; display:block; text-align:center; }
+  </style>
 </head>
 <body>
-    <section class="wrapper">
-        <form id="loginForm">
-            <h1>Login</h1>
-            <section class="input-box">
-                <input type="text" id="username" placeholder="Usuário" required minlength="4">
-                <i class='bx bxs-user'></i>
-                <span class="error-message" id="username-error"></span>
-            </section>
-            <section class="input-box">
-                <input type="password" id="password" placeholder="Senha" required minlength="6">
-                <i class='bx bxs-lock-alt'></i>
-                <span class="error-message" id="password-error"></span>
-            </section>
+  <section class="wrapper">
+    <form id="loginForm">
+      <h1>Login</h1>
+      <span class="success-message"></span>
 
-            <section class="remember-forgot">
-                <label><input type="checkbox" id="remember"> Lembre de mim</label>
-                <a href="#">Esqueceu a senha?</a>
-            </section>
-            <a href="/">
-            <button type="submit" class="btn">Login</button></a>
+      <section class="input-box">
+        <input type="text" id="username" name="username" placeholder="Usuário, CPF ou E-mail">
+        <i class='bx bxs-user'></i>
+        <span class="error-message" id="username-error"></span>
+      </section>
 
-            <section class="register-link">
-                <p>Não tem uma conta? <a href="/register">Registrar</a></p>
-            </section>
-        </form>
-        <a href="/">
-        <img src="/images/logo-form.png" class="logo">
-        </a>
-    </section>
+      <section class="input-box">
+        <input type="password" id="password" name="password" placeholder="Senha">
+        <i class='bx bxs-lock-alt'></i>
+        <span class="error-message" id="password-error"></span>
+      </section>
 
-    <script src="/js/forms.js" type="module"></script>
+      <button type="submit" class="btn">Login</button>
+
+      <section class="register-link">
+        <p>Não tem uma conta? <a href="/register">Registrar</a></p>
+      </section>
+    </form>
+
+    <a href="/"><img src="/images/logo-form.png" class="logo" alt="Logo GymBros"></a>
+  </section>
+
+  <script src="/js/forms.js" type="module"></script>
+  <script src="/js/validar.js"></script>
 </body>
 </html>

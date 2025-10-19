@@ -1,0 +1,187 @@
+/* sobre.css */
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Corpo da página */
+body {
+    background-color: #f9f9f9;
+    color: #747474;
+    line-height: 1.6;
+}
+
+/* Banner principal */
+.banner-home img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+/* História */
+.sobre-historia {
+    max-width: 1000px;
+    margin: 60px auto;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.sobre-historia h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.sobre-historia p {
+    font-size: 1.1rem;
+    color: #747474;
+}
+
+/* Missão, Visão e Valores */
+.sobre-missao-valores {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    max-width: 1100px;
+    margin: 60px auto;
+    gap: 30px;
+}
+
+.sobre-box {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
+    flex: 1 1 300px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.sobre-box:hover {
+    transform: translateY(-10px);
+}
+
+.sobre-box h2 {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.sobre-box p {
+    font-size: 1rem;
+    color: #747474;
+}
+
+/* Equipe */
+.sobre-equipe {
+    max-width: 1000px;
+    margin: 60px auto;
+    text-align: center;
+}
+
+.sobre-equipe h2 {
+    font-size: 2.2rem;
+    color: #333;
+    margin-bottom: 40px;
+}
+
+/* Modalidades/Equipe */
+.img-modalidades {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+.modalidade {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.modalidade img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 3px solid #ff4b5c;
+}
+
+.modalidade span {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.modalidade:hover {
+    transform: scale(1.1);
+}
+
+/* Call-to-action */
+.planos {
+    position: relative;
+    background-color: #ff4b5c;
+    color: #fff;
+    text-align: center;
+    padding: 80px 20px;
+    margin-top: 80px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.planos h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.planos p {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.btn-veja-mais {
+    display: inline-block;
+    padding: 15px 30px;
+    font-size: 1rem;
+    background-color: #fff;
+    color: #ff4b5c;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-veja-mais:hover {
+    background-color: #ffd2d7;
+    color: #ff4b5c;
+}
+
+
+/* Responsividade */
+@media only screen and (max-width: 768px) {
+    .sobre-missao-valores {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .img-modalidades {
+        gap: 30px;
+    }
+
+    .modalidade img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .planos {
+        padding: 60px 20px;
+    }
+}
