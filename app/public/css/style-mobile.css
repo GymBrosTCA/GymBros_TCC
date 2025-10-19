@@ -1,18 +1,20 @@
+/* ===================== MOBILE HARDCORE ===================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-html {
-    font-size: 56.25%; /* fonte ajustada já para mobile */
+html, body {
+    font-size: 56.25%;
+    overflow-x: hidden !important; /* bloqueia rolagem lateral */
+    width: 100% !important;
+    position: relative;
 }
 
 body {
     font-family: 'Arial', sans-serif;
     color: #FFFFFF;
-    overflow-x: hidden;
-    position: relative;
 }
 
 /* Títulos e textos */
@@ -22,7 +24,7 @@ h1 {
 
 h2 {
     font-size: 2.4rem;
-    color: #000000;
+    color: #000;
     text-align: center;
     margin: 4rem 0 2rem 0;
 }
@@ -32,56 +34,69 @@ p, a {
     line-height: 1.5;
 }
 
-/* Banner Home */
+/* Banner principal */
 .banner-home img {
-    width: 100%;
-    height: auto;
+    width: 100% !important;
+    height: auto !important;
     display: block;
+}
+
+/* Troca de banner em celular */
+@media (max-width: 768px) {
+    .banner-home img {
+        content: url("/images/banner-mobile.png") !important;
+    }
 }
 
 /* Banner 2 */
 .banner2 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 2rem;
-    gap: 2rem;
-    margin-bottom: 4rem;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 2rem !important;
+    gap: 2rem !important;
+    margin-bottom: 4rem !important;
+    overflow: hidden !important; /* força não empilhar fora da tela */
+    width: 100% !important;
 }
 
 .banner2 img {
-    max-width: 90%;
-    height: auto;
+    max-width: 90% !important;
+    height: auto !important;
 }
 
 .text-banner {
-    width: 100%;
+    width: 100% !important;
 }
 
 .text-banner h1 {
-    font-size: 2.4rem;
-    margin-bottom: 1.5rem;
-    color: #C5A349;
+    font-size: 2.4rem !important;
+    margin-bottom: 1rem !important;
+    color: #C5A349 !important;
+    line-height: 1.2 !important; /* evita quebra feia */
+    word-break: keep-all !important;
 }
 
 .text-banner p {
-    font-size: 1.6rem;
-    color: #000000;
+    font-size: 1.6rem !important;
+    color: #000000 !important;
+    line-height: 1.4 !important;
+    word-break: keep-all !important;
 }
 
 /* Planos */
 .planos {
-    padding: 4rem 2rem;
-    text-align: center;
+    padding: 4rem 2rem !important;
+    text-align: center !important;
 }
 
 .planos p {
-    font-size: 1.6rem;
-    color: #000000;
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    position: relative;
+    font-size: 1.6rem !important;
+    color: #000000 !important;
+    margin-bottom: 2rem !important;
+    padding-bottom: 1.5rem !important;
+    position: relative !important;
 }
 
 .planos p::after {
@@ -95,11 +110,11 @@ p, a {
     background: linear-gradient(90deg, #B8860B, #FFD700, #B8860B);
 }
 
+/* Cantos decorativos */
 .corner-left,
 .corner-right {
-    display: none;
+    display: none !important;
 }
-
 
 /* Botão Veja Mais */
 .btn-veja-mais {
@@ -156,39 +171,39 @@ p, a {
 /* Modalidades */
 .img-modalidades {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-    padding: 2rem;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2rem !important;
+    padding: 2rem !important;
 }
 
 .modalidade {
-    position: relative;
-    overflow: hidden;
-    border-radius: 1.5rem;
-    width: 90%;
-    max-width: 400px;
-    height: 200px;
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 1.5rem !important;
+    width: 90% !important;
+    max-width: 400px !important;
+    height: 200px !important;
 }
 
 .modalidade img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
     transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 .modalidade span {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 1.8rem;
-    font-weight: bold;
-    opacity: 0;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    color: white !important;
+    font-size: 1.8rem !important;
+    font-weight: bold !important;
+    opacity: 0 !important;
     transition: opacity 0.3s ease;
-    text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    text-shadow: 0 0 10px rgba(0,0,0,0.8) !important;
 }
 
 .modalidade:hover img {
@@ -202,44 +217,43 @@ p, a {
 
 /* Parceiros */
 .parceiros {
-    background-color: #DDB872;
-    margin-top: 4rem;
-    padding: 2rem 0;
-    text-align: center;
+    background-color: #DDB872 !important;
+    margin-top: 4rem !important;
+    padding: 2rem 0 !important;
+    text-align: center !important;
 }
 
 .parceiros h2 {
-    font-size: 2.4rem;
-    color: #000;
-    margin-bottom: 2rem;
+    font-size: 2.4rem !important;
+    color: #000 !important;
+    margin-bottom: 2rem !important;
 }
 
 .carrossel-wrapper {
-    width: 100%;
-    margin: 0 auto;
-    overflow: hidden;
-    position: relative;
+    width: 100% !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+    position: relative !important;
 }
 
 .carrossel {
-    display: flex;
-    gap: 1.5rem;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    padding: 1rem;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    display: flex !important;
+    gap: 1.5rem !important;
+    overflow-x: auto !important;
+    scroll-behavior: smooth !important;
+    padding: 1rem !important;
+    scrollbar-width: none !important;
 }
 
 .carrossel::-webkit-scrollbar {
-    display: none;
+    display: none !important;
 }
 
 .carrossel img {
-    flex: 0 0 auto;
-    width: 10rem;
-    border-radius: 1rem;
-    object-fit: cover;
-    user-select: none;
-    pointer-events: none;
+    flex: 0 0 auto !important;
+    width: 10rem !important;
+    border-radius: 1rem !important;
+    object-fit: cover !important;
+    user-select: none !important;
+    pointer-events: none !important;
 }
