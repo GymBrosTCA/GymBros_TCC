@@ -45,6 +45,95 @@ router.get('/area-aluno', (req, res) => {
     res.render('pages/area-aluno', { user: req.session.user });
 });
 
+//Treinos
+router.get('/treinos', (req, res) => {
+    if (!req.session.user) return res.redirect('/login'); // Protege a rota
+    res.render('pages/treinos', {
+        user: req.session.user,
+        treinos: [
+            { id: 1, nome: 'Treino de Peito', duracao: 50, tipo: 'Força', data: '20/10/2025' },
+            { id: 2, nome: 'Treino de Pernas', duracao: 60, tipo: 'Força', data: '21/10/2025' },
+            { id: 3, nome: 'Yoga leve', duracao: 40, tipo: 'Alongamento', data: '22/10/2025' },
+            { id: 4, nome: 'Treino de Costas', duracao: 55, tipo: 'Força', data: '23/10/2025' },
+            { id: 5, nome: 'Treino de Ombros', duracao: 45, tipo: 'Força', data: '24/10/2025' },
+            { id: 6, nome: 'Treino Cardio Intenso', duracao: 35, tipo: 'Cardio', data: '25/10/2025' },
+            { id: 7, nome: 'Pilates', duracao: 50, tipo: 'Alongamento', data: '26/10/2025' },
+            { id: 8, nome: 'Treino Abdominal', duracao: 30, tipo: 'Força', data: '27/10/2025' },
+            { id: 9, nome: 'Treino HIIT', duracao: 25, tipo: 'Cardio', data: '28/10/2025' }
+        ]
+    });
+});
+
+//Evolução 
+router.get('/evolucao', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    const evolucao = {
+        treinosConcluidos: 7,
+        treinosTotais: 9,
+        consistencia: 78,
+        labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+        data: [1, 1, 2, 1, 1, 1, 0],
+        detalhes: [
+            { nome: 'Treino de Peito', peso: 50, repeticoes: 12 },
+            { nome: 'Treino de Pernas', peso: 60, repeticoes: 10 },
+            { nome: 'Yoga leve', peso: 0, repeticoes: 0 },
+            { nome: 'Treino de Costas', peso: 55, repeticoes: 12 },
+            { nome: 'Treino de Ombros', peso: 45, repeticoes: 12 },
+            { nome: 'Treino Cardio', peso: 0, repeticoes: 0 },
+            { nome: 'Treino Abdominal', peso: 0, repeticoes: 20 }
+        ]
+    };
+
+    res.render('pages/evolucao', {
+        user: req.session.user,
+        evolucao
+    });
+});
+
+// Meu Plano
+router.get('/meu-plano', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    const planoAtual = {
+        nome: 'GYMBRO',
+        descricao: [
+            '3560+ Academias e estúdios',
+            'Treinos online ao vivo',
+            'Leve 4 amigos por mês',
+            'Personal trainer online'
+        ],
+        preco: 'R$ 85,60/mês',
+        tempoRestanteDias: 21,
+        progresso: 70
+    };
+
+    const outrosPlanos = [
+        {
+            nome: 'STARTER',
+            descricao: [
+                '2300+ Academias e estúdios',
+                'Treinos online e presenciais'
+            ],
+            preco: 'R$ 64,90/mês'
+        },
+        {
+            nome: 'BLACK',
+            descricao: [
+                'Acesso ilimitado em academias parceiras',
+                '+5000 Academias e estúdios',
+                'Treinos online e presenciais',
+                'Aulas exclusivas e personal trainer',
+                'Área VIP e benefícios premium'
+            ],
+            preco: 'R$ 145,90/mês'
+        }
+    ];
+
+    res.render('pages/meu-plano', { user: req.session.user, planoAtual, outrosPlanos });
+});
+
+
 // Logout
 router.get('/logout', (req, res) => {
     req.session.destroy(err => {

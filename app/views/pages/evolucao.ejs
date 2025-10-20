@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evolução - GymBros</title>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<style>
+#graficoEvolucao {
+    width: 100% !important;
+    height: 250px !important;
+}
+.cards-container {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.card { flex: 1 1 200px; }
+</style>
+</head>
+<body>
+
+<%- include('../partials/header') %>
+
+<section class="aluno-dashboard">
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img src="/images/avatar.png" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p>Aluno GymBros</p>
+        </section>
+        <ul class="aluno-menu">
+            <li><a href="/area-aluno">Painel</a></li>
+            <li><a href="/treinos">Meus Treinos</a></li>
+            <li><a href="/evolucao" class="active">Evolução</a></li>
+            <li><a href="/meu-plano">Meu Plano</a></li>
+            <li><a href="/configuracoes">Configurações</a></li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+
+        <h1>Minha Evolução</h1>
+
+        <section class="treinos-cards">
+            <section class="card card-orange">
+                <h3>Progresso Semanal</h3>
+                <canvas id="graficoEvolucao"></canvas>
+            </section>
+            <section class="card card-blue">
+                <h3>Treinos Concluídos</h3>
+                <span class="card-value"><%= evolucao.treinosConcluidos %> / <%= evolucao.treinosTotais %></span>
+            </section>
+            <section class="card card-green">
+                <h3>Meta de Consistência</h3>
+                <section class="progress-bar">
+                    <section class="progress-fill" style="width: <%= evolucao.consistencia %>%"></section>
+                </section>
+                <span class="card-value"><%= evolucao.consistencia %>%</span>
+            </section>
+        </section>
+
+        <section class="recent-activities">
+            <h2>Detalhes dos Treinos</h2>
+            <ul>
+                <% evolucao.detalhes.forEach(item => { %>
+                    <li>
+                        <i class="fas fa-dumbbell"></i> <%= item.nome %> 
+                        <span>Peso: <%= item.peso %>kg | Reps: <%= item.repeticoes %></span>
+                    </li>
+                <% }) %>
+            </ul>
+        </section>
+
+    </section>
+
+</section>
+
+<%- include('../partials/footer') %>
+
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+window.addEventListener('load', () => {
+    const ctx = document.getElementById('graficoEvolucao').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: <%- JSON.stringify(evolucao.labels) %>,
+            datasets: [{
+                label: 'Treinos Concluídos',
+                data: <%- JSON.stringify(evolucao.data) %>,
+                borderColor: '#FFD700',
+                backgroundColor: 'rgba(255,215,0,0.2)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+});
+</script>
+
+</body>
+</html>

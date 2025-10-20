@@ -260,6 +260,183 @@ body {
     box-shadow: 0 4px 15px rgba(255,215,0,0.4);
 }
 
+/* TREINOS */
+.treinos-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.treino-card {
+    background: #1f1f1f;
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+}
+
+.treino-card h3 {
+    font-size: 1.5rem;
+    color: #FFD700;
+    margin-bottom: 0.5rem;
+}
+
+.treino-card p {
+    font-size: 1.2rem;
+    color: #fff;
+    margin-bottom: 0.4rem;
+}
+
+.treino-card .btn-card {
+    margin-top: auto;
+    padding: 8px 16px;
+    background: #FFD700;
+    color: #1f1f1f;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+}
+
+.treino-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.7);
+}
+
+/* EVOLUÇÃO */
+
+.treinos-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.treinos-cards .card {
+    flex: 1 1 220px;
+    min-width: 220px;
+    max-width: 360px;
+    padding: 1.5rem;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+/* MEU PLANO */
+.card-price {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin: 0.6rem 0;
+    color: #fff;
+}
+
+.time-left {
+    font-size: 1.2rem;
+    color: #ccc;
+    margin-bottom: 1rem;
+}
+
+.plan-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.plan-actions .btn-card {
+    flex: 1;
+    text-align: center;
+}
+
+.btn-cancel {
+    background: #FF4C4C;
+    color: #fff;
+}
+
+.btn-cancel:hover {
+    transform: scale(1.05);
+    background: #FF1A1A;
+}
+
+.btn-upgrade {
+    background: #32CD32;
+    color: #fff;
+}
+
+.btn-upgrade:hover {
+    transform: scale(1.05);
+    background: #28A428;
+}
+
+/* CORES DOS PLANOS */
+.card-starter {
+    background: #cfcfcf;
+    color: #1f1f1f; /* contraste pro texto */
+}
+
+.card-gymbro {
+    background: #C5A349;
+    color: #1f1f1f;
+}
+
+.card-black {
+    background: #000;
+    color: #fff;
+}
+
+/* BOTÕES */
+.btn-card {
+    padding: 8px 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel {
+    background: #FF4C4C;
+    color: #fff;
+}
+
+.btn-cancel:hover {
+    transform: scale(1.05);
+    background: #FF1A1A;
+}
+
+.btn-upgrade {
+    background: #32CD32;
+    color: #fff;
+}
+
+.btn-upgrade:hover {
+    transform: scale(1.05);
+    background: #28A428;
+}
+
+/* BARRA DE PROGRESSO */
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 5px;
+    margin-top: 0.8rem;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 5px;
+    background: #fff;
+    transition: width 1s ease;
+}
+
 /* RESPONSIVO */
 @media(max-width:1024px){
     .aluno-dashboard { flex-direction: column; padding: 1rem; }
@@ -292,4 +469,43 @@ body {
         height: auto;
         max-width: 60px;
     }
+}
+
+/* RESPONSIVO TREINOS */
+@media(max-width:1024px){
+    .treinos-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/*RESPONSIVO EVOLUÇÃO*/
+
+/* Telas médias */
+@media(max-width: 1024px){
+    .treinos-cards .card {
+        max-width: 35%;
+    }
+}
+
+/* Telas pequenas */
+@media(max-width: 768px){
+    .treinos-cards .card {
+        flex: 1 1 100%;
+        max-width: 100%;
+        aspect-ratio: auto;
+    }
+}
+
+/*RESPONSIVO MEU PLANO*/
+
+
+@media(max-width:1024px){
+    .plan-actions {
+        flex-direction: column;
+    }
+}
+
+.other-plans h2 {
+    color: #FFD700;
+    margin-bottom: 1rem;
 }

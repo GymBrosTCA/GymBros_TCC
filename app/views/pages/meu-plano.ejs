@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu Plano - GymBros</title>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+</head>
+<body>
+
+<%- include('../partials/header') %>
+
+<section class="aluno-dashboard">
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img src="/images/avatar.png" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p>Aluno GymBros</p>
+        </section>
+        <ul class="aluno-menu">
+            <li><a href="/area-aluno"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
+            <li><a href="/treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+            <li><a href="/meu-plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="#"><i class="fas fa-cog"></i> Configurações</a></li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+
+        <section class="dashboard-top">
+            <h1>Meu Plano Atual</h1>
+            <p>Confira informações do seu plano, tempo restante e opções de upgrade ou cancelamento.</p>
+        </section>
+
+        <section class="cards-container">
+    <!-- PLANO ATUAL -->
+        <section class="card card-gymbro">
+            <h3><%= planoAtual.nome %></h3>
+            <% planoAtual.descricao.forEach(info => { %>
+                <p><%= info %></p>
+            <% }) %>
+            <p class="card-price"><%= planoAtual.preco %></p>
+
+                <section class="progress-bar">
+                    <section class="progress-fill" style="width: <%= planoAtual.progresso %>%;"></section>
+                </section>
+                <p class="time-left">Tempo restante: <%= planoAtual.tempoRestanteDias %> dias</p>
+        
+                <section class="plan-actions">
+                    <a href="/planos" class="btn-card btn-cancel">Cancelar Plano</a>
+                    <a href="/compra3" class="btn-card btn-upgrade">Upar de Plano</a>
+                </section>
+            </section>
+        </section>
+        
+        <!-- OUTROS PLANOS -->
+        <section class="other-plans">
+            <h2>Outros Planos</h2>
+            <section class="cards-container">
+                <% outrosPlanos.forEach(plano => { %>
+                    <section class="card 
+                        <% if(plano.nome === 'STARTER'){ %>card-starter<% } %>
+                        <% if(plano.nome === 'BLACK'){ %>card-black<% } %>">
+                        <h3><%= plano.nome %></h3>
+                        <% plano.descricao.forEach(info => { %>
+                            <p><%= info %></p>
+                        <% }) %>
+                        <p class="card-price"><%= plano.preco %></p>
+                        <a href="/planos" class="btn-card btn-upgrade">Assinar</a>
+                    </section>
+                <% }) %>
+            </section>
+        </section>
+
+    </section>
+</section>
+
+<%- include('../partials/footer') %>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>

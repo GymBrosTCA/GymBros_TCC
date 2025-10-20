@@ -88,17 +88,9 @@ a {
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
 }
 
-.plan-card.starter {
-    border-top: 5px solid #cfcfcf;
-}
-
-.plan-card.gymbro {
-    border-top: 5px solid #C5A349;
-}
-
-.plan-card.blaok {
-    border-top: 5px solid #000;
-}
+.card-starter { background: #cfcfcf; color: #1f1f1f; }
+.card-gymbro { background: #C5A349; color: #1f1f1f; }
+.card-black { background: #000; color: #fff; }
 
 .plan-name {
     font-size: 1.8rem;
