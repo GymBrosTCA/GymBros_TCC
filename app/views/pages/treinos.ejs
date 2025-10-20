@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meus Treinos - GymBros</title>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+</head>
+<body>
+
+<%- include('../partials/header') %>
+
+<section class="aluno-dashboard">
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img src="/images/avatar.png" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p>Aluno GymBros</p>
+        </section>
+        <ul class="aluno-menu">
+            <li><a href="/area-aluno"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
+            <li><a href="/treinos" class="active"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+            <li><a href="/meu-plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/configuracoes"><i class="fas fa-cog"></i> Configurações</a></li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+
+        <section class="dashboard-top">
+            <h1>Meus Treinos</h1>
+            <p>Aqui estão todos os seus treinos recentes e programados</p>
+        </section>
+
+        <!-- LISTA DE TREINOS -->
+        <section class="treinos-list">
+            <% if(treinos && treinos.length > 0) { %>
+                <% treinos.forEach(treino => { %>
+                    <section class="treino-card">
+                        <h3><%= treino.nome %></h3>
+                        <p>Duração: <%= treino.duracao %> minutos</p>
+                        <p>Tipo: <%= treino.tipo %></p>
+                        <p>Data: <%= treino.data %></p>
+                        <a href="/treino/<%= treino.id %>" class="btn-card">Ver Detalhes</a>
+                    </section>
+                <% }) %>
+            <% } else { %>
+                <p>Nenhum treino encontrado.</p>
+            <% } %>
+        </section>
+
+    </section>
+
+</section>
+
+<%- include('../partials/footer') %>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>
