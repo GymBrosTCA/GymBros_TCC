@@ -133,6 +133,76 @@ router.get('/meu-plano', (req, res) => {
     res.render('pages/meu-plano', { user: req.session.user, planoAtual, outrosPlanos });
 });
 
+//Configurações
+router.get('/config', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/config', { user: req.session.user });
+});
+
+// Atualizar dados pessoais (nome e e-mail)
+router.post('/config/atualizar-dados', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    const { nome, email } = req.body;
+    const user = req.session.user;
+
+    // Verifica se o email já existe
+    const emailExistente = usuarios.find(u => u.email === email && u !== user);
+    if (emailExistente) {
+        return res.status(400).json({ erro: 'E-mail já cadastrado.' });
+    }
+
+    // Atualiza no "banco" e na sessão
+    user.nome = nome;
+    user.email = email;
+
+    const index = usuarios.findIndex(u => u === user);
+    usuarios[index] = user;
+    req.session.user = user;
+
+    return res.json({ mensagem: 'Dados atualizados com sucesso!' });
+});
+
+// Alterar senha
+router.post('/config/alterar-senha', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    const { senhaAtual, novaSenha } = req.body;
+    const user = req.session.user;
+
+    if (user.password !== senhaAtual) {
+        return res.status(400).json({ erro: 'Senha atual incorreta.' });
+    }
+
+    user.password = novaSenha;
+
+    const index = usuarios.findIndex(u => u === user);
+    usuarios[index] = user;
+    req.session.user = user;
+
+    return res.json({ mensagem: 'Senha alterada com sucesso!' });
+});
+
+// Alterar plano
+router.post('/config/alterar-plano', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    const { plano } = req.body;
+    const user = req.session.user;
+
+    user.plano = plano;
+    // opcional: atualizar tempo de renovação ou benefícios
+    user.renovacao = '20/11/2025';
+
+    const index = usuarios.findIndex(u => u === user);
+    usuarios[index] = user;
+    req.session.user = user;
+
+    return res.json({ mensagem: 'Plano atualizado com sucesso!' });
+});
+
+
 
 // Logout
 router.get('/logout', (req, res) => {
