@@ -509,3 +509,9 @@ body {
     color: #FFD700;
     margin-bottom: 1rem;
 }
+
+@media(max-width: 768px){
+.card-starter{   
+    width: 330px;
+}
+}

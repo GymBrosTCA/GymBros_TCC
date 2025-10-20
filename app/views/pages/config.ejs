@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configurações - GymBros</title>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/config.css">
+</head>
+<body>
+
+<%- include('../partials/header') %>
+
+<section class="aluno-dashboard">
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img src="/images/avatar.png" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p>Aluno GymBros</p>
+        </section>
+        <ul class="aluno-menu">
+            <li><a href="/area-aluno"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
+            <li><a href="/treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+            <li><a href="/meu-plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config"><i class="fas fa-cog"></i> Configurações</a></li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+        <section class="dashboard-top">
+            <h1>Configurações</h1>
+            <p>Atualize seus dados, senha e plano</p>
+        </section>
+
+        <section class="config-forms">
+
+            <!-- DADOS PESSOAIS -->
+            <section class="config-card">
+                <h2>Dados Pessoais</h2>
+                <form id="form-dados">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" value="<%= user.nome %>" required>
+                    
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="<%= user.email %>" required>
+
+                    <button type="submit" class="btn-save data">Salvar Alterações</button>
+                    <p class="form-message"></p>
+                </form>
+            </section>
+
+            <!-- SENHA -->
+            <section class="config-card">
+                <h2>Alterar Senha</h2>
+                <form id="form-senha">
+                    <label for="senhaAtual">Senha Atual</label>
+                    <input type="password" id="senhaAtual" name="senhaAtual" required>
+
+                    <label for="novaSenha">Nova Senha</label>
+                    <input type="password" id="novaSenha" name="novaSenha" required>
+
+                    <button type="submit" class="btn-save password">Alterar Senha</button>
+                    <p class="form-message"></p>
+                </form>
+            </section>
+
+            <!-- PLANO -->
+            <section class="config-card">
+                <h2>Alterar Plano</h2>
+                <form id="form-plano">
+                    <label for="plano">Plano Atual</label>
+                    <select id="plano" name="plano">
+                        <option value="starter" <%= user.plano === 'starter' ? 'selected' : '' %>>Starter</option>
+                        <option value="gymbro" <%= user.plano === 'gymbro' ? 'selected' : '' %>>GymBro</option>
+                        <option value="black" <%= user.plano === 'black' ? 'selected' : '' %>>Black</option>
+                    </select>
+
+                    <button type="submit" class="btn-save plan">Atualizar Plano</button>
+                    <p class="form-message"></p>
+                </form>
+            </section>
+
+        </section>
+
+    </section>
+</section>
+
+<%- include('../partials/footer') %>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="/js/config.js"></script>
+</body>
+</html>

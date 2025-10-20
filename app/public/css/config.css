@@ -1,0 +1,219 @@
+/* ==============================
+   CONFIGURAÇÕES - GYMBROS
+   ============================== */
+
+/* RESET BÁSICO */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background: #121212;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* DASHBOARD LAYOUT */
+.config-dashboard {
+    display: flex;
+    min-height: 100vh;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+/* =========================
+   SIDEBAR
+   ========================= */
+.config-sidebar {
+    flex: 0 0 220px;
+    background: #1f1f1f;
+    border-radius: 15px;
+    padding: 2rem 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.config-profile {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.config-profile .avatar img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin-bottom: 0.5rem;
+}
+
+.config-profile h2 {
+    color: #FFD700;
+    font-size: 1.8rem;
+    margin-bottom: 0.2rem;
+}
+
+.config-profile p {
+    color: #bbb;
+    font-size: 1.3rem;
+}
+
+/* MENU SIDEBAR */
+.config-menu {
+    list-style: none;
+}
+
+.config-menu li {
+    margin-bottom: 1.2rem;
+}
+
+.config-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #fff;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.config-menu li a:hover {
+    background: #FFD700;
+    color: #1f1f1f;
+    transform: scale(1.05);
+}
+
+/* =========================
+   MAIN CONFIGURAÇÕES
+   ========================= */
+.config-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* TOPO */
+.config-top {
+    margin-bottom: 2rem;
+}
+
+.config-top h1 {
+    font-size: 2.4rem;
+    margin-bottom: 0.5rem;
+    color: #FFD700;
+}
+
+.config-top p {
+    font-size: 1.4rem;
+    color: #ccc;
+}
+
+/* =========================
+   FORMULÁRIOS / CARDS
+   ========================= */
+.config-card {
+    background: #1f1f1f;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.config-card h3 {
+    font-size: 1.8rem;
+    color: #FFD700;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.config-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.config-card label {
+    font-size: 1.2rem;
+    margin-bottom: 0.2rem;
+}
+
+.config-card input,
+.config-card select {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    background: #2a2a2a;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.config-card input:focus,
+.config-card select:focus {
+    outline: none;
+    box-shadow: 0 0 8px #FFD700;
+}
+
+/* BOTÕES */
+.config-card .btn-card {
+    padding: 10px 20px;
+    background: #FFD700;
+    color: #1f1f1f;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.config-card .btn-card:hover {
+    transform: scale(1.05);
+    background: #FFC700;
+}
+
+/* MENSAGENS */
+.config-card .msg {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-top: -0.5rem;
+    min-height: 1.2rem;
+}
+
+/* RESPONSIVO */
+@media(max-width:1024px) {
+    .config-dashboard {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    .config-sidebar {
+        width: 100%;
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media(max-width:768px){
+    .config-card {
+        padding: 1.5rem;
+    }
+
+    .config-card h3 {
+        font-size: 1.5rem;
+    }
+
+    .config-card input, .config-card select {
+        font-size: 0.95rem;
+        padding: 8px 12px;
+    }
+
+    .config-card .btn-card {
+        font-size: 1rem;
+        padding: 8px 12px;
+    }
+}
