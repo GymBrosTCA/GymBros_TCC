@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+Disallow: /area-aluno
+Disallow: /treinos
+Disallow: /evolucao
+Disallow: /meu-plano
+Disallow: /config
+Disallow: /ai/
+Disallow: /imc-form
+Disallow: /imc-save
+Disallow: /logout
+
+# Permitir rastreadores de redes sociais nas páginas públicas
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+Sitemap: https://gymbros-2ht3.onrender.com/

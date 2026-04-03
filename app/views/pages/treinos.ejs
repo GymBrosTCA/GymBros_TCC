@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meus Treinos - GymBros</title>
+<%- include('../partials/seo') %>
 <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 <link rel="stylesheet" href="/css/header.css">
 <link rel="stylesheet" href="/css/footer.css">
@@ -24,17 +24,17 @@
                 <img src="/images/avatar.png" alt="Avatar do Aluno">
             </section>
             <h2><%= user.nome %></h2>
-            <p>Aluno GymBros</p>
+            <p data-translate="sidebar.role">Aluno GymBros</p>
         </section>
         <ul class="aluno-menu">
-            <li><a href="/area-aluno"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
-            <li><a href="/treinos" class="active"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
-            <li><a href="/evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
-            <li><a href="/meu-plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
-            <li><a href="/config"><i class="fas fa-cog"></i> Configurações</a></li>
-            <li><a href="/ai/chat"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
-            <li><a href="/ai/avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
-            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
+            <li><a href="/area-aluno" data-translate="sidebar.painel"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
+            <li><a href="/treinos" class="active" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+            <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+            <li><a href="/imc-form" data-translate="sidebar.imc"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
         </ul>
     </section>
 
@@ -421,5 +421,6 @@ renderRegistrados();
 atualizarStats();
 atualizarCamposModal();
 </script>
+<script src="/js/translate.js"></script>
 </body>
 </html>

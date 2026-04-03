@@ -565,3 +565,59 @@
         font-size: 0.88rem;
     }
 }
+
+/* ==============================
+   LIGHT MODE — IMC Form
+   ============================== */
+body.light-mode .imc-progress-track  { background: #DEDAD6; }
+body.light-mode .step-dot            { background: #DEDAD6; color: #7E7C7A; border-color: #C9C7C4; }
+body.light-mode .step-dot.active     { background: #C98B1D; color: #F2F0EE; border-color: #C98B1D; }
+body.light-mode .step-dot.done       { background: #B07A18; color: #F2F0EE; border-color: #B07A18; }
+
+body.light-mode .imc-form-card       { background: #E8E6E3; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+body.light-mode .imc-step-header h2  { color: #C98B1D; }
+body.light-mode .imc-step-header p   { color: #7E7C7A; }
+body.light-mode .imc-step-icon       { color: #C98B1D; }
+
+body.light-mode .imc-field label     { color: #4E4C4A; }
+body.light-mode .imc-field input,
+body.light-mode .imc-field select,
+body.light-mode .imc-field textarea  { background: #DEDAD6; border-color: #C9C7C4; color: #1C1A18; }
+body.light-mode .imc-field input:focus,
+body.light-mode .imc-field select:focus,
+body.light-mode .imc-field textarea:focus { border-color: #C98B1D; }
+
+body.light-mode .imc-option-label    { background: #DEDAD6; border-color: #C9C7C4; color: #4E4C4A; }
+body.light-mode .imc-option-label:hover { border-color: #C98B1D; color: #C98B1D; }
+body.light-mode .imc-option-label input[type="radio"]:checked + span,
+body.light-mode .imc-option-label input[type="checkbox"]:checked + span { color: #C98B1D; }
+
+body.light-mode .imc-display         { background: #DEDAD6; border-color: #C9C7C4; }
+body.light-mode .imc-label           { color: #7E7C7A; }
+body.light-mode .imc-value           { color: #C98B1D; }
+body.light-mode .imc-category        { color: #4E4C4A; }
+
+body.light-mode .imc-summary .summary-section { background: #DEDAD6; border-color: #C9C7C4; }
+body.light-mode .imc-summary .summary-section h3 { color: #C98B1D; }
+body.light-mode .imc-summary p       { color: #1C1A18; }
+
+body.light-mode .imc-lgpd            { background: #DEDAD6; border-color: #C9C7C4; color: #4E4C4A; }
+
+body.light-mode .imc-btn-next        { background: #C98B1D; color: #F2F0EE; }
+body.light-mode .imc-btn-next:hover  { background: #B07A18; }
+body.light-mode .imc-btn-back        { background: #DEDAD6; color: #4E4C4A; border-color: #C9C7C4; }
+body.light-mode .imc-btn-back:hover  { border-color: #C98B1D; color: #C98B1D; }
+body.light-mode .imc-btn-submit      { background: #C98B1D; color: #F2F0EE; }
+body.light-mode .imc-btn-submit:hover { background: #B07A18; }
+
+body.light-mode .profile-view-card   { background: #E8E6E3; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+body.light-mode .profile-view-header h2 { color: #C98B1D; }
+body.light-mode .btn-edit-profile    { background: #DEDAD6; color: #4E4C4A; border-color: #C9C7C4; }
+body.light-mode .btn-edit-profile:hover { border-color: #C98B1D; color: #C98B1D; }
+body.light-mode .pv-item             { background: #DEDAD6; }
+body.light-mode .pv-label            { color: #7E7C7A; }
+body.light-mode .pv-value            { color: #1C1A18; }
+body.light-mode .pv-imc-block        { background: #DEDAD6; }
+body.light-mode .pv-imc-value        { color: #C98B1D; }
+body.light-mode .pv-imc-cat          { color: #4E4C4A; }
+body.light-mode .pv-imc-scale span   { color: #7E7C7A; }

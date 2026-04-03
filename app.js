@@ -21,11 +21,20 @@ app.use(session({
   saveUninitialized: true
 }));
 
+// Injeta baseUrl em todas as views (canonical + OG)
+app.use((req, res, next) => {
+    res.locals.baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    next();
+});
+
 const rotas = require('./app/routes/router');
 app.use('/', rotas);
 
 const rotasAI = require('./app/routes/ai');
 app.use('/ai', rotasAI);
+
+const rotasAPI = require('./app/routes/api');
+app.use('/api', rotasAPI);
 
 app.listen(port, () => {
   console.log(`Servidor ouvindo na porta ${port}\nhttp://localhost:${port}`);

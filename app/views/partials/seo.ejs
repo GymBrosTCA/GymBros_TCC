@@ -1,0 +1,46 @@
+<%
+/* SEO partial — inclua dentro de <head> em todas as páginas.
+   Cada rota deve passar: seo: { title, description, keywords, canonical, robots?,
+   ogType?, ogTitle?, ogDescription?, ogImage?, ogImageAlt? }
+*/
+const _base   = typeof baseUrl !== 'undefined' ? baseUrl : 'http://localhost:3000';
+const _seo    = typeof seo    !== 'undefined' ? seo    : {};
+const _title  = _seo.title       || 'GymBros — Academias e Treinos Online';
+const _desc   = _seo.description || 'Acesse 3.560+ academias parceiras, treinos online e personal trainer IA com o GymBros.';
+const _kw     = _seo.keywords    || 'academia, treinos, fitness, personal trainer, gymbros, saúde';
+const _robots = _seo.robots      || 'index, follow';
+const _path   = _seo.canonical   || '/';
+const _canon  = _base + _path;
+const _type   = _seo.ogType      || 'website';
+const _ogTit  = _seo.ogTitle     || _title;
+const _ogDesc = _seo.ogDescription || _desc;
+const _ogImg  = _seo.ogImage     || (_base + '/images/og-default.jpg');
+const _ogAlt  = _seo.ogImageAlt  || 'GymBros — Academias ilimitadas em todo o Brasil';
+%>
+<title><%= _title %></title>
+<meta name="description" content="<%= _desc %>">
+<meta name="keywords"    content="<%= _kw %>">
+<meta name="robots"      content="<%= _robots %>">
+<link rel="canonical"    href="<%= _canon %>">
+
+<!-- Open Graph -->
+<meta property="og:locale"             content="pt_BR">
+<meta property="og:locale:alternate"   content="en_US">
+<meta property="og:locale:alternate"   content="es_ES">
+<meta property="og:type"               content="<%= _type %>">
+<meta property="og:title"              content="<%= _ogTit %>">
+<meta property="og:description"        content="<%= _ogDesc %>">
+<meta property="og:url"                content="<%= _canon %>">
+<meta property="og:site_name"          content="GymBros">
+<meta property="og:image"              content="<%= _ogImg %>">
+<meta property="og:image:secure_url"   content="<%= _ogImg %>">
+<meta property="og:image:width"        content="1200">
+<meta property="og:image:height"       content="630">
+<meta property="og:image:type"         content="image/jpeg">
+<meta property="og:image:alt"          content="<%= _ogAlt %>">
+
+<!-- Twitter Card -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="<%= _ogTit %>">
+<meta name="twitter:description" content="<%= _ogDesc %>">
+<meta name="twitter:image"       content="<%= _ogImg %>">

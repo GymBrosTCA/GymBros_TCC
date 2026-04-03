@@ -204,3 +204,20 @@
     .chat-history { padding: 1rem 0.75rem; }
     .chat-message { max-width: 98%; }
 }
+
+/* ==============================
+   LIGHT MODE — AI Chat
+   ============================== */
+body.light-mode .chat-container              { background: #E8E6E3; box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+body.light-mode .chat-history                { background: #F2F0EE; }
+body.light-mode .chat-history::-webkit-scrollbar-track { background: #DEDAD6; }
+body.light-mode .chat-history::-webkit-scrollbar-thumb { background: #C98B1D; }
+body.light-mode .bot-message .chat-bubble    { background: #E8E6E3; color: #1C1A18; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+body.light-mode .bot-message .chat-bubble strong { color: #C98B1D; }
+body.light-mode .user-message .chat-bubble  { background: #C98B1D; color: #F2F0EE; }
+body.light-mode .chat-input-area            { background: #E8E6E3; border-top-color: #C9C7C4; }
+body.light-mode .chat-input-area input      { background: #DEDAD6; border-color: #C9C7C4; color: #1C1A18; }
+body.light-mode .chat-input-area input:focus { border-color: #C98B1D; }
+body.light-mode .chat-input-area input::placeholder { color: #7E7C7A; }
+body.light-mode .chat-input-area button     { background: #C98B1D; color: #F2F0EE; }
+body.light-mode .chat-input-area button:hover { background: #B07A18; }

@@ -511,7 +511,79 @@ body {
 }
 
 @media(max-width: 768px){
-.card-starter{   
+.card-starter{
     width: 330px;
 }
 }
+
+/* ==============================
+   LIGHT MODE — Área do Aluno
+   Palette:
+     page    #F2F0EE  card    #E8E6E3
+     card2   #DEDAD6  border  #C9C7C4
+     txt-pri #1C1A18  txt-sec #4E4C4A
+     muted   #7E7C7A  accent  #C98B1D
+   ============================== */
+body.light-mode {
+    background: #F2F0EE;
+    color: #1C1A18;
+}
+
+body.light-mode .aluno-sidebar {
+    background: #E8E6E3;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+body.light-mode .aluno-profile h2 { color: #C98B1D; }
+body.light-mode .aluno-profile p  { color: #7E7C7A; }
+
+body.light-mode .aluno-menu li a  { color: #1C1A18; }
+body.light-mode .aluno-menu li a:hover {
+    background: #C98B1D;
+    color: #F2F0EE;
+}
+
+body.light-mode .aluno-menu li a.active {
+    background: #C98B1D;
+    color: #F2F0EE;
+}
+
+body.light-mode .dashboard-top h1 { color: #C98B1D; }
+body.light-mode .dashboard-top p  { color: #4E4C4A; }
+
+/* Não sobrescreve cards coloridos de planos */
+body.light-mode .card:not(.card-gymbro):not(.card-starter):not(.card-black) {
+    background: #E8E6E3;
+    color: #1C1A18;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+body.light-mode .card h3 { color: #1C1A18; }
+
+body.light-mode .treino-card {
+    background: #E8E6E3;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+body.light-mode .treino-card h3 { color: #C98B1D; }
+body.light-mode .treino-card p  { color: #4E4C4A; }
+
+body.light-mode .recent-activities,
+body.light-mode .goals-badges {
+    background: #E8E6E3;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.07);
+}
+body.light-mode .recent-activities h2,
+body.light-mode .goals-badges h2    { color: #C98B1D; }
+body.light-mode .recent-activities li { color: #1C1A18; border-bottom-color: #C9C7C4; }
+
+body.light-mode .other-plans h2 { color: #C98B1D; }
+
+body.light-mode .card-starter { background: #C5C3C0; color: #1C1A18; }
+body.light-mode .card-gymbro  { background: #C5A349; color: #1C1A18; }
+body.light-mode .card-black   { background: #2A2826; color: #F2F0EE; }
+
+body.light-mode .progress-bar { background: rgba(0,0,0,0.12); }
+body.light-mode .progress-fill { background: rgba(0,0,0,0.35); }
+
+body.light-mode .card-price { color: #1C1A18; }
+body.light-mode .time-left  { color: #4E4C4A; }

@@ -1,16 +1,93 @@
 <header class="gymbros-header">
         <section class="header-container">
-            <section class="menu-icon" id="menuToggle">
-                <i class="fas fa-bars"></i>
+            <section class="menu-icon" id="menuToggle" aria-label="Abrir menu" aria-expanded="false">
+                <i class="fas fa-bars" aria-hidden="true"></i>
             </section>
+
             <section class="logo">
-                <a href="/">
-                <img src="/images/logo.png" alt="GymBros Logo">
-                <span>GymBros</span>
+                <a href="/" aria-label="GymBros — Página inicial">
+                    <img src="/images/logo.png" alt="Logo GymBros" width="32" height="32" loading="eager">
+                    <span>GymBros</span>
                 </a>
             </section>
-            <a href="/login" class="user-icon">
-                <i class="fas fa-user"></i>
-            </a>
+
+            <section class="header-right">
+                <!-- Seletor de idioma -->
+                <nav class="lang-selector" id="langSelector" aria-label="Selecionar idioma">
+                    <button class="lang-btn" data-lang="pt" title="Português (BR)" aria-label="Mudar para Português">🇧🇷</button>
+                    <button class="lang-btn" data-lang="en" title="English (US)"   aria-label="Switch to English">🇺🇸</button>
+                    <button class="lang-btn" data-lang="es" title="Español (ES)"   aria-label="Cambiar a Español">🇪🇸</button>
+                </nav>
+
+                <% if (typeof user !== 'undefined' && user) { %>
+                <button id="themeToggle" class="theme-toggle" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+                    <i class="fas fa-moon" id="themeIcon" aria-hidden="true"></i>
+                </button>
+                <% } %>
+
+                <a href="/login" class="user-icon" aria-label="Conta do usuário">
+                    <i class="fas fa-user" aria-hidden="true"></i>
+                </a>
+            </section>
         </section>
     </header>
+    <script>
+    (function () {
+        // ── Aplica tema salvo antes do render ──────────────────────────────
+        if (localStorage.getItem('gymbros_theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        // ── Scroll scrolled class ──────────────────────────────────────────
+        var header = document.querySelector('.gymbros-header');
+        if (header) {
+            window.addEventListener('scroll', function () {
+                header.classList.toggle('scrolled', window.scrollY > 0);
+            }, { passive: true });
+        }
+
+        // ── Bootstrap do toggle de tema ────────────────────────────────────
+        function setThemeIcon(isLight) {
+            var icon = document.getElementById('themeIcon');
+            if (!icon) return;
+            if (isLight) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
+
+        function initThemeToggle() {
+            var toggle = document.getElementById('themeToggle');
+            if (!toggle) return;
+
+            // Acerta ícone conforme tema atual
+            setThemeIcon(document.body.classList.contains('light-mode'));
+
+            toggle.addEventListener('click', function () {
+                var isLight = document.body.classList.toggle('light-mode');
+                localStorage.setItem('gymbros_theme', isLight ? 'light' : 'dark');
+
+                var icon = document.getElementById('themeIcon');
+                if (icon) {
+                    icon.classList.add('theme-icon-spin');
+                    // Troca o ícone no ponto de opacidade zero (metade da animação)
+                    setTimeout(function () { setThemeIcon(isLight); }, 180);
+                    icon.addEventListener('animationend', function onEnd() {
+                        icon.classList.remove('theme-icon-spin');
+                        icon.removeEventListener('animationend', onEnd);
+                    });
+                }
+            });
+        }
+
+        // Funciona tanto se DOM ainda não carregou quanto se já carregou
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initThemeToggle);
+        } else {
+            initThemeToggle();
+        }
+    })();
+    </script>
