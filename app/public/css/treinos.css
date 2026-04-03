@@ -1,0 +1,463 @@
+/* ==============================
+   TREINOS — GYMBROS
+   ============================== */
+
+/* STATS TOPO */
+.treinos-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-box {
+    background: #1f1f1f;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    transition: transform 0.2s;
+}
+
+.stat-box:hover { transform: translateY(-3px); }
+
+.stat-box .stat-icon {
+    font-size: 1.5rem;
+    color: #FFD700;
+    margin-bottom: 0.4rem;
+}
+
+.stat-box .stat-num {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+}
+
+.stat-box .stat-label {
+    font-size: 0.78rem;
+    color: #888;
+    margin-top: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* TOOLBAR */
+.treinos-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 1.4rem;
+}
+
+.filtros-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filtro-btn {
+    background: #1f1f1f;
+    border: 1.5px solid #333;
+    color: #aaa;
+    border-radius: 20px;
+    padding: 0.45rem 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filtro-btn:hover {
+    border-color: #FFD700;
+    color: #FFD700;
+}
+
+.filtro-btn.active {
+    background: #FFD700;
+    border-color: #FFD700;
+    color: #1f1f1f;
+}
+
+.btn-registrar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #FFD700;
+    color: #1f1f1f;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.4rem;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+}
+
+.btn-registrar:hover {
+    background: #e6c200;
+    transform: scale(1.04);
+}
+
+/* SEÇÃO TABS */
+.treinos-section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #666;
+    margin-bottom: 1rem;
+    padding-left: 2px;
+}
+
+/* GRID DE CARDS */
+.treinos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+/* CARD BASE */
+.treino-card-v2 {
+    background: #1f1f1f;
+    border-radius: 14px;
+    padding: 1.4rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    transition: transform 0.22s, box-shadow 0.22s;
+    position: relative;
+    overflow: hidden;
+}
+
+.treino-card-v2::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 14px 0 0 14px;
+}
+
+.treino-card-v2.tipo-forca::before   { background: #FFD700; }
+.treino-card-v2.tipo-cardio::before  { background: #FF6B35; }
+.treino-card-v2.tipo-along::before   { background: #4fc3f7; }
+.treino-card-v2.registrado::before   { background: #81c784; }
+
+.treino-card-v2:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.7);
+}
+
+.card-header-v2 {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.card-icon-v2 {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.tipo-forca  .card-icon-v2 { background: rgba(255,215,0,0.12); color: #FFD700; }
+.tipo-cardio .card-icon-v2 { background: rgba(255,107,53,0.12); color: #FF6B35; }
+.tipo-along  .card-icon-v2 { background: rgba(79,195,247,0.12); color: #4fc3f7; }
+.registrado  .card-icon-v2 { background: rgba(129,199,132,0.12); color: #81c784; }
+
+.card-badges {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.badge-tipo {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.tipo-forca  .badge-tipo { background: rgba(255,215,0,0.15); color: #FFD700; }
+.tipo-cardio .badge-tipo { background: rgba(255,107,53,0.15); color: #FF6B35; }
+.tipo-along  .badge-tipo { background: rgba(79,195,247,0.15); color: #4fc3f7; }
+.registrado  .badge-tipo { background: rgba(129,199,132,0.15); color: #81c784; }
+
+.badge-data {
+    font-size: 0.72rem;
+    color: #666;
+    background: #2a2a2a;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+}
+
+.card-title-v2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+.card-duracao {
+    font-size: 0.85rem;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.card-duracao i { color: #666; font-size: 0.75rem; }
+
+/* Exercícios */
+.card-exercicios {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.card-exercicios li {
+    font-size: 0.82rem;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.card-exercicios li::before {
+    content: '›';
+    color: #FFD700;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+/* Stats do treino registrado */
+.card-stats-reg {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    padding-top: 0.6rem;
+    border-top: 1px solid #2a2a2a;
+}
+
+.stat-reg {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 0.4rem 0.7rem;
+    min-width: 58px;
+}
+
+.stat-reg .sr-val {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #FFD700;
+}
+
+.stat-reg .sr-label {
+    font-size: 0.68rem;
+    color: #777;
+    text-transform: uppercase;
+}
+
+.card-obs {
+    font-size: 0.8rem;
+    color: #777;
+    font-style: italic;
+    border-top: 1px solid #2a2a2a;
+    padding-top: 0.5rem;
+}
+
+/* Botão deletar treino registrado */
+.btn-del-treino {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 2px 4px;
+}
+
+.btn-del-treino:hover { color: #ff4d4d; }
+
+/* Estado vazio */
+.treinos-empty {
+    text-align: center;
+    color: #555;
+    padding: 2rem;
+    font-size: 0.95rem;
+    grid-column: 1 / -1;
+}
+
+.treinos-empty i {
+    font-size: 2.5rem;
+    color: #333;
+    display: block;
+    margin-bottom: 0.8rem;
+}
+
+/* ==============================
+   MODAL REGISTRAR TREINO
+   ============================== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    backdrop-filter: blur(4px);
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal-box {
+    background: #1f1f1f;
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    animation: modalIn 0.25s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(12px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.4rem;
+}
+
+.modal-header h2 {
+    font-size: 1.15rem;
+    color: #FFD700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 4px;
+}
+
+.modal-close:hover { color: #fff; }
+
+.modal-field {
+    margin-bottom: 1rem;
+}
+
+.modal-field label {
+    display: block;
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+}
+
+.modal-field input,
+.modal-field select,
+.modal-field textarea {
+    width: 100%;
+    background: #2a2a2a;
+    border: 1.5px solid #3a3a3a;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.95rem;
+    padding: 0.6rem 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.modal-field input:focus,
+.modal-field select:focus,
+.modal-field textarea:focus { border-color: #FFD700; }
+
+.modal-field select option { background: #2a2a2a; }
+.modal-field textarea { resize: vertical; min-height: 60px; }
+
+.modal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+/* Campos condicionais */
+.modal-campo-forca,
+.modal-campo-cardio { display: none; }
+.modal-campo-forca.show,
+.modal-campo-cardio.show { display: block; }
+
+.modal-divider {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #555;
+    margin: 1rem 0 0.8rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.btn-salvar-treino {
+    width: 100%;
+    background: #FFD700;
+    color: #1f1f1f;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.btn-salvar-treino:hover {
+    background: #e6c200;
+    transform: scale(1.02);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .treinos-grid { grid-template-columns: 1fr; }
+    .modal-row { grid-template-columns: 1fr; }
+    .treinos-toolbar { flex-direction: column; align-items: flex-start; }
+}

@@ -47,19 +47,19 @@ router.get('/area-aluno', (req, res) => {
 
 //Treinos
 router.get('/treinos', (req, res) => {
-    if (!req.session.user) return res.redirect('/login'); // Protege a rota
+    if (!req.session.user) return res.redirect('/login');
     res.render('pages/treinos', {
         user: req.session.user,
-        treinos: [
-            { id: 1, nome: 'Treino de Peito', duracao: 50, tipo: 'Força', data: '20/10/2025' },
-            { id: 2, nome: 'Treino de Pernas', duracao: 60, tipo: 'Força', data: '21/10/2025' },
-            { id: 3, nome: 'Yoga leve', duracao: 40, tipo: 'Alongamento', data: '22/10/2025' },
-            { id: 4, nome: 'Treino de Costas', duracao: 55, tipo: 'Força', data: '23/10/2025' },
-            { id: 5, nome: 'Treino de Ombros', duracao: 45, tipo: 'Força', data: '24/10/2025' },
-            { id: 6, nome: 'Treino Cardio Intenso', duracao: 35, tipo: 'Cardio', data: '25/10/2025' },
-            { id: 7, nome: 'Pilates', duracao: 50, tipo: 'Alongamento', data: '26/10/2025' },
-            { id: 8, nome: 'Treino Abdominal', duracao: 30, tipo: 'Força', data: '27/10/2025' },
-            { id: 9, nome: 'Treino HIIT', duracao: 25, tipo: 'Cardio', data: '28/10/2025' }
+        sugestoes: [
+            { id: 1, nome: 'Treino de Peito',      duracao: 50, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Supino reto', 'Crucifixo', 'Peck deck', 'Flexão'] },
+            { id: 2, nome: 'Treino de Pernas',      duracao: 60, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Agachamento', 'Leg press', 'Cadeira extensora', 'Panturrilha'] },
+            { id: 3, nome: 'Yoga Relaxamento',      duracao: 40, tipo: 'Alongamento', icone: 'fa-leaf',       exercicios: ['Saudação ao sol', 'Postura da criança', 'Torção espinhal'] },
+            { id: 4, nome: 'Treino de Costas',      duracao: 55, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Remada curvada', 'Puxada frontal', 'Remada unilateral'] },
+            { id: 5, nome: 'Treino de Ombros',      duracao: 45, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Desenvolvimento', 'Elevação lateral', 'Elevação frontal'] },
+            { id: 6, nome: 'Cardio Intenso',        duracao: 35, tipo: 'Cardio',      icone: 'fa-running',    exercicios: ['Esteira 20min', 'Bicicleta 15min'] },
+            { id: 7, nome: 'Pilates',               duracao: 50, tipo: 'Alongamento', icone: 'fa-leaf',       exercicios: ['Controle respiratório', 'Fortalecimento core'] },
+            { id: 8, nome: 'Treino Abdominal',      duracao: 30, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Crunch', 'Prancha', 'Abdominal oblíquo'] },
+            { id: 9, nome: 'HIIT',                  duracao: 25, tipo: 'Cardio',      icone: 'fa-fire',       exercicios: ['Burpee', 'Mountain climber', 'Jumping jack', 'Sprint'] }
         ]
     });
 });

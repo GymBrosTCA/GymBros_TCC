@@ -9,11 +9,15 @@ Seja direto, motivador e use linguagem acessível. Responda sempre em português
 
 function buildSystemPrompt(user) {
     const imc = user.imc;
+    const aval = user.avaliacaoCorporal;
+
+    let prompt = BASE_PROMPT;
 
     if (!imc) {
-        return BASE_PROMPT + `
+        prompt += `
 
 Observação: o usuário ${user.nome} ainda não preencheu o formulário de perfil IMC. Se ele pedir orientações personalizadas de treino ou nutrição, informe gentilmente que pode preencher o perfil em /imc-form para receber recomendações mais precisas.`;
+        return prompt;
     }
 
     const lesoes  = imc.lesoes  && imc.lesoes.length  ? imc.lesoes.join(', ')  : 'nenhuma';
@@ -24,16 +28,34 @@ Observação: o usuário ${user.nome} ainda não preencheu o formulário de perf
         : 'não';
     const supl    = imc.suplementacao && imc.suplementacao.length ? imc.suplementacao.join(', ') : 'nenhuma';
 
-    return BASE_PROMPT + `
+    prompt += `
 
 Perfil do usuário:
 Usuário: ${user.nome}, ${imc.idade} anos, ${imc.peso}kg, ${imc.altura}cm, IMC ${imc.imcValor}.
 Objetivo: ${imc.objetivo}. Experiência: ${imc.experiencia}. Treina ${imc.diasSemana} dias/semana, ${imc.tempoPorSessao} min/sessão. Local: ${imc.localTreino}.
 Restrições físicas: ${lesoes}.
 Alimentação: consome ${grupos}, restrições: ${restric}, seletividade alimentar: ${selet}.
-Suplementação: ${supl}. Hidratação: ${imc.hidratacao}.
+Suplementação: ${supl}. Hidratação: ${imc.hidratacao}.`;
+
+    // Inclui dados da avaliação corporal por IA se disponíveis
+    if (aval && aval.composicao) {
+        const c = aval.composicao;
+        prompt += `
+
+Avaliação corporal por IA (realizada em ${aval.data || 'data não registrada'}):
+- Gordura corporal estimada: ${c.percentual_gordura_estimado} (margem: ${c.margem_erro})
+- Massa muscular aparente: ${c.massa_muscular_aparente}
+- Região de gordura predominante: ${c.regiao_predominante}
+- Classificação IMC visual: ${aval.classificacao_imc_visual}
+- Pontos positivos: ${(aval.pontos_positivos || []).join('; ')}
+- Áreas de melhoria: ${(aval.areas_melhoria || []).join('; ')}`;
+    }
+
+    prompt += `
 
 Use este perfil para personalizar todas as respostas. Não precisa repetir os dados do perfil na resposta, apenas use-os para contextualizar as orientações.`;
+
+    return prompt;
 }
 
 // GET /ai/chat — renderiza a página do chat
@@ -137,6 +159,22 @@ Analise a composição corporal do aluno pela(s) foto(s) enviadas e retorne SOME
         console.error('Erro na avaliação corporal:', err.message);
         return res.status(500).json({ erro: 'Erro de conexão com a IA. Tente novamente.' });
     }
+});
+
+// POST /ai/avaliacao-salvar — salva o resultado da avaliação corporal na sessão
+// (chamado pelo frontend após receber o resultado, para que o GymBot tenha acesso)
+router.post('/avaliacao-salvar', (req, res) => {
+    if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
+
+    const { resultado } = req.body;
+    if (!resultado) return res.status(400).json({ erro: 'Resultado não informado.' });
+
+    req.session.user.avaliacaoCorporal = {
+        ...resultado,
+        data: new Date().toLocaleDateString('pt-BR')
+    };
+
+    return res.json({ ok: true });
 });
 
 // POST /ai/message — envia mensagem ao Groq e retorna resposta em JSON

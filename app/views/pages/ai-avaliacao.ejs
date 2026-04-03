@@ -261,6 +261,9 @@ btnAnalisar.addEventListener('click', async () => {
         resultado.classList.add('visible');
         resultado.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+        // Salva na sessão (para o GymBot ter acesso) e no localStorage (histórico de evolução)
+        salvarAvaliacao(data.resultado);
+
     } catch (err) {
         loading.classList.remove('visible');
         erroBox.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
@@ -269,6 +272,30 @@ btnAnalisar.addEventListener('click', async () => {
         updateButton();
     }
 });
+
+// Salva avaliação na sessão do servidor e no localStorage
+async function salvarAvaliacao(resultado) {
+    const dataHoje = new Date().toLocaleDateString('pt-BR');
+
+    // Salva na sessão para o GymBot
+    try {
+        await fetch('/ai/avaliacao-salvar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resultado })
+        });
+    } catch (e) { console.warn('Não foi possível salvar avaliação na sessão.', e); }
+
+    // Salva no localStorage para o histórico de evolução
+    const historico = JSON.parse(localStorage.getItem('gymbros_evolucao') || '[]');
+    historico.push({
+        tipo: 'avaliacao',
+        data: dataHoje,
+        timestamp: Date.now(),
+        dados: resultado
+    });
+    localStorage.setItem('gymbros_evolucao', JSON.stringify(historico));
+}
 
 function renderResultado(r) {
     const c = r.composicao || {};

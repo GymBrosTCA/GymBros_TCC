@@ -8,18 +8,7 @@
 <link rel="stylesheet" href="/css/header.css">
 <link rel="stylesheet" href="/css/footer.css">
 <link rel="stylesheet" href="/css/area-aluno.css">
-<style>
-#graficoEvolucao {
-    width: 100% !important;
-    height: 250px !important;
-}
-.cards-container {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-.card { flex: 1 1 200px; }
-</style>
+<link rel="stylesheet" href="/css/evolucao.css">
 </head>
 <body>
 
@@ -37,11 +26,11 @@
             <p>Aluno GymBros</p>
         </section>
         <ul class="aluno-menu">
-            <li><a href="/area-aluno">Painel</a></li>
-            <li><a href="/treinos">Meus Treinos</a></li>
-            <li><a href="/evolucao" class="active">Evolução</a></li>
-            <li><a href="/meu-plano">Meu Plano</a></li>
-            <li><a href="/config">Configurações</a></li>
+            <li><a href="/area-aluno"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
+            <li><a href="/treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao" class="active"><i class="fas fa-chart-line"></i> Evolução</a></li>
+            <li><a href="/meu-plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="/ai/chat"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
             <li><a href="/ai/avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
             <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
@@ -51,70 +40,374 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <section class="aluno-main">
 
-        <h1>Minha Evolução</h1>
+        <section class="dashboard-top">
+            <h1><i class="fas fa-chart-line"></i> Minha Evolução</h1>
+            <p>Acompanhe seu histórico de IMC, avaliações e treinos ao longo do tempo</p>
+        </section>
 
-        <section class="treinos-cards">
-            <section class="card card-orange">
-                <h3>Progresso Semanal</h3>
-                <canvas id="graficoEvolucao"></canvas>
+        <!-- STATS RÁPIDOS -->
+        <section class="evo-stats">
+            <section class="evo-stat">
+                <div class="es-icon"><i class="fas fa-dumbbell"></i></div>
+                <div class="es-num" id="stTreinos">0</div>
+                <div class="es-label">Treinos Registrados</div>
             </section>
-            <section class="card card-blue">
-                <h3>Treinos Concluídos</h3>
-                <span class="card-value"><%= evolucao.treinosConcluidos %> / <%= evolucao.treinosTotais %></span>
+            <section class="evo-stat">
+                <div class="es-icon"><i class="fas fa-clock"></i></div>
+                <div class="es-num" id="stTempo">0</div>
+                <div class="es-label">Min na Academia</div>
             </section>
-            <section class="card card-green">
-                <h3>Meta de Consistência</h3>
-                <section class="progress-bar">
-                    <section class="progress-fill" style="width: <%= evolucao.consistencia %>%"></section>
-                </section>
-                <span class="card-value"><%= evolucao.consistencia %>%</span>
+            <section class="evo-stat">
+                <div class="es-icon"><i class="fas fa-weight"></i></div>
+                <div class="es-num" id="stIMC">—</div>
+                <div class="es-label">IMC Atual</div>
+            </section>
+            <section class="evo-stat">
+                <div class="es-icon"><i class="fas fa-camera"></i></div>
+                <div class="es-num" id="stAval">0</div>
+                <div class="es-label">Avaliações</div>
             </section>
         </section>
 
-        <section class="recent-activities">
-            <h2>Detalhes dos Treinos</h2>
-            <ul>
-                <% evolucao.detalhes.forEach(item => { %>
-                    <li>
-                        <i class="fas fa-dumbbell"></i> <%= item.nome %> 
-                        <span>Peso: <%= item.peso %>kg | Reps: <%= item.repeticoes %></span>
-                    </li>
-                <% }) %>
-            </ul>
+        <!-- GRÁFICO: PESO AO LONGO DO TEMPO -->
+        <section class="evo-section" id="secGraficoPeso">
+            <section class="evo-section-header">
+                <h2><i class="fas fa-weight"></i> Evolução do Peso</h2>
+                <small id="labelPeso"></small>
+            </section>
+            <section class="evo-chart-wrap">
+                <canvas id="graficoPeso"></canvas>
+            </section>
+        </section>
+
+        <!-- GRÁFICO: TREINOS POR SEMANA -->
+        <section class="evo-section" id="secGraficoTreinos">
+            <section class="evo-section-header">
+                <h2><i class="fas fa-calendar-alt"></i> Treinos por Semana</h2>
+                <small id="labelTreinos"></small>
+            </section>
+            <section class="evo-chart-wrap">
+                <canvas id="graficoTreinos"></canvas>
+            </section>
+        </section>
+
+        <!-- TABELA DE TREINOS REGISTRADOS -->
+        <section class="evo-section">
+            <section class="evo-section-header">
+                <h2><i class="fas fa-list"></i> Histórico de Treinos</h2>
+            </section>
+            <section id="tabelaTreinos"></section>
+        </section>
+
+        <!-- TIMELINE: SNAPSHOTS IMC + AVALIAÇÃO -->
+        <section class="evo-section">
+            <section class="evo-section-header">
+                <h2><i class="fas fa-history"></i> Histórico Completo</h2>
+                <small>IMC, avaliações e treinos</small>
+            </section>
+            <section class="evo-timeline" id="timeline"></section>
         </section>
 
     </section>
-
 </section>
 
 <%- include('../partials/footer') %>
-
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-window.addEventListener('load', () => {
-    const ctx = document.getElementById('graficoEvolucao').getContext('2d');
-    new Chart(ctx, {
+const EVO_KEY     = 'gymbros_evolucao';
+const TREINOS_KEY = 'gymbros_treinos_registrados';
+
+// Carrega dados dos dois storages
+function getHistorico() {
+    try { return JSON.parse(localStorage.getItem(EVO_KEY) || '[]'); }
+    catch { return []; }
+}
+
+function getTreinosRegistrados() {
+    try { return JSON.parse(localStorage.getItem(TREINOS_KEY) || '[]'); }
+    catch { return []; }
+}
+
+const historico  = getHistorico().sort((a, b) => a.timestamp - b.timestamp);
+const treinos    = getTreinosRegistrados().sort((a, b) => b.timestamp - a.timestamp);
+
+const snapIMC    = historico.filter(e => e.tipo === 'imc');
+const snapAval   = historico.filter(e => e.tipo === 'avaliacao');
+const snapTreino = historico.filter(e => e.tipo === 'treino');
+
+// ─── STATS ────────────────────────────────────────────
+document.getElementById('stTreinos').textContent = treinos.length;
+document.getElementById('stTempo').textContent   = treinos.reduce((a, t) => a + (parseInt(t.duracao) || 0), 0);
+document.getElementById('stAval').textContent    = snapAval.length;
+
+// IMC atual (último snapshot)
+const ultimoIMC = snapIMC.length ? snapIMC[snapIMC.length - 1] : null;
+if (ultimoIMC) {
+    document.getElementById('stIMC').textContent = parseFloat(ultimoIMC.dados.imcValor).toFixed(1);
+}
+
+// ─── GRÁFICO PESO ─────────────────────────────────────
+const ctxPeso = document.getElementById('graficoPeso').getContext('2d');
+if (snapIMC.length >= 1) {
+    const labels = snapIMC.map(e => e.data);
+    const pesos  = snapIMC.map(e => parseFloat(e.dados.peso));
+    document.getElementById('labelPeso').textContent = `${snapIMC.length} registro(s)`;
+
+    new Chart(ctxPeso, {
         type: 'line',
         data: {
-            labels: <%- JSON.stringify(evolucao.labels) %>,
+            labels,
             datasets: [{
-                label: 'Treinos Concluídos',
-                data: <%- JSON.stringify(evolucao.data) %>,
+                label: 'Peso (kg)',
+                data: pesos,
                 borderColor: '#FFD700',
-                backgroundColor: 'rgba(255,215,0,0.2)',
-                tension: 0.3,
-                fill: true
+                backgroundColor: 'rgba(255,215,0,0.12)',
+                tension: 0.35,
+                fill: true,
+                pointBackgroundColor: '#FFD700',
+                pointRadius: 5
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.parsed.y} kg`
+                    }
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' } },
+                y: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' }, beginAtZero: false }
+            }
         }
     });
-});
-</script>
+} else {
+    document.getElementById('secGraficoPeso').innerHTML += `<section class="evo-empty">
+        <i class="fas fa-weight"></i>
+        Salve seu perfil IMC ao menos uma vez para ver o gráfico de peso.
+    </section>`;
+    ctxPeso.canvas.style.display = 'none';
+}
 
+// ─── GRÁFICO TREINOS POR SEMANA ────────────────────────
+const ctxTreinos = document.getElementById('graficoTreinos').getContext('2d');
+if (treinos.length > 0) {
+    // Agrupa por semana (últimas 8 semanas)
+    const semanas = {};
+    const agora = Date.now();
+    for (let i = 7; i >= 0; i--) {
+        const d = new Date(agora - i * 7 * 24 * 3600 * 1000);
+        const label = `Sem ${8 - i}`;
+        semanas[label] = 0;
+    }
+
+    treinos.forEach(t => {
+        const diff = agora - t.timestamp;
+        const semIdx = Math.floor(diff / (7 * 24 * 3600 * 1000));
+        if (semIdx < 8) {
+            const label = `Sem ${8 - semIdx}`;
+            if (semanas[label] !== undefined) semanas[label]++;
+        }
+    });
+
+    const labSem = Object.keys(semanas);
+    const datSem = Object.values(semanas);
+    document.getElementById('labelTreinos').textContent = `últimas 8 semanas`;
+
+    new Chart(ctxTreinos, {
+        type: 'bar',
+        data: {
+            labels: labSem,
+            datasets: [{
+                label: 'Treinos',
+                data: datSem,
+                backgroundColor: 'rgba(255,215,0,0.7)',
+                borderColor: '#FFD700',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' } },
+                y: {
+                    ticks: { color: '#888', stepSize: 1 },
+                    grid: { color: '#1e1e1e' },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+} else {
+    document.getElementById('secGraficoTreinos').innerHTML += `<section class="evo-empty">
+        <i class="fas fa-calendar-times"></i>
+        Registre treinos na página <a href="/treinos" style="color:#FFD700">Meus Treinos</a> para ver o gráfico semanal.
+    </section>`;
+    ctxTreinos.canvas.style.display = 'none';
+}
+
+// ─── TABELA DE TREINOS ─────────────────────────────────
+const tabelaEl = document.getElementById('tabelaTreinos');
+if (treinos.length === 0) {
+    tabelaEl.innerHTML = `<section class="evo-empty">
+        <i class="fas fa-table"></i>
+        Nenhum treino registrado ainda.
+    </section>`;
+} else {
+    const badgeClass = tipo => {
+        if (tipo === 'Força') return 'forca';
+        if (tipo === 'Cardio') return 'cardio';
+        return 'alongamento';
+    };
+
+    const linhas = treinos.slice(0, 20).map(t => {
+        const cargaCell = t.tipo === 'Força' && t.peso
+            ? `${t.peso}kg${t.series ? ' · ' + t.series + 'x' : ''}${t.reps ? t.reps + 'rep' : ''}`
+            : '—';
+        const cardioCell = t.tipo === 'Cardio' && t.cardioMin
+            ? `${t.cardioMin}min ${t.intensidade ? '· ' + t.intensidade : ''}`
+            : '—';
+
+        return `<tr>
+            <td>${t.data}</td>
+            <td><strong style="color:#fff">${t.nome}</strong></td>
+            <td><span class="evo-badge ${badgeClass(t.tipo)}">${t.tipo}</span></td>
+            <td>${t.duracao} min</td>
+            <td style="color:#FFD700">${cargaCell}</td>
+            <td style="color:#FF6B35">${cardioCell}</td>
+        </tr>`;
+    }).join('');
+
+    tabelaEl.innerHTML = `<table class="evo-table">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Treino</th>
+                <th>Tipo</th>
+                <th>Duração</th>
+                <th>Carga / Séries</th>
+                <th>Cardio</th>
+            </tr>
+        </thead>
+        <tbody>${linhas}</tbody>
+    </table>`;
+}
+
+// ─── TIMELINE COMPLETA ─────────────────────────────────
+const timelineEl = document.getElementById('timeline');
+
+// Junta todos os eventos e ordena do mais recente
+const todosEventos = [
+    ...snapIMC.map(e => ({ ...e, _tipo: 'imc' })),
+    ...snapAval.map(e => ({ ...e, _tipo: 'avaliacao' })),
+    ...snapTreino.map(e => ({ ...e, _tipo: 'treino' }))
+].sort((a, b) => b.timestamp - a.timestamp);
+
+if (todosEventos.length === 0) {
+    timelineEl.innerHTML = `<section class="evo-empty">
+        <i class="fas fa-history"></i>
+        Nenhum registro ainda. Preencha seu perfil IMC, faça uma avaliação corporal ou registre treinos!
+    </section>`;
+} else {
+    // Função para calcular posição na barra IMC
+    const imcPct = imc => Math.min(100, Math.max(0, ((parseFloat(imc) - 14) / 26) * 100));
+
+    // Função para categoria IMC
+    const imcCat = v => {
+        v = parseFloat(v);
+        if (v < 18.5) return 'Abaixo do peso';
+        if (v < 25)   return 'Normal';
+        if (v < 30)   return 'Sobrepeso';
+        return 'Obesidade';
+    };
+
+    timelineEl.innerHTML = todosEventos.map(e => {
+        let dotClass = '', icon = '', title = '', detailsHtml = '';
+
+        if (e._tipo === 'imc') {
+            dotClass = 'tipo-imc';
+            icon     = 'fas fa-weight';
+            title    = 'Perfil IMC Atualizado';
+            const d  = e.dados;
+            const pct = imcPct(d.imcValor);
+            detailsHtml = `
+                <section class="evo-entry-details">
+                    <span class="evo-chip">Peso <span>${d.peso} kg</span></span>
+                    <span class="evo-chip">Altura <span>${d.altura} cm</span></span>
+                    <span class="evo-chip">Idade <span>${d.idade} anos</span></span>
+                    <span class="evo-chip">Objetivo <span>${d.objetivo || '—'}</span></span>
+                </section>
+                <section style="margin-top:0.8rem; display:flex; align-items:center; gap:0.6rem">
+                    <span style="color:#888; font-size:0.8rem">IMC</span>
+                    <strong style="color:#FFD700; font-size:1.1rem">${parseFloat(d.imcValor).toFixed(1)}</strong>
+                    <span style="color:#aaa; font-size:0.8rem">${imcCat(d.imcValor)}</span>
+                    <section class="imc-mini-bar" style="flex:1">
+                        <section class="imc-mini-marker" style="left:${pct}%"></section>
+                    </section>
+                </section>`;
+        }
+
+        else if (e._tipo === 'avaliacao') {
+            dotClass = 'tipo-avaliacao';
+            icon     = 'fas fa-camera';
+            title    = 'Avaliação Corporal com IA';
+            const d  = e.dados;
+            const c  = d.composicao || {};
+            detailsHtml = `
+                <section class="evo-entry-details">
+                    <span class="evo-chip">Gordura <span>${c.percentual_gordura_estimado || '—'}</span></span>
+                    <span class="evo-chip">Músculo <span>${c.massa_muscular_aparente || '—'}</span></span>
+                    <span class="evo-chip">Região <span>${c.regiao_predominante || '—'}</span></span>
+                </section>
+                ${d.classificacao_imc_visual
+                    ? `<p style="margin-top:0.5rem; font-size:0.82rem; color:#888">
+                        IMC visual: <span style="color:#4fc3f7">${d.classificacao_imc_visual}</span>
+                       </p>`
+                    : ''}
+                ${(d.areas_melhoria || []).length
+                    ? `<p style="margin-top:0.4rem; font-size:0.8rem; color:#888">
+                        Áreas de melhoria: ${d.areas_melhoria.slice(0,2).join(' · ')}
+                       </p>`
+                    : ''}`;
+        }
+
+        else if (e._tipo === 'treino') {
+            dotClass = 'tipo-treino';
+            icon     = 'fas fa-dumbbell';
+            title    = e.dados.nome || 'Treino Registrado';
+            const d  = e.dados;
+            const chips = [];
+            chips.push(`<span class="evo-chip">Tipo <span>${d.tipo}</span></span>`);
+            chips.push(`<span class="evo-chip">Duração <span>${d.duracao} min</span></span>`);
+            if (d.peso)      chips.push(`<span class="evo-chip">Carga <span>${d.peso} kg</span></span>`);
+            if (d.series)    chips.push(`<span class="evo-chip">Séries <span>${d.series}x${d.reps || ''}</span></span>`);
+            if (d.cardioMin) chips.push(`<span class="evo-chip">Cardio <span>${d.cardioMin} min</span></span>`);
+            detailsHtml = `<section class="evo-entry-details">${chips.join('')}</section>
+                ${d.obs ? `<p style="margin-top:0.5rem; font-size:0.8rem; color:#888; font-style:italic">"${d.obs}"</p>` : ''}`;
+        }
+
+        return `<section class="evo-entry">
+            <section class="evo-entry-dot ${dotClass}">
+                <i class="${icon}"></i>
+            </section>
+            <section class="evo-entry-body">
+                <section class="evo-entry-header">
+                    <span class="evo-entry-title">${title}</span>
+                    <span class="evo-entry-date">${e.data}</span>
+                </section>
+                ${detailsHtml}
+            </section>
+        </section>`;
+    }).join('');
+}
+</script>
 </body>
 </html>

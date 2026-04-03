@@ -456,6 +456,22 @@ async function submitForm() {
             // Salva no localStorage para persistência local
             saveProfile(payload);
 
+            // Registra snapshot no histórico de evolução
+            const historico = JSON.parse(localStorage.getItem('gymbros_evolucao') || '[]');
+            historico.push({
+                tipo: 'imc',
+                data: new Date().toLocaleDateString('pt-BR'),
+                timestamp: Date.now(),
+                dados: {
+                    peso: payload.peso,
+                    altura: payload.altura,
+                    idade: payload.idade,
+                    imcValor: payload.imcValor,
+                    objetivo: payload.objetivo
+                }
+            });
+            localStorage.setItem('gymbros_evolucao', JSON.stringify(historico));
+
             document.getElementById('submit-success').textContent = '✓ Perfil salvo com sucesso!';
 
             // Após 1.5s mostra a view do perfil em vez de redirecionar
