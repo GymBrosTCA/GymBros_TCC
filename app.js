@@ -12,8 +12,8 @@ app.use(express.static("app/public"));
 app.set("view engine", "ejs");
 app.set("views", "./app/views");
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 app.use(session({
   secret: 'gymbrossecret',

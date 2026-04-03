@@ -42,6 +42,103 @@ router.get('/chat', (req, res) => {
     res.render('pages/ai-chat', { user: req.session.user });
 });
 
+// GET /ai/avaliacao — renderiza a página de avaliação corporal
+router.get('/avaliacao', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+    res.render('pages/ai-avaliacao', { user: req.session.user });
+});
+
+// POST /ai/avaliacao — avaliação corporal por imagem (visão do LLaMA 4)
+router.post('/avaliacao', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
+
+    const { fotoFrontal, fotoLateral, fotoPosterior } = req.body;
+
+    if (!fotoFrontal) {
+        return res.status(400).json({ erro: 'A foto frontal é obrigatória.' });
+    }
+
+    const user = req.session.user;
+    const imc  = user.imc || {};
+
+    // Monta prompt com dados do perfil
+    const perfilTexto = imc.peso
+        ? `Dados do aluno: ${user.nome}, ${imc.idade || '?'} anos, ${imc.peso}kg, ${imc.altura}cm, IMC ${imc.imcValor || '?'}. Objetivo: ${imc.objetivo || 'não informado'}.`
+        : `Dados do aluno: ${user.nome}. Perfil IMC não preenchido.`;
+
+    const promptTexto = `${perfilTexto}
+
+Analise a composição corporal do aluno pela(s) foto(s) enviadas e retorne SOMENTE um JSON válido, sem markdown, sem texto fora do JSON, com exatamente esta estrutura:
+{
+  "composicao": {
+    "percentual_gordura_estimado": "X%",
+    "margem_erro": "±Y%",
+    "regiao_predominante": "abdominal | membros | uniforme",
+    "massa_muscular_aparente": "baixa | moderada | alta"
+  },
+  "classificacao_imc_visual": "string descritiva",
+  "pontos_positivos": ["...", "..."],
+  "areas_melhoria": ["...", "..."],
+  "recomendacoes": {
+    "treino": "...",
+    "nutricao": "..."
+  },
+  "aviso": "Esta análise é estimativa visual e não substitui avaliação profissional."
+}`;
+
+    // Monta array de content com texto + imagens
+    const contentArr = [{ type: 'text', text: promptTexto }];
+
+    // Adiciona cada foto como image_url (base64 já vem do frontend)
+    [fotoFrontal, fotoLateral, fotoPosterior].forEach(foto => {
+        if (foto && foto.startsWith('data:image')) {
+            contentArr.push({ type: 'image_url', image_url: { url: foto } });
+        }
+    });
+
+    try {
+        // Chama diretamente a API REST da Groq (formato OpenAI vision)
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+                messages: [{ role: 'user', content: contentArr }],
+                temperature: 0.4,
+                max_tokens: 1024
+            })
+        });
+
+        const groqData = await response.json();
+
+        if (!groqData.choices || !groqData.choices[0]) {
+            console.error('Resposta inesperada da Groq:', groqData);
+            return res.status(500).json({ erro: 'Erro ao processar a resposta da IA.' });
+        }
+
+        const rawText = groqData.choices[0].message.content.trim();
+
+        // Remove markdown code fences se existirem
+        const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+
+        let resultado;
+        try {
+            resultado = JSON.parse(cleaned);
+        } catch {
+            console.error('Falha ao parsear JSON da IA:', rawText);
+            return res.status(422).json({ erro: 'A IA não retornou um formato válido. Tente novamente com outra foto.' });
+        }
+
+        return res.json({ resultado });
+    } catch (err) {
+        console.error('Erro na avaliação corporal:', err.message);
+        return res.status(500).json({ erro: 'Erro de conexão com a IA. Tente novamente.' });
+    }
+});
+
 // POST /ai/message — envia mensagem ao Groq e retorna resposta em JSON
 router.post('/message', async (req, res) => {
     if (!req.session.user) return res.status(401).json({ reply: 'Não autorizado.' });

@@ -60,7 +60,7 @@ body{
   color: #fff;
 }
 
-.input-box i {
+.input-box > i {
   position: absolute;
   right: 20px;
   top: 50%;

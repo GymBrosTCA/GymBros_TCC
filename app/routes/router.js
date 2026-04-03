@@ -147,6 +147,13 @@ router.get('/imc-form', (req, res) => {
     res.render('pages/imc-form', { user: req.session.user });
 });
 
+//Avaliação Corporal 
+router.get('/ai/avaliacao', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/ai-avaliacao', { user: req.session.user });
+});
+
 // Atualizar dados pessoais (nome e e-mail)
 router.post('/config/atualizar-dados', (req, res) => {
     if (!req.session.user) return res.redirect('/login');

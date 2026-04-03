@@ -385,6 +385,142 @@
 }
 
 /* ==============================
+   PROFILE VIEW (perfil salvo)
+   ============================== */
+.profile-view-card {
+    background: #1f1f1f;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    animation: imcFadeIn 0.35s ease;
+}
+
+.profile-view-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.6rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #333;
+}
+
+.profile-view-header h2 {
+    font-size: 1.4rem;
+    color: #FFD700;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.btn-edit-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #2a2a2a;
+    border: 1.5px solid #FFD700;
+    color: #FFD700;
+    border-radius: 8px;
+    padding: 0.55rem 1.2rem;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-edit-profile:hover {
+    background: #FFD700;
+    color: #1f1f1f;
+}
+
+.profile-view-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1.6rem;
+}
+
+.pv-item {
+    background: #2a2a2a;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+}
+
+.pv-label {
+    display: block;
+    color: #888;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.2rem;
+}
+
+.pv-value {
+    display: block;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* IMC visual */
+.pv-imc-block {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    border: 1px solid #FFD700;
+}
+
+.pv-imc-top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.pv-imc-value {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #FFD700;
+    line-height: 1;
+}
+
+.pv-imc-cat {
+    font-size: 1rem;
+    color: #ccc;
+}
+
+.pv-imc-bar-wrap {
+    margin-top: 0.5rem;
+}
+
+.pv-imc-bar {
+    height: 10px;
+    background: linear-gradient(to right, #4fc3f7, #81c784, #ffb74d, #e57373);
+    border-radius: 5px;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.pv-imc-marker {
+    position: absolute;
+    top: -5px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 3px solid #FFD700;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+    transition: left 0.6s ease;
+}
+
+.pv-imc-scale {
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    font-size: 0.72rem;
+}
+
+/* ==============================
    RESPONSIVO
    ============================== */
 @media (max-width: 768px) {
