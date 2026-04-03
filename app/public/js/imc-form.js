@@ -1,12 +1,183 @@
-// imc-form.js — multi-step form logic
+// imc-form.js — multi-step form logic + profile view mode
 'use strict';
 
-let currentStep = 1;
-const TOTAL_STEPS = 5;
+// ================================================
+// MODO PERFIL SALVO (localStorage)
+// ================================================
+const STORAGE_KEY = 'gymbros_imc_profile';
+
+function loadSavedProfile() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null; }
+    catch { return null; }
+}
+
+function saveProfile(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// Calcula IMC e retorna categoria
+function imcCategory(imc) {
+    imc = parseFloat(imc);
+    if (imc < 18.5) return 'Abaixo do peso';
+    if (imc < 25)   return '✓ Peso normal';
+    if (imc < 30)   return 'Sobrepeso';
+    if (imc < 35)   return 'Obesidade grau I';
+    if (imc < 40)   return 'Obesidade grau II';
+    return 'Obesidade grau III';
+}
+
+// Posição na barra IMC (0–100%)
+function imcBarPercent(imc) {
+    imc = parseFloat(imc);
+    // Mapeia IMC 14–40 para 0–100%
+    const min = 14, max = 40;
+    return Math.min(100, Math.max(0, ((imc - min) / (max - min)) * 100));
+}
+
+// Renderiza a view de perfil salvo
+function renderProfileView(data) {
+    const imc  = parseFloat(data.imcValor);
+    const cat  = imcCategory(imc);
+    const pct  = imcBarPercent(imc);
+
+    const view = document.getElementById('profileView');
+    if (!view) return;
+
+    view.innerHTML = `
+    <section class="profile-view-card">
+        <section class="profile-view-header">
+            <h2><i class="fas fa-user-check"></i> Perfil IMC Salvo</h2>
+            <button class="btn-edit-profile" id="btnEditProfile">
+                <i class="fas fa-pencil-alt"></i> Editar
+            </button>
+        </section>
+
+        <section class="profile-view-grid">
+            <section class="pv-item">
+                <span class="pv-label">Peso</span>
+                <span class="pv-value">${data.peso} kg</span>
+            </section>
+            <section class="pv-item">
+                <span class="pv-label">Altura</span>
+                <span class="pv-value">${data.altura} cm</span>
+            </section>
+            <section class="pv-item">
+                <span class="pv-label">Idade</span>
+                <span class="pv-value">${data.idade} anos</span>
+            </section>
+            <section class="pv-item">
+                <span class="pv-label">Sexo</span>
+                <span class="pv-value">${data.sexo}</span>
+            </section>
+            <section class="pv-item">
+                <span class="pv-label">Objetivo</span>
+                <span class="pv-value">${data.objetivo}</span>
+            </section>
+            <section class="pv-item">
+                <span class="pv-label">Experiência</span>
+                <span class="pv-value">${data.experiencia}</span>
+            </section>
+            <section class="pv-item">
+                <span class="pv-label">Treino</span>
+                <span class="pv-value">${data.diasSemana} dias/sem · ${data.tempoPorSessao} min</span>
+            </section>
+            <section class="pv-item">
+                <span class="pv-label">Local</span>
+                <span class="pv-value">${data.localTreino}</span>
+            </section>
+        </section>
+
+        <!-- IMC com barra visual -->
+        <section class="pv-imc-block">
+            <section class="pv-imc-top">
+                <span class="pv-imc-value">${imc.toFixed(1)}</span>
+                <span class="pv-imc-cat">${cat}</span>
+            </section>
+            <section class="pv-imc-bar-wrap">
+                <section class="pv-imc-bar">
+                    <section class="pv-imc-marker" style="left: ${pct}%"></section>
+                </section>
+                <section class="pv-imc-scale">
+                    <span>Abaixo do peso</span>
+                    <span>Normal</span>
+                    <span>Sobrepeso</span>
+                    <span>Obesidade</span>
+                </section>
+            </section>
+        </section>
+    </section>`;
+
+    view.style.display = 'block';
+    document.getElementById('formWrapper').style.display = 'none';
+
+    document.getElementById('btnEditProfile').addEventListener('click', () => {
+        view.style.display = 'none';
+        document.getElementById('formWrapper').style.display = 'block';
+        // Preenche os campos com os dados salvos
+        populateForm(data);
+    });
+}
+
+// Preenche o formulário com dados do localStorage
+function populateForm(data) {
+    const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && val !== undefined) el.value = val;
+    };
+    const setRadio = (name, val) => {
+        const el = document.querySelector(`input[name="${name}"][value="${val}"]`);
+        if (el) el.checked = true;
+    };
+    const setChecks = (name, vals) => {
+        if (!Array.isArray(vals)) return;
+        document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
+            cb.checked = vals.includes(cb.value);
+        });
+    };
+
+    set('peso', data.peso);
+    set('altura', data.altura);
+    set('idade', data.idade);
+    setRadio('sexo', data.sexo);
+    setRadio('objetivo', data.objetivo);
+    set('diasSemana', data.diasSemana);
+    set('tempoPorSessao', data.tempoPorSessao);
+    setRadio('localTreino', data.localTreino);
+    setRadio('experiencia', data.experiencia);
+    setChecks('lesoes', data.lesoes);
+    setRadio('acompanhamentoMedico', data.acompanhamentoMedico);
+    setChecks('restricoesAlimentares', data.restricoesAlimentares);
+    setRadio('seletividade', data.seletividade);
+    if (data.alimentosSeletividade) set('alimentosSeletividade', data.alimentosSeletividade);
+    if (data.seletividade === 'sim') {
+        const d = document.getElementById('seletividadeDetails');
+        if (d) d.style.display = 'block';
+    }
+    setChecks('gruposAlimentares', data.gruposAlimentares);
+    set('refeicoesPorDia', data.refeicoesPorDia);
+    setRadio('pulaRefeicoes', data.pulaRefeicoes);
+    setChecks('suplementacao', data.suplementacao);
+    setRadio('hidratacao', data.hidratacao);
+
+    calcIMC();
+}
+
+// ================================================
+// INICIALIZAÇÃO
+// ================================================
+window.addEventListener('DOMContentLoaded', () => {
+    const saved = loadSavedProfile();
+    if (saved && saved.imcValor) {
+        renderProfileView(saved);
+    }
+});
 
 // ================================================
 // NAVEGAÇÃO ENTRE ETAPAS
 // ================================================
+let currentStep = 1;
+const TOTAL_STEPS = 5;
+
 function updateUI() {
     const pct = ((currentStep - 1) / (TOTAL_STEPS - 1)) * 100;
     document.getElementById('progressFill').style.width = pct + '%';
@@ -21,10 +192,16 @@ function updateUI() {
     const btnBack   = document.getElementById('btnBack');
     const btnNext   = document.getElementById('btnNext');
     const btnSubmit = document.getElementById('btnSubmit');
+    const btnCancel = document.getElementById('btnCancelEdit');
 
     btnBack.style.display   = currentStep === 1           ? 'none'         : 'inline-flex';
     btnNext.style.display   = currentStep === TOTAL_STEPS ? 'none'         : 'inline-flex';
     btnSubmit.style.display = currentStep === TOTAL_STEPS ? 'inline-flex'  : 'none';
+
+    // Mostra botão cancelar edição apenas se há perfil salvo
+    if (btnCancel) {
+        btnCancel.style.display = loadSavedProfile() ? 'inline-flex' : 'none';
+    }
 }
 
 function showStep(next, goingBack) {
@@ -51,6 +228,17 @@ document.getElementById('btnBack').addEventListener('click', () => {
 });
 
 document.getElementById('btnSubmit').addEventListener('click', submitForm);
+
+// Botão cancelar edição: volta para a view do perfil salvo
+const btnCancelEdit = document.getElementById('btnCancelEdit');
+if (btnCancelEdit) {
+    btnCancelEdit.addEventListener('click', () => {
+        const saved = loadSavedProfile();
+        if (saved) {
+            renderProfileView(saved);
+        }
+    });
+}
 
 // ================================================
 // VALIDAÇÃO POR ETAPA
@@ -132,16 +320,6 @@ function calcIMC() {
     }
 }
 
-function imcCategory(imc) {
-    imc = parseFloat(imc);
-    if (imc < 18.5) return 'Abaixo do peso';
-    if (imc < 25)   return '✓ Peso normal';
-    if (imc < 30)   return 'Sobrepeso';
-    if (imc < 35)   return 'Obesidade grau I';
-    if (imc < 40)   return 'Obesidade grau II';
-    return 'Obesidade grau III';
-}
-
 document.getElementById('peso').addEventListener('input', calcIMC);
 document.getElementById('altura').addEventListener('input', calcIMC);
 
@@ -159,7 +337,6 @@ document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
             const nenhuma = document.querySelector(`input[name="${name}"][value="nenhuma"]`);
             if (nenhuma) nenhuma.checked = false;
         }
-        // also handles "nenhum" (suplementação)
         if (cb.value === 'nenhum' && cb.checked) {
             document.querySelectorAll(`input[name="${name}"]`).forEach(other => {
                 if (other !== cb) other.checked = false;
@@ -264,8 +441,8 @@ async function submitForm() {
     };
 
     const btnSubmit = document.getElementById('btnSubmit');
-    btnSubmit.disabled     = true;
-    btnSubmit.innerHTML    = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+    btnSubmit.disabled  = true;
+    btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
 
     try {
         const res  = await fetch('/imc-save', {
@@ -276,8 +453,23 @@ async function submitForm() {
         const data = await res.json();
 
         if (data.mensagem) {
-            document.getElementById('submit-success').textContent = data.mensagem;
-            setTimeout(() => { window.location.href = '/area-aluno'; }, 1500);
+            // Salva no localStorage para persistência local
+            saveProfile(payload);
+
+            document.getElementById('submit-success').textContent = '✓ Perfil salvo com sucesso!';
+
+            // Após 1.5s mostra a view do perfil em vez de redirecionar
+            setTimeout(() => {
+                renderProfileView(payload);
+                // Volta ao passo 1 caso o usuário edite novamente
+                currentStep = 1;
+                document.querySelectorAll('.imc-step').forEach(s => s.classList.remove('active'));
+                document.getElementById('step-1').classList.add('active');
+                updateUI();
+                document.getElementById('submit-success').textContent = '';
+                btnSubmit.disabled  = false;
+                btnSubmit.innerHTML = '<i class="fas fa-check"></i> Salvar Perfil';
+            }, 1500);
         }
     } catch (err) {
         console.error(err);

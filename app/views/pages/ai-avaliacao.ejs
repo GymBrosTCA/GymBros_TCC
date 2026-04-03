@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avaliação Corporal IA - GymBros</title>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/ai-avaliacao.css">
+</head>
+<body>
+
+<%- include('../partials/header') %>
+
+<section class="aluno-dashboard">
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img src="/images/avatar.png" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p>Aluno GymBros</p>
+        </section>
+        <ul class="aluno-menu">
+            <li><a href="/area-aluno"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
+            <li><a href="/treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+            <li><a href="/meu-plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li><a href="/ai/chat"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <li><a href="/ai/avaliacao" class="active"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+
+        <section class="dashboard-top">
+            <h1><i class="fas fa-camera"></i> Avaliação Corporal com IA</h1>
+            <p>Envie suas fotos e receba uma análise estimativa de composição corporal</p>
+        </section>
+
+        <!-- FORMULÁRIO DE UPLOAD -->
+        <section class="imc-form-card">
+
+            <section class="imc-step-header">
+                <i class="fas fa-camera imc-step-icon"></i>
+                <section>
+                    <h2>Enviar Fotos</h2>
+                    <p>Foto frontal obrigatória — lateral e posterior opcionais</p>
+                </section>
+            </section>
+
+            <section class="avaliacao-upload-grid">
+
+                <!-- Foto frontal -->
+                <section class="upload-slot" id="slot-frontal">
+                    <input type="file" id="input-frontal" accept="image/*" aria-label="Foto frontal">
+                    <img class="slot-preview" id="preview-frontal" alt="Pré-visualização frontal">
+                    <i class="fas fa-user slot-icon"></i>
+                    <span class="slot-label">Foto Frontal</span>
+                    <span class="slot-required">* obrigatório</span>
+                </section>
+
+                <!-- Foto lateral -->
+                <section class="upload-slot" id="slot-lateral">
+                    <input type="file" id="input-lateral" accept="image/*" aria-label="Foto lateral">
+                    <img class="slot-preview" id="preview-lateral" alt="Pré-visualização lateral">
+                    <i class="fas fa-user-circle slot-icon"></i>
+                    <span class="slot-label">Foto Lateral</span>
+                    <span class="slot-required">opcional</span>
+                </section>
+
+                <!-- Foto posterior -->
+                <section class="upload-slot" id="slot-posterior">
+                    <input type="file" id="input-posterior" accept="image/*" aria-label="Foto posterior">
+                    <img class="slot-preview" id="preview-posterior" alt="Pré-visualização posterior">
+                    <i class="fas fa-walking slot-icon"></i>
+                    <span class="slot-label">Foto Posterior</span>
+                    <span class="slot-required">opcional</span>
+                </section>
+
+            </section>
+
+            <!-- LGPD -->
+            <label class="avaliacao-lgpd">
+                <input type="checkbox" id="consentimento">
+                Concordo com o uso temporário das minhas fotos para análise de composição corporal por IA. As imagens <strong>&nbsp;não serão armazenadas permanentemente&nbsp;</strong> e são processadas somente para gerar este relatório.
+            </label>
+
+            <button class="btn-analisar" id="btnAnalisar" disabled>
+                <i class="fas fa-search"></i> Analisar
+            </button>
+
+            <!-- Loading -->
+            <section class="avaliacao-loading" id="loading">
+                <section class="avaliacao-spinner"></section>
+                <span>Analisando imagem com IA... aguarde alguns segundos</span>
+            </section>
+
+            <!-- Erro -->
+            <section class="avaliacao-erro" id="erroBox"></section>
+
+        </section>
+
+        <!-- RESULTADO -->
+        <section class="avaliacao-resultado" id="resultado">
+
+            <!-- Composição corporal -->
+            <section class="result-card" id="card-composicao">
+                <h3><i class="fas fa-chart-pie"></i> Composição Corporal Estimada</h3>
+                <section class="composicao-grid">
+                    <section class="composicao-item">
+                        <p class="ci-label">% Gordura Estimado</p>
+                        <p class="ci-value" id="res-gordura">—</p>
+                        <p class="ci-sub" id="res-margem">±?%</p>
+                    </section>
+                    <section class="composicao-item">
+                        <p class="ci-label">Massa Muscular</p>
+                        <p class="ci-value" id="res-massa">—</p>
+                    </section>
+                    <section class="composicao-item">
+                        <p class="ci-label">Região Predominante</p>
+                        <p class="ci-value" style="font-size:1rem" id="res-regiao">—</p>
+                    </section>
+                    <section class="composicao-item">
+                        <p class="ci-label">IMC Visual</p>
+                        <p class="ci-value" style="font-size:1rem" id="res-imc-visual">—</p>
+                    </section>
+                </section>
+            </section>
+
+            <!-- Pontos positivos -->
+            <section class="result-card">
+                <h3><i class="fas fa-thumbs-up"></i> Pontos Positivos</h3>
+                <ul class="result-list" id="res-positivos"></ul>
+            </section>
+
+            <!-- Áreas de melhoria -->
+            <section class="result-card">
+                <h3><i class="fas fa-fire-alt"></i> Áreas de Melhoria</h3>
+                <ul class="result-list negativa" id="res-melhoria"></ul>
+            </section>
+
+            <!-- Recomendações -->
+            <section class="result-card">
+                <h3><i class="fas fa-lightbulb"></i> Recomendações</h3>
+                <section class="rec-block">
+                    <p class="rec-titulo">🏋️ Treino</p>
+                    <p class="rec-texto" id="res-rec-treino">—</p>
+                </section>
+                <section class="rec-block">
+                    <p class="rec-titulo">🥗 Nutrição</p>
+                    <p class="rec-texto" id="res-rec-nutricao">—</p>
+                </section>
+            </section>
+
+            <!-- Aviso -->
+            <section class="result-aviso">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="res-aviso">Esta análise é estimativa visual e não substitui avaliação profissional.</span>
+            </section>
+
+        </section>
+
+    </section>
+
+</section>
+
+<%- include('../partials/footer') %>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script>
+// Converte arquivo para base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Configura cada slot de upload
+function setupSlot(inputId, slotId, previewId) {
+    const input   = document.getElementById(inputId);
+    const slot    = document.getElementById(slotId);
+    const preview = document.getElementById(previewId);
+
+    input.addEventListener('change', () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        const url = URL.createObjectURL(file);
+        preview.src = url;
+        slot.classList.add('has-image');
+        updateButton();
+    });
+}
+
+setupSlot('input-frontal',   'slot-frontal',   'preview-frontal');
+setupSlot('input-lateral',   'slot-lateral',   'preview-lateral');
+setupSlot('input-posterior', 'slot-posterior', 'preview-posterior');
+
+const consentimento = document.getElementById('consentimento');
+const btnAnalisar   = document.getElementById('btnAnalisar');
+
+function updateButton() {
+    const temFrontal = document.getElementById('input-frontal').files.length > 0;
+    const temConsent = consentimento.checked;
+    btnAnalisar.disabled = !(temFrontal && temConsent);
+}
+
+consentimento.addEventListener('change', updateButton);
+
+// Análise
+btnAnalisar.addEventListener('click', async () => {
+    const erroBox  = document.getElementById('erroBox');
+    const loading  = document.getElementById('loading');
+    const resultado = document.getElementById('resultado');
+
+    erroBox.textContent  = '';
+    erroBox.classList.remove('visible');
+    resultado.classList.remove('visible');
+
+    // Converte imagens para base64
+    const frontalFile   = document.getElementById('input-frontal').files[0];
+    const lateralFile   = document.getElementById('input-lateral').files[0];
+    const posteriorFile = document.getElementById('input-posterior').files[0];
+
+    const fotoFrontal   = frontalFile   ? await fileToBase64(frontalFile)   : null;
+    const fotoLateral   = lateralFile   ? await fileToBase64(lateralFile)   : null;
+    const fotoPosterior = posteriorFile ? await fileToBase64(posteriorFile) : null;
+
+    loading.classList.add('visible');
+    btnAnalisar.disabled = true;
+
+    try {
+        const res = await fetch('/ai/avaliacao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fotoFrontal, fotoLateral, fotoPosterior })
+        });
+
+        const data = await res.json();
+        loading.classList.remove('visible');
+
+        if (!res.ok || data.erro) {
+            erroBox.textContent = data.erro || 'Erro ao processar a avaliação.';
+            erroBox.classList.add('visible');
+            updateButton();
+            return;
+        }
+
+        renderResultado(data.resultado);
+        resultado.classList.add('visible');
+        resultado.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch (err) {
+        loading.classList.remove('visible');
+        erroBox.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        erroBox.classList.add('visible');
+    } finally {
+        updateButton();
+    }
+});
+
+function renderResultado(r) {
+    const c = r.composicao || {};
+
+    document.getElementById('res-gordura').textContent    = c.percentual_gordura_estimado || '—';
+    document.getElementById('res-margem').textContent     = c.margem_erro || '';
+    document.getElementById('res-massa').textContent      = c.massa_muscular_aparente || '—';
+    document.getElementById('res-regiao').textContent     = c.regiao_predominante || '—';
+    document.getElementById('res-imc-visual').textContent = r.classificacao_imc_visual || '—';
+
+    // Pontos positivos
+    const posEl = document.getElementById('res-positivos');
+    posEl.innerHTML = '';
+    (r.pontos_positivos || []).forEach(p => {
+        const li = document.createElement('li');
+        li.textContent = p;
+        posEl.appendChild(li);
+    });
+
+    // Áreas de melhoria
+    const melEl = document.getElementById('res-melhoria');
+    melEl.innerHTML = '';
+    (r.areas_melhoria || []).forEach(a => {
+        const li = document.createElement('li');
+        li.textContent = a;
+        melEl.appendChild(li);
+    });
+
+    // Recomendações
+    document.getElementById('res-rec-treino').textContent   = (r.recomendacoes || {}).treino   || '—';
+    document.getElementById('res-rec-nutricao').textContent = (r.recomendacoes || {}).nutricao || '—';
+
+    // Aviso
+    document.getElementById('res-aviso').textContent = r.aviso || 'Esta análise é estimativa visual e não substitui avaliação profissional.';
+}
+</script>
+</body>
+</html>

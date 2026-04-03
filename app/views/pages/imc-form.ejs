@@ -33,6 +33,7 @@
             <li><a href="/meu-plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
             <li><a href="/config"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="/ai/chat"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <li><a href="/ai/avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
             <li><a href="/imc-form" class="active"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
         </ul>
     </section>
@@ -44,6 +45,12 @@
             <h1><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</h1>
             <p>Preencha seu perfil para receber orientações personalizadas do GymBot</p>
         </section>
+
+        <!-- VIEW DE PERFIL SALVO (renderizado via JS) -->
+        <section id="profileView" style="display:none"></section>
+
+        <!-- WRAPPER DO FORMULÁRIO (oculto quando perfil já está salvo) -->
+        <section id="formWrapper">
 
         <!-- BARRA DE PROGRESSO -->
         <section class="imc-progress-wrapper">
@@ -337,6 +344,9 @@
 
         <!-- BOTÕES DE NAVEGAÇÃO -->
         <section class="imc-nav">
+            <button type="button" class="imc-btn-back" id="btnCancelEdit" style="display:none">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
             <button type="button" class="imc-btn-back" id="btnBack" style="display:none">
                 <i class="fas fa-arrow-left"></i> Voltar
             </button>
@@ -347,6 +357,8 @@
                 <i class="fas fa-check"></i> Salvar Perfil
             </button>
         </section>
+
+        </section><!-- /formWrapper -->
 
     </section>
 
