@@ -140,6 +140,13 @@ router.get('/config', (req, res) => {
     res.render('pages/config', { user: req.session.user });
 });
 
+//Perfil IMC
+router.get('/imc-form', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/imc-form', { user: req.session.user });
+});
+
 // Atualizar dados pessoais (nome e e-mail)
 router.post('/config/atualizar-dados', (req, res) => {
     if (!req.session.user) return res.redirect('/login');
@@ -203,6 +210,22 @@ router.post('/config/alterar-plano', (req, res) => {
 });
 
 
+
+router.post('/imc-save', (req, res) => {
+    if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
+
+    const { lesoes, restricoesAlimentares, gruposAlimentares, suplementacao, ...rest } = req.body;
+
+    req.session.user.imc = {
+        ...rest,
+        lesoes:                Array.isArray(lesoes)                ? lesoes                : (lesoes                ? [lesoes]                : []),
+        restricoesAlimentares: Array.isArray(restricoesAlimentares) ? restricoesAlimentares : (restricoesAlimentares ? [restricoesAlimentares] : []),
+        gruposAlimentares:     Array.isArray(gruposAlimentares)     ? gruposAlimentares     : (gruposAlimentares     ? [gruposAlimentares]     : []),
+        suplementacao:         Array.isArray(suplementacao)         ? suplementacao         : (suplementacao         ? [suplementacao]         : []),
+    };
+
+    return res.json({ mensagem: 'Perfil salvo com sucesso! Redirecionando...' });
+});
 
 // Logout
 router.get('/logout', (req, res) => {

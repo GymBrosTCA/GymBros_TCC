@@ -122,7 +122,69 @@ body{
 
 .logo {
   display: block;
-  margin: 20px auto 0; 
-  width: 150px; 
-  height: auto; 
+  margin: 20px auto 0;
+  width: 150px;
+  height: auto;
+}
+
+/* ==============================
+   VALIDAÇÃO EM TEMPO REAL
+   ============================== */
+.input-box input.input-valid {
+  border-color: #4CAF50 !important;
+  transition: border-color 0.3s ease;
+}
+
+.input-box input.input-invalid {
+  border-color: #ff4d4d !important;
+  transition: border-color 0.3s ease;
+}
+
+/* TOGGLE SHOW/HIDE PASSWORD */
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-size: 20px;
+  padding: 4px;
+  line-height: 1;
+  z-index: 2;
+  transition: opacity 0.2s, color 0.2s;
+}
+
+.toggle-password:hover {
+  opacity: 0.7;
+}
+
+.toggle-password.visible i {
+  color: #FFD700;
+}
+
+.toggle-password i {
+  pointer-events: none;
+}
+
+/* input com toggle não deve ter o ícone padrão sobrepondo */
+.input-box:has(.toggle-password) > i {
+  display: none;
+}
+
+/* SHAKE NA VALIDAÇÃO */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%       { transform: translateX(-7px); }
+  30%       { transform: translateX(7px); }
+  45%       { transform: translateX(-5px); }
+  60%       { transform: translateX(5px); }
+  75%       { transform: translateX(-3px); }
+  90%       { transform: translateX(3px); }
+}
+
+.input-box.shake {
+  animation: shake 0.45s ease;
 }

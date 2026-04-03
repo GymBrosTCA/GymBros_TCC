@@ -1,0 +1,431 @@
+/* ==============================
+   IMC FORM — GYMBROS
+   ============================== */
+
+/* PROGRESS BAR */
+.imc-progress-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.imc-progress-track {
+    height: 6px;
+    background: #333;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.imc-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* STEP DOTS */
+.imc-steps-dots {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 4px;
+}
+
+.step-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    border: 2px solid #444;
+    color: #777;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: default;
+    transition: all 0.3s ease;
+}
+
+.step-dot.active {
+    background: #FFD700;
+    border-color: #FFD700;
+    color: #1f1f1f;
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+}
+
+.step-dot.done {
+    background: #4CAF50;
+    border-color: #4CAF50;
+    color: #fff;
+}
+
+/* FORM CARD */
+.imc-form-card {
+    background: #1f1f1f;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    margin-bottom: 1rem;
+}
+
+/* STEPS */
+.imc-step {
+    display: none;
+}
+
+.imc-step.active {
+    display: block;
+    animation: imcFadeIn 0.35s ease;
+}
+
+.imc-step.slide-back {
+    animation: imcFadeBack 0.35s ease;
+}
+
+@keyframes imcFadeIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes imcFadeBack {
+    from { opacity: 0; transform: translateX(-30px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* STEP HEADER */
+.imc-step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #333;
+}
+
+.imc-step-icon {
+    font-size: 2.2rem;
+    color: #FFD700;
+    flex-shrink: 0;
+}
+
+.imc-step-header h2 {
+    font-size: 1.6rem;
+    color: #FFD700;
+    margin: 0;
+}
+
+.imc-step-header p {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* FIELDS */
+.imc-field {
+    margin-bottom: 1.4rem;
+}
+
+.imc-field label {
+    display: block;
+    color: #ccc;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.field-required {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+.imc-field input[type="number"],
+.imc-field select,
+.imc-field textarea {
+    width: 100%;
+    background: #2a2a2a;
+    border: 1.5px solid #444;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1.05rem;
+    padding: 0.65rem 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+}
+
+.imc-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23FFD700' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 2.2rem;
+}
+
+.imc-field select option {
+    background: #2a2a2a;
+}
+
+.imc-field input:focus,
+.imc-field select:focus,
+.imc-field textarea:focus {
+    border-color: #FFD700;
+}
+
+.imc-field textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+/* FIELD ERROR */
+.field-error {
+    display: block;
+    color: #ff4d4d;
+    font-size: 0.85rem;
+    margin-top: 0.35rem;
+    min-height: 1.1em;
+}
+
+.imc-field.is-invalid input,
+.imc-field.is-invalid select {
+    border-color: #ff4d4d !important;
+}
+
+/* 2-COLUMN ROW */
+.imc-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* OPTION PILLS (radio / checkbox) */
+.imc-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+}
+
+.imc-options-wrap {
+    flex-wrap: wrap;
+}
+
+.imc-option-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: #2a2a2a;
+    border: 1.5px solid #444;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #bbb;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.imc-option-label input {
+    display: none;
+}
+
+.imc-option-label:hover {
+    border-color: #FFD700;
+    color: #fff;
+}
+
+.imc-option-label:has(input:checked) {
+    background: #FFD700;
+    border-color: #FFD700;
+    color: #1f1f1f;
+    font-weight: bold;
+}
+
+/* IMC DISPLAY */
+.imc-display {
+    background: linear-gradient(135deg, #2a2a2a, #1f1f1f);
+    border: 1px solid #FFD700;
+    border-radius: 12px;
+    padding: 1.2rem;
+    text-align: center;
+    margin-top: 1.2rem;
+    animation: imcFadeIn 0.3s ease;
+}
+
+.imc-display .imc-label {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.imc-display .imc-value {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #FFD700;
+    line-height: 1;
+}
+
+.imc-display .imc-category {
+    color: #ccc;
+    font-size: 1rem;
+    margin-top: 0.4rem;
+}
+
+/* SUMMARY (STEP 5) */
+.imc-summary {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 1.4rem;
+    margin-bottom: 1.4rem;
+    font-size: 0.95rem;
+    color: #ddd;
+    line-height: 1.7;
+}
+
+.imc-summary .summary-section {
+    padding-bottom: 0.8rem;
+    margin-bottom: 0.8rem;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.imc-summary .summary-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.imc-summary h3 {
+    color: #FFD700;
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+}
+
+.imc-summary strong {
+    color: #fff;
+}
+
+/* LGPD */
+.imc-lgpd {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 1.1rem;
+}
+
+.imc-lgpd label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    color: #bbb;
+    font-size: 0.9rem;
+    cursor: pointer;
+    line-height: 1.5;
+}
+
+.imc-lgpd input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: #FFD700;
+    margin-top: 2px;
+    cursor: pointer;
+}
+
+/* NAV BUTTONS */
+.imc-nav {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.imc-btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #2a2a2a;
+    color: #fff;
+    border: 1.5px solid #444;
+    border-radius: 8px;
+    padding: 0.75rem 1.6rem;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.imc-btn-back:hover {
+    border-color: #FFD700;
+    color: #FFD700;
+}
+
+.imc-btn-next,
+.imc-btn-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #FFD700;
+    color: #1f1f1f;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.8rem;
+    font-size: 1.05rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.imc-btn-next:hover,
+.imc-btn-submit:hover {
+    transform: scale(1.05);
+    background: #e6c200;
+}
+
+.imc-btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==============================
+   RESPONSIVO
+   ============================== */
+@media (max-width: 768px) {
+    .imc-form-card {
+        padding: 1.2rem;
+    }
+
+    .imc-row {
+        grid-template-columns: 1fr;
+    }
+
+    .imc-nav {
+        flex-direction: column-reverse;
+    }
+
+    .imc-btn-back,
+    .imc-btn-next,
+    .imc-btn-submit {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .imc-step-header {
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .imc-step-icon {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .step-dot {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+
+    .imc-option-label {
+        padding: 0.45rem 0.7rem;
+        font-size: 0.88rem;
+    }
+}

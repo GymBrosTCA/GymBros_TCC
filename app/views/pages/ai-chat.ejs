@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Trainer IA - GymBros</title>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/ai-chat.css">
+</head>
+<body>
+
+<%- include('../partials/header') %>
+
+<section class="aluno-dashboard">
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img src="/images/avatar.png" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p>Aluno GymBros</p>
+        </section>
+        <ul class="aluno-menu">
+            <li><a href="/area-aluno"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
+            <li><a href="/treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+            <li><a href="/meu-plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li><a href="/ai/chat" class="active"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+
+        <section class="dashboard-top">
+            <h1><i class="fas fa-robot"></i> Personal Trainer IA</h1>
+            <p>Tire suas dúvidas sobre treinos, exercícios, nutrição e muito mais</p>
+        </section>
+
+        <!-- ÁREA DO CHAT -->
+        <section class="chat-container">
+
+            <section class="chat-history" id="chatHistory">
+                <!-- Mensagem de boas-vindas do bot -->
+                <section class="chat-message bot-message">
+                    <section class="chat-bubble">
+                        <strong>GymBot</strong>
+                        <p>Olá, <%= user.nome %>! 💪 Sou o GymBot, seu personal trainer virtual. Como posso te ajudar hoje? Pode me perguntar sobre treinos, exercícios, nutrição ou motivação!</p>
+                    </section>
+                </section>
+            </section>
+
+            <!-- INDICADOR DE DIGITANDO -->
+            <section class="typing-indicator" id="typingIndicator" style="display: none;">
+                <section class="chat-bubble">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </section>
+            </section>
+
+            <!-- INPUT -->
+            <section class="chat-input-area">
+                <input
+                    type="text"
+                    id="chatInput"
+                    placeholder="Digite sua mensagem..."
+                    autocomplete="off"
+                    maxlength="500"
+                />
+                <button id="sendBtn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i> <span class="btn-label">Enviar</span>
+                </button>
+            </section>
+
+        </section>
+
+    </section>
+
+</section>
+
+<%- include('../partials/footer') %>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script>
+    const chatHistory = document.getElementById('chatHistory');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    function appendMessage(text, sender) {
+        const wrapper = document.createElement('section');
+        wrapper.classList.add('chat-message', sender === 'user' ? 'user-message' : 'bot-message');
+
+        const bubble = document.createElement('section');
+        bubble.classList.add('chat-bubble');
+
+        if (sender === 'bot') {
+            const name = document.createElement('strong');
+            name.textContent = 'GymBot';
+            bubble.appendChild(name);
+        }
+
+        const p = document.createElement('p');
+        p.textContent = text;
+        bubble.appendChild(p);
+
+        wrapper.appendChild(bubble);
+        chatHistory.appendChild(wrapper);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        chatInput.value = '';
+        sendBtn.disabled = true;
+        chatInput.disabled = true;
+
+        appendMessage(message, 'user');
+
+        typingIndicator.style.display = 'flex';
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+        try {
+            const response = await fetch('/ai/message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            const data = await response.json();
+            typingIndicator.style.display = 'none';
+            appendMessage(data.reply, 'bot');
+        } catch (err) {
+            typingIndicator.style.display = 'none';
+            appendMessage('Desculpe, não consegui processar sua mensagem. Tente novamente.', 'bot');
+        } finally {
+            sendBtn.disabled = false;
+            chatInput.disabled = false;
+            chatInput.focus();
+        }
+    }
+</script>
+</body>
+</html>

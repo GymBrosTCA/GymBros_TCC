@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu Perfil IMC - GymBros</title>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/imc-form.css">
+</head>
+<body>
+
+<%- include('../partials/header') %>
+
+<section class="aluno-dashboard">
+
+    <!-- SIDEBAR -->
+    <section class="aluno-sidebar">
+        <section class="aluno-profile">
+            <section class="avatar">
+                <img src="/images/avatar.png" alt="Avatar do Aluno">
+            </section>
+            <h2><%= user.nome %></h2>
+            <p>Aluno GymBros</p>
+        </section>
+        <ul class="aluno-menu">
+            <li><a href="/area-aluno"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
+            <li><a href="/treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+            <li><a href="/meu-plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li><a href="/ai/chat"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <li><a href="/imc-form" class="active"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
+        </ul>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <section class="aluno-main">
+
+        <section class="dashboard-top">
+            <h1><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</h1>
+            <p>Preencha seu perfil para receber orientações personalizadas do GymBot</p>
+        </section>
+
+        <!-- BARRA DE PROGRESSO -->
+        <section class="imc-progress-wrapper">
+            <section class="imc-progress-track">
+                <section class="imc-progress-fill" id="progressFill" style="width: 0%"></section>
+            </section>
+            <section class="imc-steps-dots">
+                <span class="step-dot active" data-step="1" title="Biometria">1</span>
+                <span class="step-dot" data-step="2" title="Objetivo">2</span>
+                <span class="step-dot" data-step="3" title="Restrições">3</span>
+                <span class="step-dot" data-step="4" title="Alimentação">4</span>
+                <span class="step-dot" data-step="5" title="Confirmação">5</span>
+            </section>
+        </section>
+
+        <!-- FORMULÁRIO -->
+        <form id="imcForm" class="imc-form-card">
+
+            <!-- ======================== STEP 1: BIOMETRIA ======================== -->
+            <section class="imc-step active" id="step-1">
+                <section class="imc-step-header">
+                    <i class="fas fa-weight imc-step-icon"></i>
+                    <section>
+                        <h2>Biometria</h2>
+                        <p>Etapa 1 de 5</p>
+                    </section>
+                </section>
+
+                <section class="imc-row">
+                    <section class="imc-field">
+                        <label for="peso">Peso (kg)</label>
+                        <input type="number" id="peso" name="peso" placeholder="Ex: 75" min="30" max="300" step="0.1">
+                        <span class="field-error" id="peso-error"></span>
+                    </section>
+                    <section class="imc-field">
+                        <label for="altura">Altura (cm)</label>
+                        <input type="number" id="altura" name="altura" placeholder="Ex: 175" min="100" max="250">
+                        <span class="field-error" id="altura-error"></span>
+                    </section>
+                </section>
+
+                <section class="imc-row">
+                    <section class="imc-field">
+                        <label for="idade">Idade</label>
+                        <input type="number" id="idade" name="idade" placeholder="Ex: 25" min="10" max="100">
+                        <span class="field-error" id="idade-error"></span>
+                    </section>
+                    <section class="imc-field">
+                        <label>Sexo biológico</label>
+                        <section class="imc-options">
+                            <label class="imc-option-label">
+                                <input type="radio" name="sexo" value="masculino">
+                                <span>♂ Masculino</span>
+                            </label>
+                            <label class="imc-option-label">
+                                <input type="radio" name="sexo" value="feminino">
+                                <span>♀ Feminino</span>
+                            </label>
+                        </section>
+                        <span class="field-error" id="sexo-error"></span>
+                    </section>
+                </section>
+
+                <!-- IMC calculado em tempo real -->
+                <section class="imc-display" id="imcDisplay" style="display:none">
+                    <p class="imc-label">Seu IMC estimado</p>
+                    <p class="imc-value" id="imcValue">—</p>
+                    <p class="imc-category" id="imcCategory"></p>
+                </section>
+            </section>
+
+            <!-- ======================== STEP 2: OBJETIVO ======================== -->
+            <section class="imc-step" id="step-2">
+                <section class="imc-step-header">
+                    <i class="fas fa-bullseye imc-step-icon"></i>
+                    <section>
+                        <h2>Objetivo e Disponibilidade</h2>
+                        <p>Etapa 2 de 5</p>
+                    </section>
+                </section>
+
+                <section class="imc-field">
+                    <label>Objetivo principal</label>
+                    <section class="imc-options imc-options-wrap">
+                        <label class="imc-option-label"><input type="radio" name="objetivo" value="perder gordura"><span>🔥 Perder gordura</span></label>
+                        <label class="imc-option-label"><input type="radio" name="objetivo" value="ganhar massa"><span>💪 Ganhar massa</span></label>
+                        <label class="imc-option-label"><input type="radio" name="objetivo" value="melhorar resistência"><span>🏃 Melhorar resistência</span></label>
+                        <label class="imc-option-label"><input type="radio" name="objetivo" value="manter saúde"><span>❤️ Manter saúde</span></label>
+                        <label class="imc-option-label"><input type="radio" name="objetivo" value="reabilitação"><span>🩹 Reabilitação</span></label>
+                    </section>
+                    <span class="field-error" id="objetivo-error"></span>
+                </section>
+
+                <section class="imc-row">
+                    <section class="imc-field">
+                        <label for="diasSemana">Dias disponíveis por semana</label>
+                        <select id="diasSemana" name="diasSemana">
+                            <option value="">Selecione...</option>
+                            <option value="1">1 dia</option>
+                            <option value="2">2 dias</option>
+                            <option value="3">3 dias</option>
+                            <option value="4">4 dias</option>
+                            <option value="5">5 dias</option>
+                            <option value="6">6 dias</option>
+                            <option value="7">7 dias</option>
+                        </select>
+                        <span class="field-error" id="diasSemana-error"></span>
+                    </section>
+                    <section class="imc-field">
+                        <label for="tempoPorSessao">Tempo por sessão (min)</label>
+                        <select id="tempoPorSessao" name="tempoPorSessao">
+                            <option value="">Selecione...</option>
+                            <option value="30">30 min</option>
+                            <option value="45">45 min</option>
+                            <option value="60">60 min</option>
+                            <option value="90">90 min</option>
+                            <option value="120">120 min</option>
+                        </select>
+                        <span class="field-error" id="tempoPorSessao-error"></span>
+                    </section>
+                </section>
+
+                <section class="imc-field">
+                    <label>Local de treino</label>
+                    <section class="imc-options">
+                        <label class="imc-option-label"><input type="radio" name="localTreino" value="academia"><span>🏋️ Academia</span></label>
+                        <label class="imc-option-label"><input type="radio" name="localTreino" value="casa"><span>🏠 Casa</span></label>
+                        <label class="imc-option-label"><input type="radio" name="localTreino" value="ambos"><span>🔄 Ambos</span></label>
+                    </section>
+                    <span class="field-error" id="localTreino-error"></span>
+                </section>
+
+                <section class="imc-field">
+                    <label>Nível de experiência</label>
+                    <section class="imc-options">
+                        <label class="imc-option-label"><input type="radio" name="experiencia" value="iniciante"><span>🌱 Iniciante</span></label>
+                        <label class="imc-option-label"><input type="radio" name="experiencia" value="intermediário"><span>⚡ Intermediário</span></label>
+                        <label class="imc-option-label"><input type="radio" name="experiencia" value="avançado"><span>🔥 Avançado</span></label>
+                    </section>
+                    <span class="field-error" id="experiencia-error"></span>
+                </section>
+            </section>
+
+            <!-- ======================== STEP 3: RESTRIÇÕES ======================== -->
+            <section class="imc-step" id="step-3">
+                <section class="imc-step-header">
+                    <i class="fas fa-heartbeat imc-step-icon"></i>
+                    <section>
+                        <h2>Restrições Físicas</h2>
+                        <p>Etapa 3 de 5</p>
+                    </section>
+                </section>
+
+                <section class="imc-field">
+                    <label>Possui lesão ou condição médica? (selecione todas que se aplicam)</label>
+                    <section class="imc-options imc-options-wrap">
+                        <label class="imc-option-label"><input type="checkbox" name="lesoes" value="joelho"><span>🦵 Joelho</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="lesoes" value="coluna"><span>🦴 Coluna</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="lesoes" value="ombro"><span>💪 Ombro</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="lesoes" value="nenhuma"><span>✅ Nenhuma</span></label>
+                    </section>
+                </section>
+
+                <section class="imc-field">
+                    <label>Faz acompanhamento médico?</label>
+                    <section class="imc-options">
+                        <label class="imc-option-label"><input type="radio" name="acompanhamentoMedico" value="sim"><span>✅ Sim</span></label>
+                        <label class="imc-option-label"><input type="radio" name="acompanhamentoMedico" value="não"><span>❌ Não</span></label>
+                    </section>
+                    <span class="field-error" id="acompanhamentoMedico-error"></span>
+                </section>
+            </section>
+
+            <!-- ======================== STEP 4: ALIMENTAÇÃO ======================== -->
+            <section class="imc-step" id="step-4">
+                <section class="imc-step-header">
+                    <i class="fas fa-utensils imc-step-icon"></i>
+                    <section>
+                        <h2>Alimentação</h2>
+                        <p>Etapa 4 de 5</p>
+                    </section>
+                </section>
+
+                <section class="imc-field">
+                    <label>Restrições alimentares</label>
+                    <section class="imc-options imc-options-wrap">
+                        <label class="imc-option-label"><input type="checkbox" name="restricoesAlimentares" value="vegetariano"><span>🌿 Vegetariano</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="restricoesAlimentares" value="vegano"><span>🌱 Vegano</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="restricoesAlimentares" value="sem glúten"><span>🌾 Sem glúten</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="restricoesAlimentares" value="sem lactose"><span>🥛 Sem lactose</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="restricoesAlimentares" value="alergia"><span>⚠️ Alergia</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="restricoesAlimentares" value="nenhuma"><span>✅ Nenhuma</span></label>
+                    </section>
+                </section>
+
+                <section class="imc-field">
+                    <label>Tem seletividade alimentar por textura, cheiro ou aparência?</label>
+                    <section class="imc-options">
+                        <label class="imc-option-label"><input type="radio" name="seletividade" value="sim"><span>Sim</span></label>
+                        <label class="imc-option-label"><input type="radio" name="seletividade" value="não"><span>Não</span></label>
+                    </section>
+                </section>
+
+                <section class="imc-field" id="seletividadeDetails" style="display:none">
+                    <label for="alimentosSeletividade">Quais alimentos consegue comer?</label>
+                    <textarea id="alimentosSeletividade" name="alimentosSeletividade" rows="2" placeholder="Ex: tolero arroz, frango, batata..."></textarea>
+                </section>
+
+                <section class="imc-field">
+                    <label>Grupos alimentares que consome habitualmente <span class="field-required">*</span></label>
+                    <section class="imc-options imc-options-wrap">
+                        <label class="imc-option-label"><input type="checkbox" name="gruposAlimentares" value="carnes"><span>🥩 Carnes</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="gruposAlimentares" value="ovos e laticínios"><span>🥚 Ovos/Laticínios</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="gruposAlimentares" value="legumes e verduras"><span>🥦 Legumes/Verduras</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="gruposAlimentares" value="frutas"><span>🍎 Frutas</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="gruposAlimentares" value="grãos e carboidratos"><span>🌾 Grãos/Carboidratos</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="gruposAlimentares" value="leguminosas"><span>🫘 Leguminosas</span></label>
+                    </section>
+                    <span class="field-error" id="gruposAlimentares-error"></span>
+                </section>
+
+                <section class="imc-row">
+                    <section class="imc-field">
+                        <label for="refeicoesPorDia">Refeições por dia</label>
+                        <select id="refeicoesPorDia" name="refeicoesPorDia">
+                            <option value="">Selecione...</option>
+                            <option value="1">1 refeição</option>
+                            <option value="2">2 refeições</option>
+                            <option value="3">3 refeições</option>
+                            <option value="4">4 refeições</option>
+                            <option value="5">5 refeições</option>
+                            <option value="6+">6 ou mais</option>
+                        </select>
+                    </section>
+                    <section class="imc-field">
+                        <label>Pula refeições?</label>
+                        <section class="imc-options">
+                            <label class="imc-option-label"><input type="radio" name="pulaRefeicoes" value="sim"><span>Sim</span></label>
+                            <label class="imc-option-label"><input type="radio" name="pulaRefeicoes" value="não"><span>Não</span></label>
+                        </section>
+                    </section>
+                </section>
+
+                <section class="imc-field">
+                    <label>Usa suplementação?</label>
+                    <section class="imc-options imc-options-wrap">
+                        <label class="imc-option-label"><input type="checkbox" name="suplementacao" value="whey"><span>🥤 Whey</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="suplementacao" value="creatina"><span>⚡ Creatina</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="suplementacao" value="vitaminas"><span>💊 Vitaminas</span></label>
+                        <label class="imc-option-label"><input type="checkbox" name="suplementacao" value="nenhum"><span>✅ Nenhum</span></label>
+                    </section>
+                </section>
+
+                <section class="imc-field">
+                    <label>Hidratação (autoavaliação)</label>
+                    <section class="imc-options">
+                        <label class="imc-option-label"><input type="radio" name="hidratacao" value="pouco"><span>💧 Pouco</span></label>
+                        <label class="imc-option-label"><input type="radio" name="hidratacao" value="razoável"><span>💧💧 Razoável</span></label>
+                        <label class="imc-option-label"><input type="radio" name="hidratacao" value="bastante"><span>💧💧💧 Bastante</span></label>
+                    </section>
+                </section>
+            </section>
+
+            <!-- ======================== STEP 5: CONFIRMAÇÃO ======================== -->
+            <section class="imc-step" id="step-5">
+                <section class="imc-step-header">
+                    <i class="fas fa-check-circle imc-step-icon"></i>
+                    <section>
+                        <h2>Confirmação</h2>
+                        <p>Etapa 5 de 5 — Revise seus dados</p>
+                    </section>
+                </section>
+
+                <!-- Resumo gerado por JS -->
+                <section class="imc-summary" id="imcSummary"></section>
+
+                <!-- LGPD -->
+                <section class="imc-lgpd">
+                    <label>
+                        <input type="checkbox" id="lgpd">
+                        <span>Li e concordo com o tratamento dos meus dados pessoais pelo GymBros para fins de personalização de treinos e orientações de saúde, conforme a Lei Geral de Proteção de Dados (LGPD – Lei nº 13.709/2018). Os dados serão usados exclusivamente dentro da plataforma.</span>
+                    </label>
+                    <span class="field-error" id="lgpd-error"></span>
+                </section>
+
+                <span class="field-error" id="submit-error" style="display:block; margin-top:0.8rem; text-align:center"></span>
+                <p id="submit-success" style="color:#4CAF50; text-align:center; margin-top:0.8rem; font-weight:bold;"></p>
+            </section>
+
+        </form>
+
+        <!-- BOTÕES DE NAVEGAÇÃO -->
+        <section class="imc-nav">
+            <button type="button" class="imc-btn-back" id="btnBack" style="display:none">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </button>
+            <button type="button" class="imc-btn-next" id="btnNext">
+                Avançar <i class="fas fa-arrow-right"></i>
+            </button>
+            <button type="button" class="imc-btn-submit" id="btnSubmit" style="display:none">
+                <i class="fas fa-check"></i> Salvar Perfil
+            </button>
+        </section>
+
+    </section>
+
+</section>
+
+<%- include('../partials/footer') %>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="/js/imc-form.js"></script>
+</body>
+</html>
