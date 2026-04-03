@@ -354,3 +354,29 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ==============================
+   LIGHT MODE — Avaliação Corporal
+   ============================== */
+body.light-mode .upload-slot           { background: #DEDAD6; border-color: #C9C7C4; }
+body.light-mode .upload-slot:hover     { border-color: #C98B1D; background: #D8D4CE; }
+body.light-mode .upload-slot .us-icon  { color: #7E7C7A; }
+body.light-mode .upload-slot .us-label { color: #4E4C4A; }
+body.light-mode .upload-slot .us-hint  { color: #7E7C7A; }
+body.light-mode .upload-slot.has-image { border-color: #C98B1D; }
+
+body.light-mode .resultado-section      { background: #E8E6E3; box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+body.light-mode .resultado-section h3   { color: #C98B1D; border-bottom-color: #C9C7C4; }
+
+body.light-mode .composicao-item        { background: #DEDAD6; }
+body.light-mode .composicao-item .ci-label { color: #7E7C7A; }
+body.light-mode .composicao-item .ci-value { color: #C98B1D; }
+body.light-mode .composicao-item .ci-sub   { color: #4E4C4A; }
+
+body.light-mode .imc-visual-label       { color: #4E4C4A; }
+body.light-mode .result-list li         { color: #1C1A18; }
+body.light-mode .result-list li::before { color: #C98B1D; }
+body.light-mode .rec-titulo             { color: #C98B1D; }
+body.light-mode .rec-texto              { color: #4E4C4A; }
+
+body.light-mode .result-aviso           { background: rgba(201,139,29,0.1); border-color: rgba(201,139,29,0.3); color: #8B5E0A; }

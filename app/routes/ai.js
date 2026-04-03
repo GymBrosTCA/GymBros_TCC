@@ -61,13 +61,17 @@ Use este perfil para personalizar todas as respostas. Não precisa repetir os da
 // GET /ai/chat — renderiza a página do chat
 router.get('/chat', (req, res) => {
     if (!req.session.user) return res.redirect('/login');
-    res.render('pages/ai-chat', { user: req.session.user });
+    res.render('pages/ai-chat', { user: req.session.user,
+        seo: { title: 'GymBot Personal Trainer IA — GymBros', canonical: '/ai/chat', robots: 'noindex, nofollow', description: 'Converse com o GymBot, seu personal trainer IA.' },
+    });
 });
 
 // GET /ai/avaliacao — renderiza a página de avaliação corporal
 router.get('/avaliacao', (req, res) => {
     if (!req.session.user) return res.redirect('/login');
-    res.render('pages/ai-avaliacao', { user: req.session.user });
+    res.render('pages/ai-avaliacao', { user: req.session.user,
+        seo: { title: 'Avaliação Corporal IA — GymBros', canonical: '/ai/avaliacao', robots: 'noindex, nofollow', description: 'Avaliação corporal por inteligência artificial GymBros.' },
+    });
 });
 
 // POST /ai/avaliacao — avaliação corporal por imagem (visão do LLaMA 4)

@@ -29,20 +29,101 @@ function validarCPF(cpf) {
 // ====================
 
 // Páginas públicas
-router.get('/', (req, res) => res.render('pages/index'));
-router.get('/login', (req, res) => res.render('pages/login'));
-router.get('/register', (req, res) => res.render('pages/register'));
-router.get('/planos', (req, res) => res.render('pages/planos'));
-router.get('/academias', (req, res) => res.render('pages/academias'));
-router.get('/compra', (req, res) => res.render('pages/compra'));
-router.get('/compra2', (req, res) => res.render('pages/compra2'));
-router.get('/compra3', (req, res) => res.render('pages/compra3'));
-router.get('/about', (req, res) => res.render('pages/about'));
+router.get('/', (req, res) => res.render('pages/index', { seo: {
+    title:         'GymBros — Academias Ilimitadas em Todo o Brasil',
+    description:   'Acesse 3.560+ academias parceiras, treinos online ao vivo e personal trainer IA com o GymBros. Planos a partir de R$ 64,90/mês.',
+    keywords:      'academia, treinos, fitness, personal trainer ia, gymbros, academias parceiras, treinos online',
+    canonical:     '/',
+    ogTitle:       'Treine em Qualquer Academia do Brasil — GymBros',
+    ogDescription: '3.560+ academias, treinos online e IA personal trainer. Comece agora.',
+}}));
+
+router.get('/login', (req, res) => res.render('pages/login', { seo: {
+    title:         'Login — GymBros',
+    description:   'Acesse sua conta GymBros para ver seus treinos, acompanhar sua evolução e usar o personal trainer IA GymBot.',
+    keywords:      'login gymbros, entrar gymbros, acesso aluno',
+    canonical:     '/login',
+    robots:        'noindex, follow',
+    ogTitle:       'Entrar no GymBros',
+    ogDescription: 'Acesse sua conta e continue seu treino.',
+}}));
+
+router.get('/register', (req, res) => {
+    if (req.session.user) return res.redirect('/area-aluno');
+    res.render('pages/register', { seo: {
+        title:         'Cadastro — GymBros',
+        description:   'Crie sua conta GymBros gratuitamente e acesse academias parceiras, treinos online e o personal trainer IA GymBot.',
+        keywords:      'cadastro gymbros, criar conta, registrar gymbros',
+        canonical:     '/register',
+        ogTitle:       'Crie sua Conta GymBros Grátis',
+        ogDescription: 'Junte-se a milhares de alunos e treine sem limites.',
+    }});
+});
+
+router.get('/planos', (req, res) => res.render('pages/planos', { seo: {
+    title:         'Planos GymBros: Starter, GymBro e Black',
+    description:   'Compare os planos GymBros: Starter (R$64,90), GymBro (R$85,60) e Black (R$145,90). Academias ilimitadas, treinos online e personal trainer IA.',
+    keywords:      'planos gymbros, preço academia, assinatura academia, plano fitness',
+    canonical:     '/planos',
+    ogTitle:       'Escolha seu Plano GymBros — A partir de R$64,90',
+    ogDescription: 'Starter, GymBro ou Black. Academias ilimitadas + IA personal trainer.',
+}}));
+
+router.get('/academias', (req, res) => res.render('pages/academias', { seo: {
+    title:         'Academias Parceiras GymBros — Encontre a Sua',
+    description:   'Encontre academias e estúdios parceiros do GymBros perto de você no mapa interativo. Mais de 3.560 locais em todo o Brasil.',
+    keywords:      'academias parceiras, academia perto de mim, gymbros academias, mapa academia',
+    canonical:     '/academias',
+    ogTitle:       'Academias GymBros Perto de Você — Mapa Interativo',
+    ogDescription: 'Localize 3.560+ academias parceiras no mapa. Treine onde quiser.',
+}}));
+
+router.get('/compra', (req, res) => res.render('pages/compra', { seo: {
+    title:         'Assinar GymBros — Dados de Pagamento',
+    description:   'Finalize sua assinatura GymBros com segurança. Acesse academias parceiras e treinos online em minutos.',
+    keywords:      'assinar gymbros, pagamento academia, contratar gymbros',
+    canonical:     '/compra',
+    robots:        'noindex, nofollow',
+    ogTitle:       'Assinar GymBros',
+    ogDescription: 'Finalize sua assinatura e comece a treinar agora.',
+}}));
+
+router.get('/compra2', (req, res) => res.render('pages/compra2', { seo: {
+    title:         'Assinar GymBros — Confirmação de Plano',
+    description:   'Revise e confirme os dados do seu plano GymBros antes de finalizar a assinatura.',
+    keywords:      'confirmar plano gymbros, assinatura',
+    canonical:     '/compra2',
+    robots:        'noindex, nofollow',
+    ogTitle:       'Confirmação de Plano — GymBros',
+    ogDescription: 'Revise seu plano antes de finalizar.',
+}}));
+
+router.get('/compra3', (req, res) => res.render('pages/compra3', { seo: {
+    title:         'Assinatura GymBros Confirmada!',
+    description:   'Sua assinatura GymBros foi confirmada! Acesse agora academias parceiras, treinos online e o GymBot personal trainer IA.',
+    keywords:      'assinatura confirmada gymbros, bem vindo gymbros',
+    canonical:     '/compra3',
+    robots:        'noindex, nofollow',
+    ogTitle:       'Bem-vindo ao GymBros!',
+    ogDescription: 'Assinatura confirmada. Comece a treinar agora mesmo!',
+}}));
+
+router.get('/about', (req, res) => res.render('pages/about', { seo: {
+    title:         'Sobre o GymBros — Nossa Missão e Equipe',
+    description:   'Conheça a história do GymBros, nossa missão de democratizar o acesso à saúde e fitness no Brasil e o time apaixonado por esporte.',
+    keywords:      'sobre gymbros, história gymbros, missão gymbros, equipe gymbros',
+    canonical:     '/about',
+    ogTitle:       'Sobre o GymBros — Saúde para Todos',
+    ogDescription: 'Nossa missão: democratizar o acesso à saúde e ao fitness no Brasil.',
+}}));
 
 // Área do Aluno (protegida)
 router.get('/area-aluno', (req, res) => {
-    if (!req.session.user) return res.redirect('/login'); // se não logado, volta pro login
-    res.render('pages/area-aluno', { user: req.session.user });
+    if (!req.session.user) return res.redirect('/login');
+    res.render('pages/area-aluno', { user: req.session.user, seo: {
+        title: 'Painel do Aluno — GymBros', canonical: '/area-aluno',
+        robots: 'noindex, nofollow', description: 'Painel do aluno GymBros.',
+    }});
 });
 
 //Treinos
@@ -50,6 +131,7 @@ router.get('/treinos', (req, res) => {
     if (!req.session.user) return res.redirect('/login');
     res.render('pages/treinos', {
         user: req.session.user,
+        seo: { title: 'Meus Treinos — GymBros', canonical: '/treinos', robots: 'noindex, nofollow', description: 'Gerencie seus treinos no GymBros.' },
         sugestoes: [
             { id: 1, nome: 'Treino de Peito',      duracao: 50, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Supino reto', 'Crucifixo', 'Peck deck', 'Flexão'] },
             { id: 2, nome: 'Treino de Pernas',      duracao: 60, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Agachamento', 'Leg press', 'Cadeira extensora', 'Panturrilha'] },
@@ -87,7 +169,8 @@ router.get('/evolucao', (req, res) => {
 
     res.render('pages/evolucao', {
         user: req.session.user,
-        evolucao
+        evolucao,
+        seo: { title: 'Minha Evolução — GymBros', canonical: '/evolucao', robots: 'noindex, nofollow', description: 'Acompanhe sua evolução física no GymBros.' },
     });
 });
 
@@ -130,21 +213,27 @@ router.get('/meu-plano', (req, res) => {
         }
     ];
 
-    res.render('pages/meu-plano', { user: req.session.user, planoAtual, outrosPlanos });
+    res.render('pages/meu-plano', { user: req.session.user, planoAtual, outrosPlanos,
+        seo: { title: 'Meu Plano — GymBros', canonical: '/meu-plano', robots: 'noindex, nofollow', description: 'Gerencie seu plano GymBros.' },
+    });
 });
 
 //Configurações
 router.get('/config', (req, res) => {
     if (!req.session.user) return res.redirect('/login');
 
-    res.render('pages/config', { user: req.session.user });
+    res.render('pages/config', { user: req.session.user,
+        seo: { title: 'Configurações — GymBros', canonical: '/config', robots: 'noindex, nofollow', description: 'Configurações da conta GymBros.' },
+    });
 });
 
 //Perfil IMC
 router.get('/imc-form', (req, res) => {
     if (!req.session.user) return res.redirect('/login');
 
-    res.render('pages/imc-form', { user: req.session.user });
+    res.render('pages/imc-form', { user: req.session.user,
+        seo: { title: 'Meu Perfil IMC — GymBros', canonical: '/imc-form', robots: 'noindex, nofollow', description: 'Perfil IMC personalizado GymBros.' },
+    });
 });
 
 //Avaliação Corporal 
@@ -279,10 +368,16 @@ router.post('/register',
       return res.status(400).json({ erros: errors.array() });
     }
 
-    const { nome, cpf, email, cep, password } = req.body;
-    const jaExiste = usuarios.find(u => u.cpf === cpf || u.email === email);
-    if (jaExiste) {
-      return res.status(400).json({ erros: [{ param: 'cpf', msg: 'CPF ou e-mail já cadastrado.' }] });
+    const { nome, email, cep, password } = req.body;
+    const cpf = req.body.cpf.replace(/\D/g, ''); // normaliza antes de comparar/guardar
+
+    const cpfExiste   = usuarios.find(u => u.cpf === cpf);
+    const emailExiste = usuarios.find(u => u.email === email);
+    if (cpfExiste) {
+      return res.status(400).json({ erros: [{ param: 'cpf', msg: 'CPF já cadastrado.' }] });
+    }
+    if (emailExiste) {
+      return res.status(400).json({ erros: [{ param: 'email', msg: 'E-mail já cadastrado.' }] });
     }
 
     usuarios.push({ nome, cpf, email, cep, password });

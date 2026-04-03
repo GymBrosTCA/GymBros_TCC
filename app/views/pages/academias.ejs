@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academias</title>
+    <%- include('../partials/seo') %>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/academia-mobile.css" media="only screen and (max-width: 768px)">
     <link rel="stylesheet" href="/css/academia.css">
     <link rel="stylesheet" href="/css/footer.css">
 </head>
@@ -21,161 +21,336 @@
     <section class="side-menu" id="sideMenu">
         <span class="close-menu" id="closeMenu"><i class="fas fa-times"></i></span>
         <ul class="menu-items">
-            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="/academias"><i class="fas fa-dumbbell"></i> Academias</a></li>
-            <li><a href="/about"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
-            <li><a href="/planos"><i class="fas fa-tags"></i> Planos e Preços</a></li>
+            <li><a href="/" data-translate="nav.home"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/academias" data-translate="nav.academias"><i class="fas fa-dumbbell"></i> Academias</a></li>
+            <li><a href="/about" data-translate="nav.about"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
+            <li><a href="/planos" data-translate="nav.planos"><i class="fas fa-tags"></i> Planos e Preços</a></li>
         </ul>
     </section>
-
     <section class="menu-overlay" id="menuOverlay"></section>
 
-    <main>
-        <section class="academias-container">
-            <h1 class="academias-title">Academias Parceiras</h1>
+    <main class="academias-main">
+
+        <!-- HERO -->
+        <section class="acad-hero">
+            <h1 class="acad-hero-title"><i class="fas fa-map-marked-alt"></i> Academias Próximas</h1>
+            <p class="acad-hero-sub">Encontre academias e estúdios perto de você no mapa</p>
+
+            <section class="acad-search-bar">
+                <button id="btnGeolocate" class="btn-geo">
+                    <i class="fas fa-location-crosshairs"></i> Usar minha localização
+                </button>
+                <span class="acad-ou">ou</span>
+                <section class="acad-cep-wrap">
+                    <input type="text" id="cepInput" class="acad-cep-input" placeholder="Digite seu CEP" maxlength="9">
+                    <button id="btnCepSearch" class="btn-cep-search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </section>
+            </section>
+
+            <p id="acad-status" class="acad-status"></p>
+        </section>
+
+        <!-- MAPA -->
+        <section class="acad-map-wrap">
+            <div id="map"></div>
+        </section>
+
+        <!-- RESULTADOS OVERPASS -->
+        <section class="acad-results-section" id="acadResultsSection" style="display:none">
+            <h2 class="acad-section-title">
+                <i class="fas fa-dumbbell"></i> Academias encontradas
+                <span id="acadCount" class="acad-count-badge">0</span>
+            </h2>
+            <section class="acad-results-grid" id="acadResultsGrid"></section>
+        </section>
+
+        <!-- PARCEIROS -->
+        <section class="acad-partners-section">
+            <h2 class="acad-section-title"><i class="fas fa-star"></i> Parceiros GymBros</h2>
+            <p class="acad-section-sub">Academias conveniadas com planos especiais para assinantes</p>
 
             <section class="academias-grid">
-                <!-- Skyfit -->
                 <article class="academia-card">
                     <img src="/images/parceiro2.png" alt="Skyfit" class="academia-imagem">
                     <section class="academia-info">
                         <span class="presencial-badge">Presencial</span>
                         <h2 class="academia-nome">Skyfit</h2>
-                        <section class="academia-horario">
-                            <i class="far fa-clock"></i>
-                            <span>05:00 - 23:00</span>
-                        </section>
+                        <section class="academia-horario"><i class="far fa-clock"></i><span>05:00 – 23:00</span></section>
                         <section class="academia-modalidade">
                             <h3>Modalidades:</h3>
                             <p>Musculação, aeróbico, fit dance e pilates</p>
                         </section>
-                        <section class="academia-modalidade">
-                            <h3>CLIQUE PARA VER A LOCALIZAÇÃO
-                            </h3>
-                        </section>
                     </section>
-                    <section class="academia-mapa"></section>
                 </article>
 
-                <!-- Smart Fit -->
                 <article class="academia-card">
                     <img src="/images/parceiro1.png" alt="Smart Fit" class="academia-imagem">
                     <section class="academia-info">
                         <span class="presencial-badge">Presencial</span>
                         <h2 class="academia-nome">Smart Fit</h2>
-                        <section class="academia-horario">
-                            <i class="far fa-clock"></i>
-                            <span>24 horas</span>
-                        </section>
+                        <section class="academia-horario"><i class="far fa-clock"></i><span>24 horas</span></section>
                         <section class="academia-modalidade">
                             <h3>Modalidades:</h3>
                             <p>Musculação, aeróbico, fit dance e crossfit</p>
                         </section>
-                        <section class="academia-modalidade">
-                            <h3>CLIQUE PARA VER A LOCALIZAÇÃO
-                            </h3>
-                        </section>
                     </section>
-                    <section class="academia-mapa"></section>
                 </article>
 
-                <!-- Bluefit -->
                 <article class="academia-card">
                     <img src="/images/parceiro5.png" alt="Bluefit" class="academia-imagem">
                     <section class="academia-info">
                         <span class="presencial-badge">Presencial</span>
                         <h2 class="academia-nome">Bluefit</h2>
-                        <section class="academia-horario">
-                            <i class="far fa-clock"></i>
-                            <span>05:00 - 23:59</span>
-                        </section>
+                        <section class="academia-horario"><i class="far fa-clock"></i><span>05:00 – 23:59</span></section>
                         <section class="academia-modalidade">
                             <h3>Modalidades:</h3>
                             <p>Musculação, aeróbico, artes marciais e meditação</p>
                         </section>
-                        <section class="academia-modalidade">
-                            <h3>CLIQUE PARA VER A LOCALIZAÇÃO
-                            </h3>
-                        </section>
                     </section>
-                    <section class="academia-mapa"></section>
                 </article>
 
-                <!-- Panoblanco -->
                 <article class="academia-card">
                     <img src="/images/parceiro6.png" alt="Panoblanco" class="academia-imagem">
                     <section class="academia-info">
                         <span class="presencial-badge">Presencial</span>
                         <h2 class="academia-nome">Panoblanco</h2>
-                        <section class="academia-horario">
-                            <i class="far fa-clock"></i>
-                            <span>05:00 - 23:00</span>
-                        </section>
+                        <section class="academia-horario"><i class="far fa-clock"></i><span>05:00 – 23:00</span></section>
                         <section class="academia-modalidade">
                             <h3>Modalidades:</h3>
                             <p>Musculação, aeróbico, fit dance e pilates</p>
                         </section>
-                        <section class="academia-modalidade">
-                            <h3>CLIQUE PARA VER A LOCALIZAÇÃO
-                            </h3>
-                        </section>
                     </section>
-                    <section class="academia-mapa"></section>
                 </article>
 
-                <!-- Gavides GYM -->
                 <article class="academia-card">
-                    <img src="/images/parceiro4.png" alt="Gavides GYM" class="academia-imagem">
+                    <img src="/images/parceiro4.png" alt="Gaviões GYM" class="academia-imagem">
                     <section class="academia-info">
                         <span class="presencial-badge">Presencial</span>
                         <h2 class="academia-nome">Gaviões GYM</h2>
-                        <section class="academia-horario">
-                            <i class="far fa-clock"></i>
-                            <span>24 horas</span>
-                        </section>
+                        <section class="academia-horario"><i class="far fa-clock"></i><span>24 horas</span></section>
                         <section class="academia-modalidade">
                             <h3>Modalidades:</h3>
                             <p>Musculação, aeróbico, fit dance e meditação</p>
                         </section>
-                        <section class="academia-modalidade">
-                            <h3>CLIQUE PARA VER A LOCALIZAÇÃO
-                            </h3>
-                        </section>
                     </section>
-                    <section class="academia-mapa"></section>
                 </article>
 
-                <!-- Fokar Academia -->
                 <article class="academia-card">
                     <img src="/images/parceiro8.png" alt="Fokar Academia" class="academia-imagem">
                     <section class="academia-info">
                         <span class="presencial-badge">Presencial</span>
                         <h2 class="academia-nome">Fokar Academia</h2>
-                        <section class="academia-horario">
-                            <i class="far fa-clock"></i>
-                            <span>06:00 - 22:00</span>
-                        </section>
+                        <section class="academia-horario"><i class="far fa-clock"></i><span>06:00 – 22:00</span></section>
                         <section class="academia-modalidade">
                             <h3>Modalidades:</h3>
                             <p>Musculação, aeróbico e yoga</p>
                         </section>
-                        <section class="academia-modalidade">
-                            <h3>CLIQUE PARA VER A LOCALIZAÇÃO
-                            </h3>
-                        </section>
                     </section>
-                    <section class="academia-mapa"></section>
                 </article>
             </section>
         </section>
+
     </main>
 
     <%- include('../partials/footer') %>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="/js/menu.js"></script>
     <script src="/js/header.js"></script>
-    <script src="/js/carrossel.js"></script>
-    <script src="/js/academia.js"></script>
+    <script>
+    // ================================================
+    // MAPA + GEOLOCALIZAÇÃO + OVERPASS API
+    // ================================================
+    const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+    const SEARCH_RADIUS = 3000; // metros
+
+    // Inicializa o mapa centrado no Brasil
+    const map = L.map('map', { zoomControl: true }).setView([-15.78, -47.93], 4);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(map);
+
+    let userMarker = null;
+    let gymMarkers = [];
+    let userCircle = null;
+
+    const statusEl      = document.getElementById('acad-status');
+    const resultsSection = document.getElementById('acadResultsSection');
+    const resultsGrid    = document.getElementById('acadResultsGrid');
+    const countBadge     = document.getElementById('acadCount');
+
+    function setStatus(msg, type = '') {
+        statusEl.textContent = msg;
+        statusEl.className = 'acad-status' + (type ? ' acad-status-' + type : '');
+    }
+
+    // Ícone personalizado para academias
+    const gymIcon = L.divIcon({
+        html: '<div class="gym-marker"><i class="fas fa-dumbbell"></i></div>',
+        className: '',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+    });
+
+    const userIcon = L.divIcon({
+        html: '<div class="user-marker"><i class="fas fa-user"></i></div>',
+        className: '',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+    });
+
+    function clearGyms() {
+        gymMarkers.forEach(m => map.removeLayer(m));
+        gymMarkers = [];
+        resultsGrid.innerHTML = '';
+        resultsSection.style.display = 'none';
+    }
+
+    function buildGymCard(gym) {
+        const name = gym.tags.name || gym.tags['name:pt'] || 'Academia';
+        const phone = gym.tags.phone || gym.tags['contact:phone'] || '';
+        const website = gym.tags.website || gym.tags['contact:website'] || '';
+        const hours = gym.tags.opening_hours || '';
+        const street = gym.tags['addr:street'] ? `${gym.tags['addr:street']}${gym.tags['addr:housenumber'] ? ', ' + gym.tags['addr:housenumber'] : ''}` : '';
+
+        return `
+        <article class="acad-result-card" data-lat="${gym.lat}" data-lon="${gym.lon}">
+            <section class="arc-icon"><i class="fas fa-dumbbell"></i></section>
+            <section class="arc-info">
+                <h3 class="arc-name">${name}</h3>
+                ${street ? `<p class="arc-detail"><i class="fas fa-map-pin"></i> ${street}</p>` : ''}
+                ${hours ? `<p class="arc-detail"><i class="far fa-clock"></i> ${hours}</p>` : ''}
+                ${phone ? `<p class="arc-detail"><i class="fas fa-phone"></i> ${phone}</p>` : ''}
+                ${website ? `<p class="arc-detail"><i class="fas fa-globe"></i> <a href="${website}" target="_blank" rel="noopener">Ver site</a></p>` : ''}
+            </section>
+            <button class="arc-map-btn" onclick="flyToGym(${gym.lat}, ${gym.lon})">
+                <i class="fas fa-map-marker-alt"></i> Ver no mapa
+            </button>
+        </article>`;
+    }
+
+    function flyToGym(lat, lon) {
+        map.flyTo([lat, lon], 17, { duration: 1.2 });
+    }
+
+    async function searchGymsNear(lat, lon) {
+        clearGyms();
+        setStatus('Buscando academias próximas...', 'loading');
+
+        // Adiciona marcador do usuário
+        if (userMarker) map.removeLayer(userMarker);
+        if (userCircle) map.removeLayer(userCircle);
+
+        userMarker = L.marker([lat, lon], { icon: userIcon })
+            .addTo(map)
+            .bindPopup('<strong>Você está aqui</strong>')
+            .openPopup();
+
+        userCircle = L.circle([lat, lon], {
+            radius: SEARCH_RADIUS,
+            color: '#FFD700',
+            fillColor: '#FFD70020',
+            fillOpacity: 0.15,
+            weight: 2
+        }).addTo(map);
+
+        map.flyTo([lat, lon], 14, { duration: 1.5 });
+
+        // Consulta Overpass API
+        const query = `[out:json][timeout:25];(node["leisure"="fitness_centre"](around:${SEARCH_RADIUS},${lat},${lon});node["sport"="fitness"](around:${SEARCH_RADIUS},${lat},${lon});node["amenity"="gym"](around:${SEARCH_RADIUS},${lat},${lon}););out body;`;
+
+        try {
+            const res = await fetch(`${OVERPASS_URL}?data=${encodeURIComponent(query)}`);
+            const json = await res.json();
+            const gyms = json.elements || [];
+
+            if (gyms.length === 0) {
+                setStatus('Nenhuma academia encontrada num raio de 3 km. Tente um CEP diferente.', 'warn');
+                return;
+            }
+
+            setStatus(`${gyms.length} academia(s) encontrada(s) num raio de 3 km.`, 'ok');
+            countBadge.textContent = gyms.length;
+            resultsSection.style.display = 'block';
+
+            gyms.forEach(gym => {
+                const name = gym.tags.name || 'Academia';
+                const marker = L.marker([gym.lat, gym.lon], { icon: gymIcon })
+                    .addTo(map)
+                    .bindPopup(`<strong>${name}</strong>`);
+                gymMarkers.push(marker);
+                resultsGrid.insertAdjacentHTML('beforeend', buildGymCard(gym));
+            });
+
+        } catch (err) {
+            console.error(err);
+            setStatus('Erro ao buscar academias. Verifique sua conexão.', 'error');
+        }
+    }
+
+    // ── Botão de geolocalização ──
+    document.getElementById('btnGeolocate').addEventListener('click', () => {
+        if (!navigator.geolocation) {
+            setStatus('Geolocalização não suportada pelo seu navegador.', 'error');
+            return;
+        }
+        setStatus('Obtendo sua localização...', 'loading');
+        navigator.geolocation.getCurrentPosition(
+            pos => searchGymsNear(pos.coords.latitude, pos.coords.longitude),
+            err => {
+                console.warn(err);
+                setStatus('Não foi possível obter sua localização. Tente pelo CEP.', 'warn');
+            },
+            { timeout: 10000 }
+        );
+    });
+
+    // ── Busca por CEP via ViaCEP ──
+    document.getElementById('btnCepSearch').addEventListener('click', buscarPorCep);
+    document.getElementById('cepInput').addEventListener('keydown', e => { if (e.key === 'Enter') buscarPorCep(); });
+
+    function formatCep(val) {
+        return val.replace(/\D/g, '').slice(0, 8);
+    }
+
+    document.getElementById('cepInput').addEventListener('input', function () {
+        this.value = formatCep(this.value);
+    });
+
+    async function buscarPorCep() {
+        const raw = document.getElementById('cepInput').value.replace(/\D/g, '');
+        if (raw.length !== 8) {
+            setStatus('CEP deve ter 8 dígitos.', 'warn');
+            return;
+        }
+        setStatus('Buscando CEP...', 'loading');
+        try {
+            const res = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
+            const data = await res.json();
+            if (data.erro) { setStatus('CEP não encontrado.', 'error'); return; }
+
+            // Usa Nominatim para converter endereço em coordenadas
+            const addr = encodeURIComponent(`${data.logradouro || ''}, ${data.bairro || ''}, ${data.localidade}, ${data.uf}, Brasil`);
+            const geo = await fetch(`https://nominatim.openstreetmap.org/search?q=${addr}&format=json&limit=1`, {
+                headers: { 'Accept-Language': 'pt-BR' }
+            });
+            const geoData = await geo.json();
+            if (!geoData.length) { setStatus('Não foi possível geocodificar o CEP.', 'error'); return; }
+
+            const lat = parseFloat(geoData[0].lat);
+            const lon = parseFloat(geoData[0].lon);
+            searchGymsNear(lat, lon);
+        } catch (err) {
+            console.error(err);
+            setStatus('Erro ao buscar CEP. Tente novamente.', 'error');
+        }
+    }
+    </script>
+<script src="/js/translate.js"></script>
 </body>
 </html>

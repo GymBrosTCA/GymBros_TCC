@@ -2,6 +2,16 @@
 const loginForm    = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 
+// Limpa os campos do registro após carregamento para evitar autofill do navegador
+if (registerForm) {
+    // Timeout curto: Chrome preenche autofill APÓS DOMContentLoaded
+    setTimeout(() => {
+        registerForm.querySelectorAll('input').forEach(input => {
+            if (input.type !== 'checkbox') input.value = '';
+        });
+    }, 100);
+}
+
 // =============================================
 // MÁSCARAS
 // =============================================

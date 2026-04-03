@@ -217,3 +217,16 @@ body {
         padding: 8px 12px;
     }
 }
+
+/* ==============================
+   LIGHT MODE — Configurações
+   ============================== */
+body.light-mode .config-card          { background: #E8E6E3; box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+body.light-mode .config-card h3       { color: #C98B1D; }
+body.light-mode .config-card label    { color: #4E4C4A; }
+body.light-mode .config-card input,
+body.light-mode .config-card select   { background: #DEDAD6; color: #1C1A18; border-color: #C9C7C4; }
+body.light-mode .config-card input:focus,
+body.light-mode .config-card select:focus { border-color: #C98B1D; }
+body.light-mode .config-card .msg     { color: #4E4C4A; }
+

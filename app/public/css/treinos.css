@@ -461,3 +461,52 @@
     .modal-row { grid-template-columns: 1fr; }
     .treinos-toolbar { flex-direction: column; align-items: flex-start; }
 }
+
+/* ==============================
+   LIGHT MODE — Treinos
+   ============================== */
+body.light-mode .stat-box             { background: #E8E6E3; box-shadow: 0 4px 14px rgba(0,0,0,0.07); }
+body.light-mode .stat-box .stat-num  { color: #1C1A18; }
+body.light-mode .stat-box .stat-label{ color: #7E7C7A; }
+
+body.light-mode .filtro-btn          { background: #E8E6E3; border-color: #C9C7C4; color: #4E4C4A; }
+body.light-mode .filtro-btn:hover    { border-color: #C98B1D; color: #C98B1D; }
+body.light-mode .filtro-btn.active   { background: #C98B1D; border-color: #C98B1D; color: #F2F0EE; }
+
+body.light-mode .btn-registrar       { background: #C98B1D; color: #F2F0EE; }
+body.light-mode .btn-registrar:hover { background: #B07A18; }
+
+body.light-mode .treinos-section-title { color: #7E7C7A; }
+
+body.light-mode .treino-card-v2      { background: #E8E6E3; box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+body.light-mode .card-title-v2       { color: #1C1A18; }
+body.light-mode .card-duracao        { color: #4E4C4A; }
+body.light-mode .card-duracao i      { color: #7E7C7A; }
+body.light-mode .card-exercicios li  { color: #4E4C4A; }
+body.light-mode .card-exercicios li::before { color: #C98B1D; }
+body.light-mode .card-stats-reg      { border-top-color: #C9C7C4; }
+body.light-mode .stat-reg            { background: #DEDAD6; }
+body.light-mode .stat-reg .sr-val   { color: #C98B1D; }
+body.light-mode .stat-reg .sr-label { color: #7E7C7A; }
+body.light-mode .badge-data          { background: #DEDAD6; color: #4E4C4A; }
+body.light-mode .card-obs            { color: #7E7C7A; border-top-color: #C9C7C4; }
+
+body.light-mode .treinos-empty       { color: #7E7C7A; }
+body.light-mode .treinos-empty i     { color: #C9C7C4; }
+
+body.light-mode .modal-overlay       { background: rgba(30,28,26,0.65); }
+body.light-mode .modal-box           { background: #E8E6E3; }
+body.light-mode .modal-header h2     { color: #C98B1D; }
+body.light-mode .modal-close         { color: #7E7C7A; }
+body.light-mode .modal-close:hover   { color: #1C1A18; }
+body.light-mode .modal-field label   { color: #4E4C4A; }
+body.light-mode .modal-field input,
+body.light-mode .modal-field select,
+body.light-mode .modal-field textarea { background: #DEDAD6; border-color: #C9C7C4; color: #1C1A18; }
+body.light-mode .modal-field input:focus,
+body.light-mode .modal-field select:focus,
+body.light-mode .modal-field textarea:focus { border-color: #C98B1D; }
+body.light-mode .modal-field select option   { background: #E8E6E3; color: #1C1A18; }
+body.light-mode .modal-divider       { color: #7E7C7A; border-bottom-color: #C9C7C4; }
+body.light-mode .btn-salvar-treino   { background: #C98B1D; color: #F2F0EE; }
+body.light-mode .btn-salvar-treino:hover { background: #B07A18; }

@@ -240,3 +240,33 @@
     .evo-entry-dot { width: 28px; height: 28px; font-size: 0.75rem; }
     .evo-chart-wrap { height: 160px; }
 }
+
+/* ==============================
+   LIGHT MODE — Evolução
+   ============================== */
+body.light-mode .evo-stat            { background: #E8E6E3; box-shadow: 0 4px 14px rgba(0,0,0,0.07); }
+body.light-mode .evo-stat .es-icon  { color: #C98B1D; }
+body.light-mode .evo-stat .es-num   { color: #1C1A18; }
+body.light-mode .evo-stat .es-label { color: #7E7C7A; }
+
+body.light-mode .evo-section         { background: #E8E6E3; box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+body.light-mode .evo-section-header  { border-bottom-color: #C9C7C4; }
+body.light-mode .evo-section-header h2 { color: #C98B1D; }
+body.light-mode .evo-section-header small { color: #7E7C7A; }
+
+body.light-mode .evo-entry-dot.tipo-imc       { background: rgba(201,139,29,0.15); color: #C98B1D; }
+body.light-mode .evo-entry-dot.tipo-avaliacao { background: rgba(2,132,199,0.12); color: #0284C7; }
+body.light-mode .evo-entry-dot.tipo-treino    { background: rgba(22,163,74,0.12); color: #16A34A; }
+
+body.light-mode .evo-entry-body      { background: #DEDAD6; }
+body.light-mode .evo-entry-title     { color: #1C1A18; }
+body.light-mode .evo-entry-date      { background: #C9C7C4; color: #4E4C4A; }
+body.light-mode .evo-chip            { background: #C9C7C4; color: #4E4C4A; }
+body.light-mode .evo-chip span       { color: #C98B1D; }
+
+body.light-mode .evo-empty           { color: #7E7C7A; }
+body.light-mode .evo-empty i         { color: #C9C7C4; }
+
+body.light-mode .evo-table th        { color: #7E7C7A; border-bottom-color: #C9C7C4; }
+body.light-mode .evo-table td        { color: #1C1A18; border-bottom-color: #DEDAD6; }
+body.light-mode .evo-table tr:hover td { background: rgba(0,0,0,0.04); }

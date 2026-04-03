@@ -4,7 +4,9 @@
 // ================================================
 // MODO PERFIL SALVO (localStorage)
 // ================================================
-const STORAGE_KEY = 'gymbros_imc_profile';
+// Namespaced per user to avoid data bleed between accounts
+const _uid = (window.GYMBROS_USER_ID || 'guest').replace(/\D/g, '');
+const STORAGE_KEY = `gymbros_imc_profile_${_uid}`;
 
 function loadSavedProfile() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null; }
@@ -85,6 +87,10 @@ function renderProfileView(data) {
                 <span class="pv-label">Local</span>
                 <span class="pv-value">${data.localTreino}</span>
             </section>
+            <section class="pv-item">
+                <span class="pv-label">Lesões</span>
+                <span class="pv-value">${Array.isArray(data.lesoes) && data.lesoes.length ? data.lesoes.join(', ') + (data.lesoesOutros ? ` — ${data.lesoesOutros}` : '') : 'nenhuma'}</span>
+            </section>
         </section>
 
         <!-- IMC com barra visual -->
@@ -145,6 +151,11 @@ function populateForm(data) {
     setRadio('localTreino', data.localTreino);
     setRadio('experiencia', data.experiencia);
     setChecks('lesoes', data.lesoes);
+    if (data.lesoesOutros) {
+        set('lesoesOutros', data.lesoesOutros);
+        const outrosField = document.getElementById('lesoesOutrosField');
+        if (outrosField) outrosField.style.display = 'block';
+    }
     setRadio('acompanhamentoMedico', data.acompanhamentoMedico);
     setChecks('restricoesAlimentares', data.restricoesAlimentares);
     setRadio('seletividade', data.seletividade);
@@ -359,6 +370,17 @@ document.querySelectorAll('input[name="seletividade"]').forEach(r => {
 });
 
 // ================================================
+// OUTROS — campo condicional de lesões
+// ================================================
+const lesoesOutrosCheckbox = document.querySelector('input[name="lesoes"][value="outros"]');
+if (lesoesOutrosCheckbox) {
+    lesoesOutrosCheckbox.addEventListener('change', () => {
+        const field = document.getElementById('lesoesOutrosField');
+        if (field) field.style.display = lesoesOutrosCheckbox.checked ? 'block' : 'none';
+    });
+}
+
+// ================================================
 // RESUMO — ETAPA 5
 // ================================================
 function buildSummary() {
@@ -390,7 +412,7 @@ function buildSummary() {
         </section>
         <section class="summary-section">
             <h3>🩺 Restrições Físicas</h3>
-            <p>Lesões/condições: <strong>${checks('lesoes')}</strong></p>
+            <p>Lesões/condições: <strong>${checks('lesoes')}${val('lesoesOutros') ? ` — ${val('lesoesOutros')}` : ''}</strong></p>
             <p>Acompanhamento médico: <strong>${radio('acompanhamentoMedico')}</strong></p>
         </section>
         <section class="summary-section">
@@ -428,6 +450,7 @@ async function submitForm() {
         localTreino:           radio('localTreino'),
         experiencia:           radio('experiencia'),
         lesoes:                checks('lesoes'),
+        lesoesOutros:          document.getElementById('lesoesOutros')?.value || '',
         acompanhamentoMedico:  radio('acompanhamentoMedico'),
         restricoesAlimentares: checks('restricoesAlimentares'),
         seletividade:          radio('seletividade'),

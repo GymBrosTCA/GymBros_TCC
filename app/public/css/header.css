@@ -1,3 +1,9 @@
+/* Evita overflow de palavras longas em outros idiomas */
+body {
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
 .gymbros-header {
     position: sticky;
     top: 0;
@@ -20,6 +26,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.menu-icon {
+    flex: 1;
+    display: flex;
+    align-items: center;
 }
 
 .menu-icon i,
@@ -127,6 +139,68 @@ a {
     text-align: center;
 }
 
+/* HEADER RIGHT (lang selector + theme toggle + user icon) */
+.header-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+/* SELETOR DE IDIOMA */
+.lang-selector {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 20px;
+    padding: 3px 5px;
+}
+
+.lang-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 3px 5px;
+    border-radius: 12px;
+    opacity: 0.5;
+    transition: opacity 0.2s, transform 0.15s;
+}
+
+.lang-btn:hover    { opacity: 0.85; transform: scale(1.15); }
+.lang-btn.active   { opacity: 1; background: rgba(255,255,255,0.2); }
+
+@media (max-width: 480px) {
+    .lang-selector { display: none; } /* esconde em telas muito pequenas */
+}
+
+.theme-toggle {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+    background: rgba(255,255,255,0.3);
+    transform: rotate(20deg);
+}
+
+.theme-toggle i {
+    font-size: 1rem;
+    color: #fff;
+}
+
 .close-menu {
     position: absolute;
     top: 20px;
@@ -134,4 +208,22 @@ a {
     color: #fff;
     font-size: 24px;
     cursor: pointer;
+}
+
+/* ── Animação do ícone de tema ────────────────────────────────────────── */
+@keyframes theme-spin {
+    0%   { transform: rotate(0deg) scale(1); opacity: 1; }
+    40%  { transform: rotate(180deg) scale(0.5); opacity: 0; }
+    60%  { transform: rotate(180deg) scale(0.5); opacity: 0; }
+    100% { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+
+.theme-icon-spin {
+    animation: theme-spin 0.45s ease-in-out forwards;
+}
+
+#themeIcon {
+    transition: color 0.3s ease;
+    font-size: 1rem;
+    color: #fff;
 }
