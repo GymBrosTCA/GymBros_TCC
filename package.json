@@ -8,10 +8,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^1.48.0",
+    "dotenv": "^17.4.0",
     "ejs": "^3.1.6",
     "express": "^4.17.3",
     "express-session": "^1.18.2",
     "express-validator": "^7.2.1",
+    "groq-sdk": "^1.1.2",
     "jsonwebtoken": "^9.0.2"
   },
   "keywords": [],

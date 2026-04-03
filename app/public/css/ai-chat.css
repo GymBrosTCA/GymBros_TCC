@@ -1,0 +1,206 @@
+/* ==============================
+   AI CHAT - GYMBROS
+   ============================== */
+
+/*
+  Estratégia de layout:
+  aluno-dashboard (flex row) → aluno-main (flex col, flex:1, min-height:0)
+    → dashboard-top (height natural)
+    → chat-container (flex:1, min-height:0) ← nunca cresce além do espaço disponível
+      → chat-history (flex:1, overflow-y:auto) ← scroll aqui
+      → typing-indicator (height natural)
+      → chat-input-area (height natural)
+*/
+
+/* Garante que a cadeia flex não "vaze" */
+.aluno-dashboard {
+    height: calc(100vh - 80px);
+    overflow: hidden;
+}
+
+.aluno-main {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* CONTAINER DO CHAT — ocupa todo espaço restante, nunca cresce */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    background: #1f1f1f;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;  /* essencial para flex filho não estourar o pai */
+}
+
+/* HISTÓRICO — único elemento com scroll */
+.chat-history {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: #FFD700 #2a2a2a;
+}
+
+.chat-history::-webkit-scrollbar        { width: 6px; }
+.chat-history::-webkit-scrollbar-track  { background: #2a2a2a; border-radius: 3px; }
+.chat-history::-webkit-scrollbar-thumb  { background: #FFD700;  border-radius: 3px; }
+
+/* ANIMAÇÃO DE ENTRADA DAS MENSAGENS */
+@keyframes msgFadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.chat-message {
+    display: flex;
+    max-width: 75%;
+    animation: msgFadeUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.user-message {
+    align-self: flex-end;
+    justify-content: flex-end;
+}
+
+.bot-message {
+    align-self: flex-start;
+    justify-content: flex-start;
+}
+
+.chat-bubble {
+    padding: 0.75rem 1rem;
+    border-radius: 14px;
+    font-size: 1.25rem;
+    line-height: 1.6;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.user-message .chat-bubble {
+    background: #FFD700;
+    color: #1f1f1f;
+    border-bottom-right-radius: 4px;
+}
+
+.bot-message .chat-bubble {
+    background: #2e2e2e;
+    color: #f0f0f0;
+    border-bottom-left-radius: 4px;
+}
+
+.bot-message .chat-bubble strong {
+    display: block;
+    color: #FFD700;
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+}
+
+/* INDICADOR DE DIGITANDO */
+.typing-indicator {
+    flex-shrink: 0;
+    padding: 0.5rem 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.typing-indicator .chat-bubble {
+    background: #2e2e2e;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    padding: 0.75rem 1.2rem;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background: #FFD700;
+    border-radius: 50%;
+    animation: bounce 1.2s infinite ease-in-out;
+}
+
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.6; }
+    40%           { transform: translateY(-8px); opacity: 1; }
+}
+
+/* INPUT AREA */
+.chat-input-area {
+    flex-shrink: 0;
+    display: flex;
+    gap: 0.8rem;
+    padding: 1rem 1.5rem;
+    background: #161616;
+    border-top: 1px solid #333;
+}
+
+.chat-input-area input {
+    flex: 1;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1.3rem;
+    padding: 0.7rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 0;
+}
+
+.chat-input-area input:focus   { border-color: #FFD700; }
+.chat-input-area input::placeholder { color: #777; }
+
+.chat-input-area button {
+    background: #FFD700;
+    color: #1f1f1f;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    padding: 0.7rem 1.4rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.chat-input-area button:hover    { transform: scale(1.05); background: #e6c200; }
+.chat-input-area button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ==============================
+   RESPONSIVO
+   ============================== */
+@media (max-width: 1024px) {
+    .aluno-dashboard { height: auto; overflow: visible; }
+    .aluno-main      { min-height: 0; }
+    .chat-container  { height: 62vh; min-height: 350px; flex: none; }
+
+    .chat-message { max-width: 85%; }
+}
+
+@media (max-width: 768px) {
+    .chat-container { height: 58vh; border-radius: 10px; }
+    .chat-message   { max-width: 92%; }
+    .chat-bubble    { font-size: 1.1rem; }
+
+    .chat-input-area            { padding: 0.75rem 1rem; gap: 0.5rem; }
+    .chat-input-area input      { font-size: 1.1rem; padding: 0.6rem 0.8rem; }
+    .chat-input-area button .btn-label { display: none; }
+    .chat-input-area button     { font-size: 1.2rem; padding: 0.6rem 0.9rem; }
+}
+
+@media (max-width: 420px) {
+    .chat-history { padding: 1rem 0.75rem; }
+    .chat-message { max-width: 98%; }
+}

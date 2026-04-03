@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const session = require('express-session');
 const app = express();
@@ -22,6 +23,9 @@ app.use(session({
 
 const rotas = require('./app/routes/router');
 app.use('/', rotas);
+
+const rotasAI = require('./app/routes/ai');
+app.use('/ai', rotasAI);
 
 app.listen(port, () => {
   console.log(`Servidor ouvindo na porta ${port}\nhttp://localhost:${port}`);
