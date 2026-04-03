@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="/css/header.css">
 <link rel="stylesheet" href="/css/footer.css">
 <link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="stylesheet" href="/css/treinos.css">
 </head>
 <body>
 
@@ -41,32 +42,384 @@
     <section class="aluno-main">
 
         <section class="dashboard-top">
-            <h1>Meus Treinos</h1>
-            <p>Aqui estão todos os seus treinos recentes e programados</p>
+            <h1><i class="fas fa-dumbbell"></i> Meus Treinos</h1>
+            <p>Registre suas sessões e acompanhe seu progresso</p>
         </section>
 
-        <!-- LISTA DE TREINOS -->
-        <section class="treinos-list">
-            <% if(treinos && treinos.length > 0) { %>
-                <% treinos.forEach(treino => { %>
-                    <section class="treino-card">
-                        <h3><%= treino.nome %></h3>
-                        <p>Duração: <%= treino.duracao %> minutos</p>
-                        <p>Tipo: <%= treino.tipo %></p>
-                        <p>Data: <%= treino.data %></p>
-                        <a href="/treino/<%= treino.id %>" class="btn-card">Ver Detalhes</a>
+        <!-- STATS RÁPIDOS (preenchidos via JS do localStorage) -->
+        <section class="treinos-stats">
+            <section class="stat-box">
+                <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="stat-num" id="statTotal">0</div>
+                <div class="stat-label">Treinos Registrados</div>
+            </section>
+            <section class="stat-box">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-num" id="statTempo">0</div>
+                <div class="stat-label">Minutos no Total</div>
+            </section>
+            <section class="stat-box">
+                <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                <div class="stat-num" id="statCardio">0</div>
+                <div class="stat-label">Min de Cardio</div>
+            </section>
+            <section class="stat-box">
+                <div class="stat-icon"><i class="fas fa-weight-hanging"></i></div>
+                <div class="stat-num" id="statPeso">—</div>
+                <div class="stat-label">Maior Carga (kg)</div>
+            </section>
+        </section>
+
+        <!-- TOOLBAR -->
+        <section class="treinos-toolbar">
+            <section class="filtros-tabs">
+                <button class="filtro-btn active" data-filtro="todos">Todos</button>
+                <button class="filtro-btn" data-filtro="Força">💪 Força</button>
+                <button class="filtro-btn" data-filtro="Cardio">🔥 Cardio</button>
+                <button class="filtro-btn" data-filtro="Alongamento">🧘 Alongamento</button>
+            </section>
+            <button class="btn-registrar" id="btnAbrirModal">
+                <i class="fas fa-plus"></i> Registrar Treino
+            </button>
+        </section>
+
+        <!-- TREINOS REGISTRADOS (localStorage) -->
+        <p class="treinos-section-title">Seus Treinos Registrados</p>
+        <section class="treinos-grid" id="gridRegistrados"></section>
+
+        <!-- SUGESTÕES DO PROGRAMA -->
+        <p class="treinos-section-title" style="margin-top:0.5rem">Sugestões do Programa</p>
+        <section class="treinos-grid" id="gridSugestoes">
+            <% sugestoes.forEach(t => { %>
+            <%
+                let tipoClass = 'tipo-forca';
+                if (t.tipo === 'Cardio')      tipoClass = 'tipo-cardio';
+                if (t.tipo === 'Alongamento') tipoClass = 'tipo-along';
+            %>
+            <section class="treino-card-v2 <%= tipoClass %>" data-tipo="<%= t.tipo %>">
+                <section class="card-header-v2">
+                    <section class="card-icon-v2">
+                        <i class="fas <%= t.icone %>"></i>
                     </section>
-                <% }) %>
-            <% } else { %>
-                <p>Nenhum treino encontrado.</p>
-            <% } %>
+                    <section class="card-badges">
+                        <span class="badge-tipo"><%= t.tipo %></span>
+                    </section>
+                </section>
+                <h3 class="card-title-v2"><%= t.nome %></h3>
+                <p class="card-duracao">
+                    <i class="fas fa-clock"></i> <%= t.duracao %> minutos
+                </p>
+                <ul class="card-exercicios">
+                    <% t.exercicios.forEach(ex => { %>
+                        <li><%= ex %></li>
+                    <% }) %>
+                </ul>
+                <button class="btn-registrar" style="margin-top:0.5rem; width:100%; justify-content:center"
+                        onclick="preencherModal('<%= t.nome %>', '<%= t.tipo %>', <%= t.duracao %>)">
+                    <i class="fas fa-plus"></i> Usar este treino
+                </button>
+            </section>
+            <% }) %>
         </section>
 
     </section>
+</section>
 
+<!-- MODAL REGISTRAR TREINO -->
+<section class="modal-overlay" id="modalOverlay">
+    <section class="modal-box">
+        <section class="modal-header">
+            <h2><i class="fas fa-plus-circle"></i> Registrar Treino</h2>
+            <button class="modal-close" id="btnFecharModal"><i class="fas fa-times"></i></button>
+        </section>
+
+        <section class="modal-field">
+            <label>Nome do Treino</label>
+            <input type="text" id="mNome" placeholder="Ex: Treino de Peito">
+        </section>
+
+        <section class="modal-row">
+            <section class="modal-field">
+                <label>Tipo</label>
+                <select id="mTipo">
+                    <option value="Força">💪 Força</option>
+                    <option value="Cardio">🔥 Cardio</option>
+                    <option value="Alongamento">🧘 Alongamento</option>
+                </select>
+            </section>
+            <section class="modal-field">
+                <label>Duração (min)</label>
+                <input type="number" id="mDuracao" placeholder="Ex: 50" min="1" max="300">
+            </section>
+        </section>
+
+        <!-- Campos Força -->
+        <section class="modal-campo-forca" id="camposForca">
+            <p class="modal-divider">Detalhes — Força</p>
+            <section class="modal-row">
+                <section class="modal-field">
+                    <label>Maior carga (kg)</label>
+                    <input type="number" id="mPeso" placeholder="Ex: 60" min="0" step="0.5">
+                </section>
+                <section class="modal-field">
+                    <label>Séries</label>
+                    <input type="number" id="mSeries" placeholder="Ex: 4" min="1">
+                </section>
+            </section>
+            <section class="modal-field">
+                <label>Repetições por série</label>
+                <input type="number" id="mReps" placeholder="Ex: 12" min="1">
+            </section>
+        </section>
+
+        <!-- Campos Cardio -->
+        <section class="modal-campo-cardio" id="camposCardio">
+            <p class="modal-divider">Detalhes — Cardio</p>
+            <section class="modal-row">
+                <section class="modal-field">
+                    <label>Tempo de cardio (min)</label>
+                    <input type="number" id="mCardioMin" placeholder="Ex: 30" min="1">
+                </section>
+                <section class="modal-field">
+                    <label>Intensidade</label>
+                    <select id="mIntensidade">
+                        <option value="leve">Leve</option>
+                        <option value="moderada" selected>Moderada</option>
+                        <option value="intensa">Intensa</option>
+                    </select>
+                </section>
+            </section>
+        </section>
+
+        <section class="modal-field" style="margin-top:0.5rem">
+            <label>Observações (opcional)</label>
+            <textarea id="mObs" placeholder="Como foi o treino? Algo que queira registrar..."></textarea>
+        </section>
+
+        <button class="btn-salvar-treino" id="btnSalvarTreino">
+            <i class="fas fa-check"></i> Salvar Treino
+        </button>
+    </section>
 </section>
 
 <%- include('../partials/footer') %>
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script>
+const STORAGE_KEY = 'gymbros_treinos_registrados';
+const EVO_KEY     = 'gymbros_evolucao';
+
+let filtroAtivo = 'todos';
+
+// ─── Helpers localStorage ───────────────────────────────
+function getTreinos() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+}
+
+function salvarTreinos(lista) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+}
+
+// ─── Stats ──────────────────────────────────────────────
+function atualizarStats() {
+    const lista = getTreinos();
+    const total     = lista.length;
+    const tempo     = lista.reduce((a, t) => a + (parseInt(t.duracao) || 0), 0);
+    const cardio    = lista.filter(t => t.tipo === 'Cardio').reduce((a, t) => a + (parseInt(t.cardioMin) || parseInt(t.duracao) || 0), 0);
+    const pesos     = lista.map(t => parseFloat(t.peso) || 0).filter(v => v > 0);
+    const maiorPeso = pesos.length ? Math.max(...pesos) : null;
+
+    document.getElementById('statTotal').textContent  = total;
+    document.getElementById('statTempo').textContent  = tempo;
+    document.getElementById('statCardio').textContent = cardio;
+    document.getElementById('statPeso').textContent   = maiorPeso !== null ? maiorPeso + 'kg' : '—';
+}
+
+// ─── Render treinos registrados ─────────────────────────
+function tipoClass(tipo) {
+    if (tipo === 'Cardio')      return 'tipo-cardio';
+    if (tipo === 'Alongamento') return 'tipo-along';
+    return 'tipo-forca';
+}
+
+function tipoIcon(tipo) {
+    if (tipo === 'Cardio')      return 'fa-running';
+    if (tipo === 'Alongamento') return 'fa-leaf';
+    return 'fa-dumbbell';
+}
+
+function renderRegistrados() {
+    const grid = document.getElementById('gridRegistrados');
+    const lista = getTreinos();
+
+    const filtrados = filtroAtivo === 'todos'
+        ? lista
+        : lista.filter(t => t.tipo === filtroAtivo);
+
+    if (filtrados.length === 0) {
+        grid.innerHTML = `<section class="treinos-empty">
+            <i class="fas fa-clipboard"></i>
+            ${lista.length === 0
+                ? 'Nenhum treino registrado ainda. Clique em <strong>Registrar Treino</strong> para começar!'
+                : 'Nenhum treino deste tipo registrado.'}
+        </section>`;
+        return;
+    }
+
+    // Ordena do mais recente pro mais antigo
+    const ordenados = [...filtrados].sort((a, b) => b.timestamp - a.timestamp);
+
+    grid.innerHTML = ordenados.map(t => {
+        const tc = tipoClass(t.tipo);
+        const ic = tipoIcon(t.tipo);
+
+        let statsHtml = '';
+        if (t.tipo === 'Força' && (t.peso || t.series || t.reps)) {
+            statsHtml = `<section class="card-stats-reg">
+                ${t.peso   ? `<section class="stat-reg"><span class="sr-val">${t.peso}kg</span><span class="sr-label">Carga</span></section>` : ''}
+                ${t.series ? `<section class="stat-reg"><span class="sr-val">${t.series}x</span><span class="sr-label">Séries</span></section>` : ''}
+                ${t.reps   ? `<section class="stat-reg"><span class="sr-val">${t.reps}</span><span class="sr-label">Reps</span></section>` : ''}
+            </section>`;
+        } else if (t.tipo === 'Cardio' && t.cardioMin) {
+            statsHtml = `<section class="card-stats-reg">
+                <section class="stat-reg"><span class="sr-val">${t.cardioMin}min</span><span class="sr-label">Cardio</span></section>
+                ${t.intensidade ? `<section class="stat-reg"><span class="sr-val" style="font-size:0.8rem">${t.intensidade}</span><span class="sr-label">Intensidade</span></section>` : ''}
+            </section>`;
+        }
+
+        const obsHtml = t.obs ? `<p class="card-obs">"${t.obs}"</p>` : '';
+
+        return `<section class="treino-card-v2 ${tc} registrado" data-tipo="${t.tipo}">
+            <button class="btn-del-treino" onclick="deletarTreino(${t.timestamp})" title="Remover">
+                <i class="fas fa-trash"></i>
+            </button>
+            <section class="card-header-v2">
+                <section class="card-icon-v2"><i class="fas ${ic}"></i></section>
+                <section class="card-badges">
+                    <span class="badge-tipo">${t.tipo}</span>
+                    <span class="badge-data">${t.data}</span>
+                </section>
+            </section>
+            <h3 class="card-title-v2">${t.nome}</h3>
+            <p class="card-duracao"><i class="fas fa-clock"></i> ${t.duracao} minutos</p>
+            ${statsHtml}
+            ${obsHtml}
+        </section>`;
+    }).join('');
+}
+
+// ─── Deletar ────────────────────────────────────────────
+function deletarTreino(timestamp) {
+    const lista = getTreinos().filter(t => t.timestamp !== timestamp);
+    salvarTreinos(lista);
+    // Remove do histórico de evolução também
+    const evo = JSON.parse(localStorage.getItem(EVO_KEY) || '[]').filter(e => !(e.tipo === 'treino' && e.timestamp === timestamp));
+    localStorage.setItem(EVO_KEY, JSON.stringify(evo));
+    renderRegistrados();
+    atualizarStats();
+}
+
+// ─── Filtros ─────────────────────────────────────────────
+document.querySelectorAll('.filtro-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filtroAtivo = btn.dataset.filtro;
+        renderRegistrados();
+
+        // Filtra também sugestões
+        const tipo = filtroAtivo;
+        document.querySelectorAll('#gridSugestoes .treino-card-v2').forEach(card => {
+            const cardTipo = card.dataset.tipo;
+            card.style.display = (tipo === 'todos' || cardTipo === tipo) ? '' : 'none';
+        });
+    });
+});
+
+// ─── Modal ───────────────────────────────────────────────
+const modal   = document.getElementById('modalOverlay');
+const mTipo   = document.getElementById('mTipo');
+
+document.getElementById('btnAbrirModal').addEventListener('click', () => abrirModal());
+document.getElementById('btnFecharModal').addEventListener('click', fecharModal);
+modal.addEventListener('click', e => { if (e.target === modal) fecharModal(); });
+
+function abrirModal() { modal.classList.add('open'); atualizarCamposModal(); }
+function fecharModal() { modal.classList.remove('open'); }
+
+function preencherModal(nome, tipo, duracao) {
+    document.getElementById('mNome').value    = nome;
+    document.getElementById('mTipo').value    = tipo;
+    document.getElementById('mDuracao').value = duracao;
+    abrirModal();
+}
+
+function atualizarCamposModal() {
+    const tipo = mTipo.value;
+    document.getElementById('camposForca').classList.toggle('show', tipo === 'Força');
+    document.getElementById('camposCardio').classList.toggle('show', tipo === 'Cardio');
+}
+
+mTipo.addEventListener('change', atualizarCamposModal);
+
+document.getElementById('btnSalvarTreino').addEventListener('click', () => {
+    const nome    = document.getElementById('mNome').value.trim();
+    const tipo    = mTipo.value;
+    const duracao = document.getElementById('mDuracao').value;
+
+    if (!nome || !duracao) {
+        alert('Preencha nome e duração antes de salvar.');
+        return;
+    }
+
+    const agora = Date.now();
+    const registro = {
+        timestamp: agora,
+        data:      new Date().toLocaleDateString('pt-BR'),
+        nome, tipo,
+        duracao:   parseInt(duracao),
+        obs:       document.getElementById('mObs').value.trim()
+    };
+
+    if (tipo === 'Força') {
+        registro.peso   = document.getElementById('mPeso').value   || null;
+        registro.series = document.getElementById('mSeries').value || null;
+        registro.reps   = document.getElementById('mReps').value   || null;
+    }
+    if (tipo === 'Cardio') {
+        registro.cardioMin   = document.getElementById('mCardioMin').value   || null;
+        registro.intensidade = document.getElementById('mIntensidade').value || null;
+    }
+
+    // Salva no localStorage de treinos
+    const lista = getTreinos();
+    lista.push(registro);
+    salvarTreinos(lista);
+
+    // Salva no histórico de evolução
+    const evo = JSON.parse(localStorage.getItem(EVO_KEY) || '[]');
+    evo.push({ tipo: 'treino', timestamp: agora, data: registro.data, dados: registro });
+    localStorage.setItem(EVO_KEY, JSON.stringify(evo));
+
+    fecharModal();
+    limparModal();
+    renderRegistrados();
+    atualizarStats();
+});
+
+function limparModal() {
+    ['mNome','mDuracao','mPeso','mSeries','mReps','mCardioMin','mObs'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    document.getElementById('mTipo').value = 'Força';
+    atualizarCamposModal();
+}
+
+// ─── Init ────────────────────────────────────────────────
+renderRegistrados();
+atualizarStats();
+atualizarCamposModal();
+</script>
 </body>
 </html>

@@ -1,0 +1,242 @@
+/* ==============================
+   EVOLUÇÃO — GYMBROS
+   ============================== */
+
+/* STATS TOPO */
+.evo-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.evo-stat {
+    background: #1f1f1f;
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    transition: transform 0.2s;
+}
+
+.evo-stat:hover { transform: translateY(-3px); }
+
+.evo-stat .es-icon {
+    font-size: 1.4rem;
+    color: #FFD700;
+    margin-bottom: 0.4rem;
+}
+
+.evo-stat .es-num {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+}
+
+.evo-stat .es-label {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* SEÇÃO TÍTULO */
+.evo-section {
+    background: #1f1f1f;
+    border-radius: 14px;
+    padding: 1.4rem 1.6rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    margin-bottom: 1.4rem;
+}
+
+.evo-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.evo-section-header h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #FFD700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.evo-section-header small {
+    font-size: 0.78rem;
+    color: #666;
+}
+
+/* GRÁFICOS */
+.evo-chart-wrap {
+    position: relative;
+    height: 200px;
+}
+
+/* TIMELINE DE SNAPSHOTS */
+.evo-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.evo-entry {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.evo-entry-dot {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    margin-top: 2px;
+}
+
+.evo-entry-dot.tipo-imc       { background: rgba(255,215,0,0.15); color: #FFD700; }
+.evo-entry-dot.tipo-avaliacao { background: rgba(79,195,247,0.15); color: #4fc3f7; }
+.evo-entry-dot.tipo-treino    { background: rgba(129,199,132,0.15); color: #81c784; }
+
+.evo-entry-body {
+    flex: 1;
+    background: #2a2a2a;
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+}
+
+.evo-entry-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.evo-entry-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.evo-entry-date {
+    font-size: 0.75rem;
+    color: #666;
+    background: #1f1f1f;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+}
+
+.evo-entry-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.evo-chip {
+    font-size: 0.78rem;
+    background: #1f1f1f;
+    border-radius: 6px;
+    padding: 0.2rem 0.6rem;
+    color: #bbb;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.evo-chip span { color: #FFD700; font-weight: 700; }
+
+/* TABELA TREINOS */
+.evo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.evo-table th {
+    text-align: left;
+    color: #666;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.evo-table td {
+    padding: 0.6rem 0.6rem;
+    color: #ccc;
+    border-bottom: 1px solid #1a1a1a;
+    vertical-align: middle;
+}
+
+.evo-table tr:last-child td { border-bottom: none; }
+
+.evo-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.evo-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+}
+
+.evo-badge.forca       { background: rgba(255,215,0,0.15); color: #FFD700; }
+.evo-badge.cardio      { background: rgba(255,107,53,0.15); color: #FF6B35; }
+.evo-badge.alongamento { background: rgba(79,195,247,0.15); color: #4fc3f7; }
+
+/* IMC bar mini */
+.imc-mini-bar {
+    height: 6px;
+    background: linear-gradient(to right, #4fc3f7, #81c784, #ffb74d, #e57373);
+    border-radius: 3px;
+    position: relative;
+    width: 100px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+}
+
+.imc-mini-marker {
+    position: absolute;
+    top: -3px;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border: 2px solid #FFD700;
+    border-radius: 50%;
+    transform: translateX(-50%);
+}
+
+/* Estado vazio */
+.evo-empty {
+    text-align: center;
+    color: #555;
+    padding: 2rem;
+    font-size: 0.9rem;
+}
+
+.evo-empty i {
+    font-size: 2rem;
+    color: #333;
+    display: block;
+    margin-bottom: 0.6rem;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .evo-entry { gap: 0.6rem; }
+    .evo-entry-dot { width: 28px; height: 28px; font-size: 0.75rem; }
+    .evo-chart-wrap { height: 160px; }
+}
