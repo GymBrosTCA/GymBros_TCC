@@ -14,7 +14,7 @@ const _canon  = _base + _path;
 const _type   = _seo.ogType      || 'website';
 const _ogTit  = _seo.ogTitle     || _title;
 const _ogDesc = _seo.ogDescription || _desc;
-const _ogImg  = _seo.ogImage     || (_base + '/images/og-default.jpg');
+const _ogImg  = _seo.ogImage     || 'https://gymbros-2ht3.onrender.com/logo.png';
 const _ogAlt  = _seo.ogImageAlt  || 'GymBros — Academias ilimitadas em todo o Brasil';
 %>
 <title><%= _title %></title>
@@ -36,7 +36,7 @@ const _ogAlt  = _seo.ogImageAlt  || 'GymBros — Academias ilimitadas em todo o 
 <meta property="og:image:secure_url"   content="<%= _ogImg %>">
 <meta property="og:image:width"        content="1200">
 <meta property="og:image:height"       content="630">
-<meta property="og:image:type"         content="image/jpeg">
+<meta property="og:image:type"         content="image/png">
 <meta property="og:image:alt"          content="<%= _ogAlt %>">
 
 <!-- Twitter Card -->
