@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<%- include('../partials/seo') %>
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link rel="stylesheet" href="/css/pagamento.css">
+</head>
+<body class="pagamento-page">
+
+<%- include('../partials/header') %>
+
+<main>
+<section class="pagamento-wrapper">
+
+    <!-- ── PROGRESS INDICATOR ── -->
+    <section class="pagamento-progress">
+        <section class="prog-step active" id="prog-1">
+            <section class="prog-circle"><span>1</span></section>
+            <span class="prog-label">Método</span>
+        </section>
+        <section class="prog-line" id="prog-line-1"></section>
+        <section class="prog-step" id="prog-2">
+            <section class="prog-circle"><span>2</span></section>
+            <span class="prog-label">Pagamento</span>
+        </section>
+        <section class="prog-line" id="prog-line-2"></section>
+        <section class="prog-step" id="prog-3">
+            <section class="prog-circle"><span>3</span></section>
+            <span class="prog-label">Confirmação</span>
+        </section>
+    </section>
+
+    <section class="pagamento-steps">
+
+        <!-- ══════════════════════════════════════
+             STEP 1 — ESCOLHA DO MÉTODO
+        ══════════════════════════════════════ -->
+        <section id="step-1" class="pagamento-step">
+            <section class="step1-grid">
+
+                <!-- Resumo do pedido -->
+                <section class="resumo-col">
+                    <section class="resumo-card">
+                        <section class="resumo-header">
+                            <i class="fas fa-crown"></i>
+                            <h2 class="resumo-plano-nome"><%= plano.nome %></h2>
+                        </section>
+                        <section class="resumo-preco">
+                            <span class="resumo-valor"><%= plano.precoFmt %></span>
+                            <span class="resumo-periodo">/mês</span>
+                        </section>
+                        <ul class="resumo-lista">
+                            <% (plano.beneficios || []).forEach(b => { %>
+                            <li class="resumo-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span><%= b %></span>
+                            </li>
+                            <% }) %>
+                        </ul>
+                        <section class="resumo-divider"></section>
+                        <section class="resumo-total">
+                            <span>Total mensal</span>
+                            <strong><%= plano.precoFmt %></strong>
+                        </section>
+                        <section class="resumo-seguro">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Pagamento 100% seguro e criptografado</span>
+                        </section>
+                    </section>
+                </section>
+
+                <!-- Seleção de método -->
+                <section class="metodo-col">
+                    <h3 class="metodo-titulo">Escolha como pagar</h3>
+
+                    <section class="metodo-card" data-metodo="pix">
+                        <section class="metodo-icon"><i class="fas fa-qrcode"></i></section>
+                        <section class="metodo-info">
+                            <span class="metodo-nome">PIX</span>
+                            <span class="metodo-desc">Aprovação instantânea · Sem taxas</span>
+                        </section>
+                        <section class="metodo-check"><i class="fas fa-check-circle"></i></section>
+                    </section>
+
+                    <section class="metodo-card" data-metodo="cartao">
+                        <section class="metodo-icon"><i class="fas fa-credit-card"></i></section>
+                        <section class="metodo-info">
+                            <span class="metodo-nome">Cartão de Crédito / Débito</span>
+                            <span class="metodo-desc">Parcelamento em até 12x · Todas as bandeiras</span>
+                        </section>
+                        <section class="metodo-check"><i class="fas fa-check-circle"></i></section>
+                    </section>
+
+                    <section class="metodo-card" data-metodo="boleto">
+                        <section class="metodo-icon"><i class="fas fa-barcode"></i></section>
+                        <section class="metodo-info">
+                            <span class="metodo-nome">Boleto Bancário</span>
+                            <span class="metodo-desc">Vencimento em 3 dias úteis</span>
+                        </section>
+                        <section class="metodo-check"><i class="fas fa-check-circle"></i></section>
+                    </section>
+
+                    <button class="btn-continuar" id="btn-continuar" disabled>
+                        Continuar <i class="fas fa-arrow-right"></i>
+                    </button>
+                </section>
+
+            </section>
+        </section>
+
+        <!-- ══════════════════════════════════════
+             STEP 2A — PIX
+        ══════════════════════════════════════ -->
+        <section id="step-2-pix" class="pagamento-step hidden">
+            <section class="step2-header">
+                <button class="btn-voltar-step" id="btn-voltar-pix">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <h2>Pagamento via PIX</h2>
+            </section>
+
+            <section class="pix-wrapper">
+                <section class="pix-qr-section">
+                    <section class="pix-qr">
+                        <i class="fas fa-qrcode"></i>
+                    </section>
+                    <p class="pix-instrucao">Abra o app do seu banco e escaneie o QR Code</p>
+                </section>
+
+                <section class="pix-divider"><span>ou copie o código PIX</span></section>
+
+                <section class="pix-codigo-wrap">
+                    <input type="text" class="pix-codigo-input" id="pix-codigo" readonly
+                        value="00020126580014br.gov.bcb.pix0136a394a92e-ac91-4c63-b9f1-8f2b3e4d5a6b5204000053039865802BR5910GYMBROSTCC6009SaoPaulo62070503***6304ABCD">
+                    <button class="btn-copiar" id="btn-copiar-pix">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                </section>
+
+                <section class="pix-timer">
+                    <i class="fas fa-clock"></i>
+                    Expira em <span id="pix-countdown" class="pix-timer-count">30:00</span>
+                </section>
+
+                <section class="pix-acoes">
+                    <button class="btn-ja-paguei" id="btn-ja-paguei">
+                        <i class="fas fa-check"></i> Já paguei
+                    </button>
+                </section>
+            </section>
+        </section>
+
+        <!-- ══════════════════════════════════════
+             STEP 2B — CARTÃO
+        ══════════════════════════════════════ -->
+        <section id="step-2-cartao" class="pagamento-step hidden">
+            <section class="step2-header">
+                <button class="btn-voltar-step" id="btn-voltar-cartao">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <h2>Pagamento com Cartão</h2>
+            </section>
+
+            <section class="cartao-wrapper">
+
+                <!-- Card Preview -->
+                <section class="card-preview">
+                    <section class="card-chip"></section>
+                    <section class="card-preview-logo"><i class="fas fa-credit-card"></i></section>
+                    <section class="card-preview-numero" id="prev-numero">•••• •••• •••• ••••</section>
+                    <section class="card-preview-bottom">
+                        <section>
+                            <span class="card-preview-label">Nome</span>
+                            <span class="card-preview-nome" id="prev-nome">SEU NOME</span>
+                        </section>
+                        <section>
+                            <span class="card-preview-label">Validade</span>
+                            <span class="card-preview-validade" id="prev-validade">MM/AA</span>
+                        </section>
+                    </section>
+                </section>
+
+                <!-- Formulário -->
+                <section class="cartao-form">
+                    <section class="form-grupo">
+                        <label class="form-label" for="cartao-numero">Número do cartão</label>
+                        <input class="form-input" id="cartao-numero" type="text"
+                            placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" autocomplete="cc-number">
+                    </section>
+
+                    <section class="form-grupo">
+                        <label class="form-label" for="cartao-nome">Nome do titular</label>
+                        <input class="form-input" id="cartao-nome" type="text"
+                            placeholder="Como está no cartão" autocomplete="cc-name">
+                    </section>
+
+                    <section class="form-row">
+                        <section class="form-grupo">
+                            <label class="form-label" for="cartao-validade">Validade</label>
+                            <input class="form-input" id="cartao-validade" type="text"
+                                placeholder="MM/AA" maxlength="5" inputmode="numeric" autocomplete="cc-exp">
+                        </section>
+                        <section class="form-grupo">
+                            <label class="form-label" for="cartao-cvv">CVV</label>
+                            <input class="form-input" id="cartao-cvv" type="text"
+                                placeholder="•••" maxlength="4" inputmode="numeric" autocomplete="cc-csc">
+                        </section>
+                    </section>
+
+                    <section class="form-grupo">
+                        <label class="form-label" for="cartao-parcelas">Parcelas</label>
+                        <select class="form-input select-parcelas" id="cartao-parcelas"></select>
+                    </section>
+
+                    <button class="btn-confirmar-cartao" id="btn-confirmar-cartao">
+                        <i class="fas fa-lock"></i> Confirmar Pagamento
+                    </button>
+                </section>
+
+            </section>
+        </section>
+
+        <!-- ══════════════════════════════════════
+             STEP 2C — BOLETO
+        ══════════════════════════════════════ -->
+        <section id="step-2-boleto" class="pagamento-step hidden">
+            <section class="step2-header">
+                <button class="btn-voltar-step" id="btn-voltar-boleto">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <h2>Pagamento por Boleto</h2>
+            </section>
+
+            <section class="boleto-wrapper">
+                <section class="boleto-barras"></section>
+
+                <section class="boleto-codigo-wrap">
+                    <input type="text" class="pix-codigo-input" id="boleto-codigo" readonly
+                        value="23790.00009 01020.269702 03010.247409 8 94350000006490">
+                    <button class="btn-copiar" id="btn-copiar-boleto">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                </section>
+
+                <section class="boleto-aviso">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <section>
+                        <strong>Prazo de pagamento: 3 dias úteis</strong>
+                        <p>Após o vencimento, o boleto é cancelado automaticamente. Gere um novo na sua área do aluno.</p>
+                    </section>
+                </section>
+
+                <section class="boleto-msg">
+                    <i class="fas fa-envelope"></i>
+                    <span>Um e-mail com o boleto completo será enviado para
+                    <strong><%= user ? user.email : 'seu e-mail cadastrado' %></strong> em instantes.
+                    Após o pagamento, sua assinatura é ativada em até 2 dias úteis.</span>
+                </section>
+
+                <button class="btn-ja-paguei boleto-confirmar" id="btn-confirmar-boleto">
+                    <i class="fas fa-file-invoice"></i> Confirmar e Gerar Boleto
+                </button>
+            </section>
+        </section>
+
+        <!-- ══════════════════════════════════════
+             STEP 3 — CONFIRMAÇÃO
+        ══════════════════════════════════════ -->
+        <section id="step-3" class="pagamento-step hidden">
+            <section class="confirmacao-wrapper">
+                <section class="confirmacao-check">
+                    <i class="fas fa-check"></i>
+                </section>
+
+                <h1 class="confirmacao-titulo">Pagamento Concluído!</h1>
+                <p class="confirmacao-sub" id="conf-sub">Sua assinatura foi ativada com sucesso.</p>
+
+                <section class="confirmacao-status" id="conf-status-badge">
+                    <i class="fas fa-check-circle"></i> Assinatura ativada
+                </section>
+
+                <section class="confirmacao-resumo">
+                    <section class="conf-row">
+                        <span class="conf-label">Plano</span>
+                        <span class="conf-val" id="conf-plano">—</span>
+                    </section>
+                    <section class="conf-row">
+                        <span class="conf-label">Valor</span>
+                        <span class="conf-val" id="conf-valor">—</span>
+                    </section>
+                    <section class="conf-row">
+                        <span class="conf-label">Método</span>
+                        <span class="conf-val" id="conf-metodo">—</span>
+                    </section>
+                    <section class="conf-row">
+                        <span class="conf-label">Data</span>
+                        <span class="conf-val" id="conf-data">—</span>
+                    </section>
+                </section>
+
+                <section class="confirmacao-acoes">
+                    <a href="/area-aluno" class="btn-primario">
+                        <i class="fas fa-tachometer-alt"></i> Explorar meu plano
+                    </a>
+                    <a href="/" class="btn-secundario">Voltar ao início</a>
+                </section>
+            </section>
+        </section>
+
+    </section><!-- .pagamento-steps -->
+</section><!-- .pagamento-wrapper -->
+</main>
+
+<%- include('../partials/footer') %>
+
+<script>
+const PLANO = {
+    id:       '<%= plano.id %>',
+    nome:     '<%= plano.nome %>',
+    preco:    <%= plano.preco %>,
+    precoFmt: '<%= plano.precoFmt %>'
+};
+</script>
+<script src="/js/pagamento.js"></script>
+<script src="/js/translate.js"></script>
+</body>
+</html>
