@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios — GymBros Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<div class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <div class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <h1 class="admin-page-title">Relatórios</h1>
+            <p class="admin-page-subtitle">Análises e métricas de crescimento da plataforma</p>
+
+            <!-- Crescimento + Distribuição -->
+            <div class="admin-2col" style="margin-bottom:20px">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <span class="admin-card-title"><i class="fas fa-chart-line text-gold"></i> Crescimento de Usuários</span>
+                        <span class="text-muted" style="font-size:.78rem">Últimos 6 meses</span>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="chart-wrap"><canvas id="chartCrescimento"></canvas></div>
+                    </div>
+                </div>
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <span class="admin-card-title"><i class="fas fa-chart-pie text-gold"></i> Distribuição por Plano</span>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="chart-wrap-sm"><canvas id="chartPlanos"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academias mais ativas -->
+            <div class="admin-card" style="margin-bottom:20px">
+                <div class="admin-card-header">
+                    <span class="admin-card-title"><i class="fas fa-dumbbell text-gold"></i> Academias Mais Ativas (Check-ins)</span>
+                </div>
+                <div class="admin-card-body">
+                    <div class="chart-wrap"><canvas id="chartAcademias"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Tabela resumo -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title">Resumo Executivo</span>
+                    <button class="btn btn-outline btn-sm" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+                </div>
+                <div class="admin-card-body">
+                    <div class="admin-3col">
+                        <div style="text-align:center;padding:16px">
+                            <div class="text-muted" style="font-size:.75rem;margin-bottom:4px">NOVOS USUÁRIOS (6 MES)</div>
+                            <div style="font-size:2rem;font-weight:700;color:var(--gold)"><%= JSON.parse(crescimento).reduce((a,b)=>a+b,0) %></div>
+                        </div>
+                        <div style="text-align:center;padding:16px;border-left:1px solid var(--border);border-right:1px solid var(--border)">
+                            <div class="text-muted" style="font-size:.75rem;margin-bottom:4px">TOTAL CHECK-INS</div>
+                            <div style="font-size:2rem;font-weight:700;color:var(--gold)"><%= JSON.parse(acadAtivas).reduce((a,b)=>a+b.count,0) %></div>
+                        </div>
+                        <div style="text-align:center;padding:16px">
+                            <div class="text-muted" style="font-size:.75rem;margin-bottom:4px">PLANO MAIS POPULAR</div>
+                            <div style="font-size:1.2rem;font-weight:700;color:var(--gold)"><%= JSON.parse(distPlano).sort((a,b)=>b.count-a.count)[0]?.nome || '—' %></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/js/admin.js"></script>
+<script>
+const baseOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#9A9A9A', font: { size: 11 } } } }, scales: { x: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A' } }, y: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A' }, beginAtZero: true } } };
+
+const crescData = <%- crescimento %>;
+new Chart(document.getElementById('chartCrescimento'), {
+    type: 'line',
+    data: { labels: <%- meses %>, datasets: [{ label: 'Novos usuários', data: crescData, borderColor: '#C98B1D', backgroundColor: 'rgba(201,139,29,0.1)', tension: 0.4, fill: true }] },
+    options: { ...baseOpts, plugins: { legend: { display: false } } }
+});
+
+const distData = <%- distPlano %>;
+new Chart(document.getElementById('chartPlanos'), {
+    type: 'doughnut',
+    data: {
+        labels: distData.map(d => d.nome),
+        datasets: [{ data: distData.map(d => d.count), backgroundColor: ['#C98B1D','#E0A835','rgba(201,139,29,0.4)'], borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#9A9A9A', padding: 12 } } } }
+});
+
+const acadData = <%- acadAtivas %>;
+new Chart(document.getElementById('chartAcademias'), {
+    type: 'bar',
+    data: {
+        labels: acadData.map(a => a.nome.substring(0,18)),
+        datasets: [{ label: 'Check-ins', data: acadData.map(a => a.count), backgroundColor: 'rgba(201,139,29,0.7)', borderRadius: 5 }]
+    },
+    options: baseOpts
+});
+</script>
+</body>
+</html>

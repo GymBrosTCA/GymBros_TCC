@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — GymBros Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+    .login-bg {
+        position: fixed; inset: 0;
+        background: #0a0a0a;
+        overflow: hidden;
+        z-index: 0;
+    }
+    .login-bg-glow1 {
+        position: absolute;
+        width: 700px; height: 700px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(201,139,29,0.13) 0%, transparent 65%);
+        top: -200px; right: -150px;
+        animation: driftA 12s ease-in-out infinite alternate;
+    }
+    .login-bg-glow2 {
+        position: absolute;
+        width: 500px; height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(201,139,29,0.07) 0%, transparent 65%);
+        bottom: -150px; left: -100px;
+        animation: driftB 15s ease-in-out infinite alternate;
+    }
+    .login-bg-grid {
+        position: absolute; inset: 0;
+        background-image: linear-gradient(rgba(201,139,29,0.04) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(201,139,29,0.04) 1px, transparent 1px);
+        background-size: 48px 48px;
+    }
+    @keyframes driftA { from { transform: translate(0,0) scale(1); } to { transform: translate(-40px, 30px) scale(1.1); } }
+    @keyframes driftB { from { transform: translate(0,0) scale(1); } to { transform: translate(30px, -20px) scale(1.08); } }
+
+    .admin-login-wrap { position: relative; z-index: 1; }
+
+    .admin-login-box {
+        background: rgba(20,20,20,0.95);
+        border: 1px solid rgba(201,139,29,0.25);
+        border-radius: 20px;
+        padding: 48px 44px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,139,29,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
+        backdrop-filter: blur(16px);
+    }
+
+    .admin-login-logo img {
+        width: 64px; height: 64px;
+        border-radius: 16px;
+        border: 2px solid rgba(201,139,29,0.4);
+        animation: logoPulse 3s ease-in-out infinite;
+        box-shadow: 0 0 24px rgba(201,139,29,0.3);
+    }
+    @keyframes logoPulse {
+        0%,100% { box-shadow: 0 0 16px rgba(201,139,29,0.3); border-color: rgba(201,139,29,0.4); }
+        50%      { box-shadow: 0 0 40px rgba(201,139,29,0.55); border-color: rgba(201,139,29,0.7); }
+    }
+    .admin-login-logo h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; margin-top: 12px; }
+    .admin-login-logo p {
+        font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;
+        background: rgba(201,139,29,0.12);
+        border: 1px solid rgba(201,139,29,0.25);
+        color: rgba(201,139,29,0.9);
+        padding: 3px 14px; border-radius: 20px; display: inline-block; margin-top: 6px;
+    }
+
+    .admin-form-group label { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.3px; color: #888; }
+    .admin-input {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 11px 14px;
+        font-size: 0.9rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .admin-input:focus {
+        border-color: rgba(201,139,29,0.6);
+        box-shadow: 0 0 0 3px rgba(201,139,29,0.1);
+    }
+
+    .btn-gold {
+        background: linear-gradient(135deg, #C98B1D 0%, #E0A835 100%);
+        color: #000;
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 13px;
+        border-radius: 10px;
+        letter-spacing: 0.3px;
+        box-shadow: 0 4px 20px rgba(201,139,29,0.35);
+        transition: all 0.2s;
+    }
+    .btn-gold:hover {
+        background: linear-gradient(135deg, #E0A835 0%, #F0C060 100%);
+        box-shadow: 0 6px 28px rgba(201,139,29,0.5);
+        transform: translateY(-1px);
+    }
+    .btn-gold:active { transform: translateY(0); }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+    .divider span { font-size: 0.72rem; color: #555; }
+
+    .admin-login-footer { text-align: center; margin-top: 24px; }
+    .admin-login-footer a { font-size: 0.78rem; color: #555; transition: color 0.2s; }
+    .admin-login-footer a:hover { color: #C98B1D; }
+    </style>
+</head>
+<body class="admin-body" style="display:block">
+
+<div class="login-bg">
+    <div class="login-bg-grid"></div>
+    <div class="login-bg-glow1"></div>
+    <div class="login-bg-glow2"></div>
+</div>
+
+<div class="admin-login-wrap" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">
+    <div class="admin-login-box">
+        <div class="admin-login-logo" style="text-align:center;margin-bottom:32px">
+            <img src="/images/logo.png" alt="GymBros">
+            <h1 class="text-gold">GymBros</h1>
+            <p>Painel Administrativo</p>
+        </div>
+
+        <% if (erro) { %>
+        <div class="admin-login-error" style="margin-bottom:20px">
+            <i class="fas fa-exclamation-circle"></i> <%= erro %>
+        </div>
+        <% } %>
+
+        <form method="POST" action="/admin/login">
+            <input type="hidden" name="next" value="<%= next %>">
+
+            <div class="admin-form-group">
+                <label>E-mail</label>
+                <div style="position:relative;margin-top:5px">
+                    <i class="fas fa-envelope" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#555;font-size:0.8rem"></i>
+                    <input type="email" name="email" class="admin-input" style="width:100%;padding-left:36px"
+                        placeholder="admin@gymbros.com" required autofocus>
+                </div>
+            </div>
+            <div class="admin-form-group" style="margin-bottom:24px">
+                <label>Senha</label>
+                <div style="position:relative;margin-top:5px">
+                    <i class="fas fa-lock" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#555;font-size:0.8rem"></i>
+                    <input type="password" name="password" class="admin-input" style="width:100%;padding-left:36px"
+                        placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-gold w-100" style="justify-content:center">
+                <i class="fas fa-sign-in-alt"></i> Entrar no Painel
+            </button>
+        </form>
+
+        <div class="divider"><span>acesso restrito</span></div>
+
+        <div class="admin-login-footer">
+            <a href="/"><i class="fas fa-arrow-left" style="font-size:0.7rem;margin-right:4px"></i>Voltar ao site</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

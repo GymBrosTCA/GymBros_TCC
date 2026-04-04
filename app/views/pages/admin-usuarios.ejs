@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuários — GymBros Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<div class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <div class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <div class="flex-between mb-16">
+                <div>
+                    <h1 class="admin-page-title">Usuários</h1>
+                    <p class="admin-page-subtitle"><%= total %> usuários encontrados</p>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <form method="GET" action="/admin/usuarios" class="admin-toolbar">
+                <div class="admin-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="busca" value="<%= busca %>" placeholder="Buscar por nome ou CPF">
+                </div>
+                <select name="plano" class="admin-select">
+                    <option value="">Todos os planos</option>
+                    <% planos.forEach(p => { %>
+                    <option value="<%= p.nome %>" <%= plano===p.nome?'selected':'' %>><%= p.nome %></option>
+                    <% }) %>
+                </select>
+                <select name="status" class="admin-select">
+                    <option value="">Todos os status</option>
+                    <option value="ativo"   <%= status==='ativo'   ?'selected':'' %>>Ativo</option>
+                    <option value="inativo" <%= status==='inativo' ?'selected':'' %>>Inativo</option>
+                </select>
+                <button type="submit" class="btn btn-gold"><i class="fas fa-filter"></i> Filtrar</button>
+                <% if (busca || plano || status) { %>
+                <a href="/admin/usuarios" class="btn btn-outline">Limpar</a>
+                <% } %>
+            </form>
+
+            <div class="admin-card">
+                <div class="admin-card-body no-pad">
+                    <div class="admin-table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>CPF</th>
+                                    <th>E-mail</th>
+                                    <th>Plano</th>
+                                    <th>Cadastro</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <% if (items.length === 0) { %>
+                            <tr><td colspan="7" style="text-align:center;padding:32px" class="text-muted">Nenhum usuário encontrado</td></tr>
+                            <% } %>
+                            <% items.forEach(u => { %>
+                            <tr>
+                                <td><a href="/admin/usuarios/<%= u.id %>" class="fw-600"><%= u.nome %></a></td>
+                                <td class="text-muted"><%= u.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') %></td>
+                                <td class="text-muted"><%= u.email %></td>
+                                <td><span class="badge badge-gold"><%= u.plano || '—' %></span></td>
+                                <td class="text-muted"><%= u.createdAt.toLocaleDateString('pt-BR') %></td>
+                                <td>
+                                    <span class="badge <%= u.status==='ativo' ? 'badge-success' : 'badge-muted' %>">
+                                        <%= u.status || 'ativo' %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="flex gap-10">
+                                        <a href="/admin/usuarios/<%= u.id %>" class="btn btn-outline btn-sm btn-icon" title="Ver perfil"><i class="fas fa-eye"></i></a>
+                                        <button class="btn btn-danger btn-sm btn-icon" data-toggle-user="<%= u.id %>" title="<%= u.status==='ativo' ? 'Desativar' : 'Ativar' %>">
+                                            <i class="fas <%= u.status==='ativo' ? 'fa-ban' : 'fa-check' %>"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paginação -->
+            <% if (pages > 1) { %>
+            <div class="admin-pagination">
+                <% for (let i = 1; i <= pages; i++) { %>
+                <a href="/admin/usuarios?busca=<%= busca %>&plano=<%= plano %>&status=<%= status %>&page=<%= i %>" class="<%= i===currentPage ? 'active' : '' %>"><%= i %></a>
+                <% } %>
+            </div>
+            <% } %>
+        </main>
+    </div>
+</div>
+<script src="/js/admin.js"></script>
+</body>
+</html>

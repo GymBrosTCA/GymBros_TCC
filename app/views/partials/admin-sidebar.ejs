@@ -1,0 +1,61 @@
+<aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-brand">
+        <img src="/images/logo.png" alt="GymBros">
+        <div>
+            <span>GymBros</span>
+            <small>Admin Panel</small>
+        </div>
+    </div>
+
+    <nav class="admin-nav">
+        <div class="admin-nav-section">Principal</div>
+        <a href="/admin/dashboard" class="admin-nav-item <%= page==='dashboard' ? 'active' : '' %>">
+            <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+
+        <div class="admin-nav-section">Gestão</div>
+        <a href="/admin/usuarios" class="admin-nav-item <%= page==='usuarios' ? 'active' : '' %>">
+            <i class="fas fa-users"></i> Usuários
+        </a>
+        <a href="/admin/academias" class="admin-nav-item <%= page==='academias' ? 'active' : '' %>">
+            <i class="fas fa-dumbbell"></i> Academias
+        </a>
+        <a href="/admin/planos" class="admin-nav-item <%= page==='planos' ? 'active' : '' %>">
+            <i class="fas fa-tags"></i> Planos
+        </a>
+        <a href="/admin/checkins" class="admin-nav-item <%= page==='checkins' ? 'active' : '' %>">
+            <i class="fas fa-map-marker-check"></i> Check-ins
+        </a>
+
+        <div class="admin-nav-section">Operações</div>
+        <a href="/admin/financeiro" class="admin-nav-item <%= page==='financeiro' ? 'active' : '' %>">
+            <i class="fas fa-dollar-sign"></i> Financeiro
+        </a>
+        <a href="/admin/suporte" class="admin-nav-item <%= page==='suporte' ? 'active' : '' %>">
+            <i class="fas fa-headset"></i> Suporte
+            <% if (ticketCount > 0) { %>
+            <span class="admin-nav-badge"><%= ticketCount %></span>
+            <% } %>
+        </a>
+        <a href="/admin/notificacoes" class="admin-nav-item <%= page==='notificacoes' ? 'active' : '' %>">
+            <i class="fas fa-bell"></i> Notificações
+        </a>
+
+        <div class="admin-nav-section">Analytics</div>
+        <a href="/admin/relatorios" class="admin-nav-item <%= page==='relatorios' ? 'active' : '' %>">
+            <i class="fas fa-file-chart-line"></i> Relatórios
+        </a>
+
+        <div class="admin-nav-section">Sistema</div>
+        <a href="/admin/configuracoes" class="admin-nav-item <%= page==='configuracoes' ? 'active' : '' %>">
+            <i class="fas fa-cog"></i> Configurações
+        </a>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+        <div>GymBros v<%= adminConfig.version %></div>
+        <% if (adminConfig.maintenance) { %>
+        <div class="text-warning mt-4"><i class="fas fa-tools"></i> Manutenção ativa</div>
+        <% } %>
+    </div>
+</aside>

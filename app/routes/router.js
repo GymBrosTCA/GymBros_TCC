@@ -4,8 +4,25 @@ const router = express.Router();
 const path = require('path');
 const { body, validationResult } = require('express-validator');
 
-// "Banco" temporário
-const usuarios = [];
+// Store central compartilhado com admin
+const { usuarios, onlineUsers } = require('../data');
+const { broadcast } = require('../events');
+
+// ── Middleware: rastreia usuários online ──────────────────────────────────────
+router.use((req, res, next) => {
+    if (req.session && req.session.user) {
+        const user = req.session.user;
+        const uid  = user.id || user.cpf;
+        const isNew = !onlineUsers.has(uid);
+        onlineUsers.set(uid, { nome: user.nome, email: user.email, page: req.path, lastSeen: Date.now() });
+        if (isNew) {
+            broadcast('user_online', { id: uid, nome: user.nome, email: user.email, page: req.path, lastSeen: Date.now() });
+        } else {
+            broadcast('user_activity', { id: uid, nome: user.nome, page: req.path, lastSeen: Date.now() });
+        }
+    }
+    next();
+});
 
 // Função simples pra validar CPF (só pra demo)
 function validarCPF(cpf) {
@@ -321,6 +338,121 @@ router.post('/imc-save', (req, res) => {
     };
 
     return res.json({ mensagem: 'Perfil salvo com sucesso! Redirecionando...' });
+});
+
+// Suporte (área do aluno)
+router.get('/suporte', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+    res.render('pages/suporte', { user: req.session.user, seo: {
+        title: 'Suporte — GymBros', canonical: '/suporte',
+        robots: 'noindex, nofollow', description: 'Central de suporte GymBros.',
+    }});
+});
+
+//Administração
+router.get('/admin-dashboard', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-dashboard', { user: req.session.user });
+});
+
+//Checkin
+router.get('/admin-checkins', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-checkins', { user: req.session.user });
+});
+
+//Admin Configurações
+router.get('/admin-configuracoes', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-configuracoes', { user: req.session.user });
+});
+
+//Administração Login
+router.get('/admin-login', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-login', { user: req.session.user });
+});
+
+//Administração Academias
+router.get('/admin-academias', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-academias', { user: req.session.user });
+});
+
+//Administração Inadimplentes
+router.get('/admin-financeiro-inadimplentes', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-financeiro-inadimplentes', { user: req.session.user });
+});
+
+//Administração Receitas
+router.get('/admin-financeiro-receitas', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-financeiro-receitas', { user: req.session.user });
+});
+
+//Administração Financeiro
+router.get('/admin-financeiro', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-financeiro', { user: req.session.user });
+});
+
+//Administração Notificações
+router.get('/admin-notificacoes', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-notificacoes', { user: req.session.user });
+});
+
+//Administração Planos
+router.get('/admin-planos', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-planos', { user: req.session.user });
+});
+
+//Administração Relatórios
+router.get('/admin-relatorios', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-relatorios', { user: req.session.user });
+});
+
+
+//Administração Suporte Chat
+router.get('/admin-suporte-chat', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-suporte-chat', { user: req.session.user });
+});
+
+//Administração Suporte
+router.get('/admin-suporte', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-suporte', { user: req.session.user });
+});
+
+//Administração Usuário Perfil
+router.get('/admin-usuario-perfil', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-usuario-perfil', { user: req.session.user });
+});
+
+//Administração Usuários
+router.get('/admin-usuarios', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    res.render('pages/admin-usuarios', { user: req.session.user });
 });
 
 // Logout

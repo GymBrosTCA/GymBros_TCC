@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificações — GymBros Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<div class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <div class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <h1 class="admin-page-title">Notificações</h1>
+            <p class="admin-page-subtitle">Envie notificações para usuários da plataforma</p>
+
+            <div class="admin-2col">
+                <!-- Formulário de envio -->
+                <div class="admin-card">
+                    <div class="admin-card-header"><span class="admin-card-title"><i class="fas fa-bell text-gold"></i> Nova Notificação</span></div>
+                    <div class="admin-card-body">
+                        <form id="form-notificacao">
+                            <div class="admin-form-group">
+                                <label>Título *</label>
+                                <input type="text" name="titulo" class="admin-input" required placeholder="Ex: Manutenção programada">
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Mensagem *</label>
+                                <textarea name="mensagem" class="admin-textarea" required placeholder="Conteúdo da notificação..."></textarea>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Tipo</label>
+                                <select name="tipo" class="admin-input">
+                                    <option value="informativo">Informativo</option>
+                                    <option value="alerta">Alerta</option>
+                                    <option value="promocao">Promoção</option>
+                                </select>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Destinatários</label>
+                                <select name="destinatarios" class="admin-input">
+                                    <option value="todos">Todos os usuários</option>
+                                    <% planos.forEach(p => { %>
+                                    <option value="<%= p.id %>">Plano <%= p.nome %></option>
+                                    <% }) %>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-gold w-100" style="justify-content:center">
+                                <i class="fas fa-paper-plane"></i> Enviar Notificação
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Histórico -->
+                <div class="admin-card">
+                    <div class="admin-card-header"><span class="admin-card-title">Histórico</span></div>
+                    <div class="admin-card-body no-pad">
+                        <% if (!lista.length) { %>
+                        <div class="admin-empty"><i class="fas fa-bell-slash"></i>Nenhuma notificação enviada</div>
+                        <% } else { %>
+                        <% lista.forEach(n => { %>
+                        <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
+                            <div class="flex-between">
+                                <span class="fw-600" style="font-size:.875rem"><%= n.titulo %></span>
+                                <span class="badge <%= n.tipo==='alerta'?'badge-warning':n.tipo==='promocao'?'badge-gold':'badge-info' %>"><%= n.tipo %></span>
+                            </div>
+                            <div class="text-muted" style="font-size:.8rem;margin-top:4px"><%= n.mensagem %></div>
+                            <div class="text-muted" style="font-size:.72rem;margin-top:6px">
+                                <i class="fas fa-users"></i> <%= n.destinatarios === 'todos' ? 'Todos' : 'Plano específico' %> •
+                                <i class="fas fa-clock"></i> <%= n.criadaEm.toLocaleDateString('pt-BR') %> •
+                                <i class="fas fa-eye"></i> <%= (n.lidas||[]).length %> leituras
+                            </div>
+                        </div>
+                        <% }) %>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<script src="/js/admin.js"></script>
+</body>
+</html>
