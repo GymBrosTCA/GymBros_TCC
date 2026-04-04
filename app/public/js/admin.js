@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 // ── SSE: conecta ao stream de eventos do admin ────────────────────────────────
 (function initSSE() {
@@ -71,7 +71,7 @@ function clearNotifs() {
     const badge = document.getElementById('notif-badge');
     if (badge) badge.style.display = 'none';
     const list = document.getElementById('notif-list');
-    if (list) list.innerHTML = '<div class="admin-notif-empty">Nenhuma atividade ainda</div>';
+    if (list) list.innerHTML = '<section class="admin-notif-empty">Nenhuma atividade ainda</section>';
 }
 
 function updateNavBadge(delta) {
@@ -97,13 +97,13 @@ function setOnlineCount(n) {
 function toast(msg, type = 'success', duration = 3500) {
     let container = document.getElementById('admin-toasts');
     if (!container) {
-        container = document.createElement('div');
+        container = document.createElement('section');
         container.id = 'admin-toasts';
         container.className = 'admin-toasts';
         document.body.appendChild(container);
     }
     const icon = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' }[type] || 'fa-info-circle';
-    const el = document.createElement('div');
+    const el = document.createElement('section');
     el.className = `admin-toast ${type}`;
     el.innerHTML = `<i class="fas ${icon}"></i><span>${msg}</span>`;
     container.appendChild(el);
@@ -221,20 +221,21 @@ if (formNotif) {
                 if (empty) empty.remove();
                 const tipoBadge = fd.tipo === 'alerta' ? 'badge-warning' : fd.tipo === 'promocao' ? 'badge-gold' : 'badge-info';
                 const destLabel = fd.destinatarios === 'todos' ? 'Todos' : 'Plano específico';
-                const div = document.createElement('div');
-                div.style.cssText = 'padding:14px 16px;border-bottom:1px solid var(--border);animation:fadeIn .3s ease';
-                div.innerHTML = `
-                    <div class="flex-between">
+                // historyEntry: distinct notification record in the history list
+                const historyEntry = document.createElement('section');
+                historyEntry.style.cssText = 'padding:14px 16px;border-bottom:1px solid var(--border);animation:fadeIn .3s ease';
+                historyEntry.innerHTML = `
+                    <section class="flex-between">
                         <span class="fw-600" style="font-size:.875rem">${escHtml(fd.titulo)}</span>
                         <span class="badge ${tipoBadge}">${escHtml(fd.tipo)}</span>
-                    </div>
-                    <div class="text-muted" style="font-size:.8rem;margin-top:4px">${escHtml(fd.mensagem)}</div>
-                    <div class="text-muted" style="font-size:.72rem;margin-top:6px">
+                    </section>
+                    <section class="text-muted" style="font-size:.8rem;margin-top:4px">${escHtml(fd.mensagem)}</section>
+                    <section class="text-muted" style="font-size:.72rem;margin-top:6px">
                         <i class="fas fa-users"></i> ${destLabel} •
                         <i class="fas fa-clock"></i> ${new Date().toLocaleDateString('pt-BR')} •
                         <i class="fas fa-eye"></i> 0 leituras
-                    </div>`;
-                hist.insertBefore(div, hist.firstChild);
+                    </section>`;
+                hist.insertBefore(historyEntry, hist.firstChild);
             }
         } catch (err) { toast(err.message, 'error'); }
     });

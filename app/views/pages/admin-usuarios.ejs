@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,24 +11,24 @@
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
-<div class="admin-wrapper">
+<section class="admin-wrapper">
     <%- include('../partials/admin-sidebar') %>
-    <div class="admin-content">
+    <section class="admin-content">
         <%- include('../partials/admin-topbar') %>
         <main class="admin-main">
-            <div class="flex-between mb-16">
-                <div>
+            <section class="flex-between mb-16">
+                <section>
                     <h1 class="admin-page-title">Usuários</h1>
                     <p class="admin-page-subtitle"><%= total %> usuários encontrados</p>
-                </div>
-            </div>
+                </section>
+            </section>
 
             <!-- Filtros -->
             <form method="GET" action="/admin/usuarios" class="admin-toolbar">
-                <div class="admin-search">
+                <section class="admin-search">
                     <i class="fas fa-search"></i>
                     <input type="text" name="busca" value="<%= busca %>" placeholder="Buscar por nome ou CPF">
-                </div>
+                </section>
                 <select name="plano" class="admin-select">
                     <option value="">Todos os planos</option>
                     <% planos.forEach(p => { %>
@@ -46,9 +46,9 @@
                 <% } %>
             </form>
 
-            <div class="admin-card">
-                <div class="admin-card-body no-pad">
-                    <div class="admin-table-wrap">
+            <section class="admin-card">
+                <section class="admin-card-body no-pad">
+                    <section class="admin-table-wrap">
                         <table class="admin-table">
                             <thead>
                                 <tr>
@@ -78,32 +78,32 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <div class="flex gap-10">
+                                    <section class="flex gap-10">
                                         <a href="/admin/usuarios/<%= u.id %>" class="btn btn-outline btn-sm btn-icon" title="Ver perfil"><i class="fas fa-eye"></i></a>
                                         <button class="btn btn-danger btn-sm btn-icon" data-toggle-user="<%= u.id %>" title="<%= u.status==='ativo' ? 'Desativar' : 'Ativar' %>">
                                             <i class="fas <%= u.status==='ativo' ? 'fa-ban' : 'fa-check' %>"></i>
                                         </button>
-                                    </div>
+                                    </section>
                                 </td>
                             </tr>
                             <% }) %>
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
+                    </section>
+                </section>
+            </section>
 
             <!-- Paginação -->
             <% if (pages > 1) { %>
-            <div class="admin-pagination">
+            <section class="admin-pagination">
                 <% for (let i = 1; i <= pages; i++) { %>
                 <a href="/admin/usuarios?busca=<%= busca %>&plano=<%= plano %>&status=<%= status %>&page=<%= i %>" class="<%= i===currentPage ? 'active' : '' %>"><%= i %></a>
                 <% } %>
-            </div>
+            </section>
             <% } %>
         </main>
-    </div>
-</div>
+    </section>
+</section>
 <script src="/js/admin.js"></script>
 </body>
 </html>

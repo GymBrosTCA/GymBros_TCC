@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,51 +11,51 @@
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
-<div class="admin-wrapper">
+<section class="admin-wrapper">
     <%- include('../partials/admin-sidebar') %>
-    <div class="admin-content">
+    <section class="admin-content">
         <%- include('../partials/admin-topbar') %>
         <main class="admin-main">
-            <div class="flex-between mb-16">
-                <div>
+            <section class="flex-between mb-16">
+                <section>
                     <h1 class="admin-page-title">Planos</h1>
                     <p class="admin-page-subtitle">Gerencie os planos disponíveis na plataforma</p>
-                </div>
+                </section>
                 <button class="btn btn-gold" data-modal-open="modal-plano">
                     <i class="fas fa-plus"></i> Novo Plano
                 </button>
-            </div>
+            </section>
 
-            <div class="admin-3col">
+            <section class="admin-3col">
             <% planos.forEach(p => { %>
-            <div class="admin-card">
-                <div class="admin-card-header">
+            <section class="admin-card">
+                <section class="admin-card-header">
                     <span class="admin-card-title"><%= p.nome %></span>
                     <span class="badge <%= p.status==='ativo'?'badge-success':'badge-muted' %>"><%= p.status %></span>
-                </div>
-                <div class="admin-card-body">
-                    <div style="font-size:1.8rem;font-weight:700;color:var(--gold);margin-bottom:4px">
+                </section>
+                <section class="admin-card-body">
+                    <section style="font-size:1.8rem;font-weight:700;color:var(--gold);margin-bottom:4px">
                         R$ <%= p.preco.toFixed(2) %><span style="font-size:0.85rem;color:var(--text-muted)">/<%= p.duracao %></span>
-                    </div>
-                    <div class="text-muted" style="font-size:.8rem;margin-bottom:12px"><%= p.descricao %></div>
+                    </section>
+                    <section class="text-muted" style="font-size:.8rem;margin-bottom:12px"><%= p.descricao %></section>
                     <ul style="list-style:none;margin-bottom:16px">
                     <% (p.beneficios||[]).forEach(b => { %>
                         <li style="font-size:.8rem;padding:3px 0;color:var(--text-muted)"><i class="fas fa-check text-success" style="width:14px;margin-right:6px"></i><%= b %></li>
                     <% }) %>
                     </ul>
-                    <div class="flex-between" style="font-size:.82rem">
+                    <section class="flex-between" style="font-size:.82rem">
                         <span class="text-muted">Assinantes</span>
                         <span class="badge badge-gold"><%= p.totalAssinantes %></span>
-                    </div>
-                </div>
-            </div>
+                    </section>
+                </section>
+            </section>
             <% }) %>
-            </div>
+            </section>
 
             <!-- Tabela completa -->
-            <div class="admin-card mt-16" style="margin-top:20px">
-                <div class="admin-card-header"><span class="admin-card-title">Resumo dos Planos</span></div>
-                <div class="admin-card-body no-pad">
+            <section class="admin-card mt-16" style="margin-top:20px">
+                <section class="admin-card-header"><span class="admin-card-title">Resumo dos Planos</span></section>
+                <section class="admin-card-body no-pad">
                     <table class="admin-table">
                         <thead><tr><th>Plano</th><th>Preço</th><th>Duração</th><th>Assinantes</th><th>Receita Mensal</th><th>Status</th></tr></thead>
                         <tbody>
@@ -71,53 +71,53 @@
                         <% }) %>
                         </tbody>
                     </table>
-                </div>
-            </div>
+                </section>
+            </section>
         </main>
-    </div>
-</div>
+    </section>
+</section>
 
 <!-- Modal Novo Plano -->
-<div class="admin-modal-backdrop" id="modal-plano">
-    <div class="admin-modal">
-        <div class="admin-modal-header">
+<section class="admin-modal-backdrop" id="modal-plano">
+    <section class="admin-modal">
+        <section class="admin-modal-header">
             <span class="admin-modal-title"><i class="fas fa-tags text-gold"></i> Novo Plano</span>
             <button class="admin-modal-close" data-modal-close="modal-plano"><i class="fas fa-times"></i></button>
-        </div>
+        </section>
         <form id="form-plano">
-            <div class="admin-2col">
-                <div class="admin-form-group">
+            <section class="admin-2col">
+                <section class="admin-form-group">
                     <label>Nome *</label>
                     <input type="text" name="nome" class="admin-input" required placeholder="Black Premium">
-                </div>
-                <div class="admin-form-group">
+                </section>
+                <section class="admin-form-group">
                     <label>Preço (R$) *</label>
                     <input type="number" name="preco" class="admin-input" required step="0.01" placeholder="0.00">
-                </div>
-            </div>
-            <div class="admin-form-group">
+                </section>
+            </section>
+            <section class="admin-form-group">
                 <label>Descrição</label>
                 <input type="text" name="descricao" class="admin-input" placeholder="Breve descrição do plano">
-            </div>
-            <div class="admin-form-group">
+            </section>
+            <section class="admin-form-group">
                 <label>Duração</label>
                 <select name="duracao" class="admin-input">
                     <option value="mensal">Mensal</option>
                     <option value="trimestral">Trimestral</option>
                     <option value="anual">Anual</option>
                 </select>
-            </div>
-            <div class="admin-form-group">
+            </section>
+            <section class="admin-form-group">
                 <label>Benefícios (um por linha)</label>
                 <textarea name="beneficios" class="admin-textarea" placeholder="5000+ academias&#10;Personal trainer&#10;Área VIP"></textarea>
-            </div>
-            <div class="admin-modal-footer">
+            </section>
+            <section class="admin-modal-footer">
                 <button type="button" class="btn btn-outline" data-modal-close="modal-plano">Cancelar</button>
                 <button type="submit" class="btn btn-gold"><i class="fas fa-save"></i> Criar Plano</button>
-            </div>
+            </section>
         </form>
-    </div>
-</div>
+    </section>
+</section>
 
 <script src="/js/admin.js"></script>
 </body>

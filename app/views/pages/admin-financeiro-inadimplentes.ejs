@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,24 +11,24 @@
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
-<div class="admin-wrapper">
+<section class="admin-wrapper">
     <%- include('../partials/admin-sidebar') %>
-    <div class="admin-content">
+    <section class="admin-content">
         <%- include('../partials/admin-topbar') %>
         <main class="admin-main">
             <h1 class="admin-page-title">Inadimplentes</h1>
-            <div class="flex gap-10 mb-16" style="margin-bottom:16px">
+            <section class="flex gap-10 mb-16" style="margin-bottom:16px">
                 <a href="/admin/financeiro" class="btn btn-outline btn-sm">Visão Geral</a>
                 <a href="/admin/financeiro/receitas" class="btn btn-outline btn-sm">Receitas</a>
                 <a href="/admin/financeiro/inadimplentes" class="btn btn-gold btn-sm">Inadimplentes</a>
-            </div>
+            </section>
 
             <% if (lista.length === 0) { %>
-            <div class="admin-card"><div class="admin-empty"><i class="fas fa-check-circle" style="color:var(--success);opacity:1"></i>Nenhum inadimplente no momento!</div></div>
+            <section class="admin-card"><section class="admin-empty"><i class="fas fa-check-circle" style="color:var(--success);opacity:1"></i>Nenhum inadimplente no momento!</section></section>
             <% } else { %>
-            <div class="admin-card">
-                <div class="admin-card-body no-pad">
-                    <div class="admin-table-wrap">
+            <section class="admin-card">
+                <section class="admin-card-body no-pad">
+                    <section class="admin-table-wrap">
                         <table class="admin-table">
                             <thead><tr><th>Usuário</th><th>Plano</th><th>Valor</th><th>Dias em Atraso</th><th>Ação</th></tr></thead>
                             <tbody>
@@ -36,7 +36,7 @@
                             <tr>
                                 <td>
                                     <% if (t.user) { %><a href="/admin/usuarios/<%= t.user.id %>" class="fw-600"><%= t.userName %></a><% } else { %><span class="fw-600"><%= t.userName %></span><% } %>
-                                    <div class="text-muted" style="font-size:.75rem"><%= t.userEmail || '' %></div>
+                                    <section class="text-muted" style="font-size:.75rem"><%= t.userEmail || '' %></section>
                                 </td>
                                 <td><span class="badge badge-gold"><%= t.planoNome %></span></td>
                                 <td class="fw-600">R$ <%= t.valor.toFixed(2) %></td>
@@ -54,13 +54,13 @@
                             <% }) %>
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
+                    </section>
+                </section>
+            </section>
             <% } %>
         </main>
-    </div>
-</div>
+    </section>
+</section>
 <script src="/js/admin.js"></script>
 </body>
 </html>

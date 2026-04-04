@@ -113,9 +113,9 @@
     sse.addEventListener('admin_notification', function(e) {
         const d = JSON.parse(e.data);
         const icons = { alerta:'⚠️', promocao:'🎁', informativo:'📢' };
-        const t = document.createElement('div');
+        const t = document.createElement('section');
         t.className = 'gymbros-toast';
-        t.innerHTML = `<div class="gymbros-toast-title">${icons[d.tipo]||'🔔'} ${escHtmlToast(d.titulo)}</div><div class="gymbros-toast-body">${escHtmlToast(d.mensagem)}</div>`;
+        t.innerHTML = `<section class="gymbros-toast-title">${icons[d.tipo]||'🔔'} ${escHtmlToast(d.titulo)}</section><section class="gymbros-toast-body">${escHtmlToast(d.mensagem)}</section>`;
         t.addEventListener('click', () => t.remove());
         document.body.appendChild(t);
         setTimeout(() => { if(t.parentNode) { t.style.animation='toastOut .25s ease forwards'; setTimeout(()=>t.remove(),260); } }, 7000);

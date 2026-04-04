@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
@@ -56,7 +56,7 @@
 
         <!-- MAPA -->
         <section class="acad-map-wrap">
-            <div id="map"></div>
+            <section id="map"></section>
         </section>
 
         <!-- RESULTADOS OVERPASS -->
@@ -193,14 +193,14 @@
 
     // Ícone personalizado para academias
     const gymIcon = L.divIcon({
-        html: '<div class="gym-marker"><i class="fas fa-dumbbell"></i></div>',
+        html: '<section class="gym-marker"><i class="fas fa-dumbbell"></i></section>',
         className: '',
         iconSize: [36, 36],
         iconAnchor: [18, 18]
     });
 
     const userIcon = L.divIcon({
-        html: '<div class="user-marker"><i class="fas fa-user"></i></div>',
+        html: '<section class="user-marker"><i class="fas fa-user"></i></section>',
         className: '',
         iconSize: [36, 36],
         iconAnchor: [18, 18]
