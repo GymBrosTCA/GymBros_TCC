@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receitas — GymBros Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+<div class="admin-wrapper">
+    <%- include('../partials/admin-sidebar') %>
+    <div class="admin-content">
+        <%- include('../partials/admin-topbar') %>
+        <main class="admin-main">
+            <h1 class="admin-page-title">Receitas</h1>
+            <div class="flex gap-10 mb-16" style="margin-bottom:16px">
+                <a href="/admin/financeiro" class="btn btn-outline btn-sm">Visão Geral</a>
+                <a href="/admin/financeiro/receitas" class="btn btn-gold btn-sm">Receitas</a>
+                <a href="/admin/financeiro/inadimplentes" class="btn btn-outline btn-sm">Inadimplentes</a>
+            </div>
+
+            <form method="GET" action="/admin/financeiro/receitas" class="admin-toolbar">
+                <select name="status" class="admin-select">
+                    <option value="">Todos os status</option>
+                    <option value="pago"      <%= status==='pago'      ?'selected':'' %>>Pago</option>
+                    <option value="pendente"  <%= status==='pendente'  ?'selected':'' %>>Pendente</option>
+                    <option value="cancelado" <%= status==='cancelado' ?'selected':'' %>>Cancelado</option>
+                </select>
+                <button type="submit" class="btn btn-gold"><i class="fas fa-filter"></i> Filtrar</button>
+                <span class="text-muted" style="margin-left:auto;font-size:.82rem"><%= total %> transações</span>
+            </form>
+
+            <div class="admin-card">
+                <div class="admin-card-body no-pad">
+                    <div class="admin-table-wrap">
+                        <table class="admin-table">
+                            <thead><tr><th>Usuário</th><th>Plano</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
+                            <tbody>
+                            <% items.forEach(t => { %>
+                            <tr>
+                                <td class="fw-600"><%= t.userName %></td>
+                                <td><span class="badge badge-gold"><%= t.planoNome %></span></td>
+                                <td class="fw-600">R$ <%= t.valor.toFixed(2) %></td>
+                                <td class="text-muted"><%= t.data.toLocaleDateString('pt-BR') %></td>
+                                <td>
+                                    <span class="badge <%= t.status==='pago'?'badge-success':t.status==='pendente'?'badge-warning':'badge-error' %>"><%= t.status %></span>
+                                </td>
+                            </tr>
+                            <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <% if (pages > 1) { %>
+            <div class="admin-pagination">
+                <% for (let i = 1; i <= pages; i++) { %>
+                <a href="/admin/financeiro/receitas?status=<%= status %>&page=<%= i %>" class="<%= i===currentPage?'active':'' %>"><%= i %></a>
+                <% } %>
+            </div>
+            <% } %>
+        </main>
+    </div>
+</div>
+<script src="/js/admin.js"></script>
+</body>
+</html>

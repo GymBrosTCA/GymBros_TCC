@@ -36,6 +36,15 @@ app.use('/ai', rotasAI);
 const rotasAPI = require('./app/routes/api');
 app.use('/api', rotasAPI);
 
+const rotasAdmin = require('./app/routes/admin');
+app.use('/admin', rotasAdmin);
+
+const rotasAdminAPI = require('./app/routes/admin-api');
+app.use('/api/admin', rotasAdminAPI);
+
+const rotasSuporte = require('./app/routes/suporte');
+app.use('/api/suporte', rotasSuporte);
+
 app.listen(port, () => {
   console.log(`Servidor ouvindo na porta ${port}\nhttp://localhost:${port}`);
 });
