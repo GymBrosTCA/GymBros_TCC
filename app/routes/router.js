@@ -31,8 +31,15 @@ const photoUpload = multer({
 });
 
 // Store central compartilhado com admin
-const { usuarios, onlineUsers } = require('../data');
+const { usuarios, onlineUsers, transacoes, nextId } = require('../data');
 const { broadcast } = require('../events');
+
+// ── Dados dos planos disponíveis ──────────────────────────────────────────
+const PLANOS_PAGAMENTO = {
+    starter: { id: 'pl001', nome: 'Starter', preco: 64.90, precoFmt: 'R$ 64,90', beneficios: ['2300+ academias e estúdios', 'Treinos online e presenciais', 'App GymBros', 'Suporte 24h'] },
+    gymbro:  { id: 'pl002', nome: 'GymBro',  preco: 85.60, precoFmt: 'R$ 85,60', beneficios: ['3560+ academias e estúdios', 'Treinos online ao vivo', 'Leve 4 amigos por mês', 'Personal trainer online'] },
+    black:   { id: 'pl003', nome: 'Black',   preco: 145.90, precoFmt: 'R$ 145,90', beneficios: ['5000+ academias e estúdios', 'Treinos online ao vivo', 'Leve amigos ilimitado', 'Personal trainer exclusivo', 'Área VIP e benefícios premium'] },
+};
 
 // ── Middleware: rastreia usuários online ──────────────────────────────────────
 router.use((req, res, next) => {
@@ -152,6 +159,62 @@ router.get('/compra3', (req, res) => res.render('pages/compra3', { seo: {
     ogTitle:       'Bem-vindo ao GymBros!',
     ogDescription: 'Assinatura confirmada. Comece a treinar agora mesmo!',
 }}));
+
+
+// Pagamento
+router.get('/pagamento', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+    const slug = (req.query.plano || 'gymbro').toLowerCase();
+    const plano = PLANOS_PAGAMENTO[slug] || PLANOS_PAGAMENTO.gymbro;
+    res.render('pages/pagamento', {
+        user: req.session.user,
+        plano,
+        seo: {
+            title:       'Pagamento — GymBros',
+            canonical:   '/pagamento',
+            robots:      'noindex, nofollow',
+            description: 'Finalize sua assinatura GymBros com segurança.',
+        }
+    });
+});
+
+router.post('/api/pagamento', (req, res) => {
+    if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
+
+    const { planoId, planoNome, valor, metodo, parcelas } = req.body;
+    const user = req.session.user;
+
+    // Cartão = ativo imediatamente; PIX e boleto = pendente até confirmação
+    const status = metodo === 'cartao' ? 'pago' : 'pendente';
+
+    const transacao = {
+        id:         nextId('tr'),
+        userId:     user.id || user.cpf,
+        userName:   user.nome,
+        userEmail:  user.email,
+        planoId:    planoId,
+        planoNome:  planoNome,
+        valor:      Number(valor),
+        metodo,
+        parcelas:   Number(parcelas) || 1,
+        data:       new Date(),
+        status,
+        diasAtraso: 0,
+    };
+
+    transacoes.push(transacao);
+
+    // Atualiza o plano do usuário na sessão e no store
+    const stored = usuarios.find(u => u.id === user.id || u.cpf === user.cpf);
+    if (stored) {
+        stored.plano   = planoNome;
+        stored.planoId = planoId;
+        stored.status  = 'ativo';
+    }
+    req.session.user = { ...user, plano: planoNome, planoId, status: 'ativo' };
+
+    return res.json({ ok: true, status, transacaoId: transacao.id });
+});
 
 router.get('/about', (req, res) => res.render('pages/about', { seo: {
     title:         'Sobre o GymBros — Nossa Missão e Equipe',
