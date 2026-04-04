@@ -48,9 +48,9 @@ function seedAcademias() {
 // ── SEED Planos ───────────────────────────────────────────────────────────────
 function seedPlanos() {
     planos.push(
-        { id: 'pl001', nome: 'Starter', descricao: 'Para quem está começando na vida fitness.',  preco: 119.90, duracao: 'mensal', beneficios: ['2300+ academias e estúdios', 'Treinos online e presenciais', 'App GymBros', 'Suporte 24h'],                                                               status: 'ativo', createdAt: daysAgo(365) },
-        { id: 'pl002', nome: 'GymBro',  descricao: 'O plano mais popular do GymBros.',           preco: 219.90, duracao: 'mensal', beneficios: ['3560+ academias e estúdios', 'Treinos online ao vivo', 'Leve 4 amigos por mês', 'Personal trainer online', 'Acesso a estúdios premium'],                status: 'ativo', createdAt: daysAgo(365) },
-        { id: 'pl003', nome: 'Black',   descricao: 'Acesso total, sem limites.',                  preco: 389.90, duracao: 'mensal', beneficios: ['5000+ academias e estúdios', 'Treinos online ao vivo', 'Leve amigos ilimitado', 'Personal trainer exclusivo', 'Área VIP', 'Benefícios premium'], status: 'ativo', createdAt: daysAgo(365) }
+        { id: 'pl001', nome: 'Starter', descricao: 'Para quem está começando na vida fitness.',  preco: 64.90,  duracao: 'mensal', beneficios: ['2300+ academias e estúdios', 'Treinos online e presenciais', 'App GymBros', 'Suporte 24h'],                                                               status: 'ativo', createdAt: daysAgo(365) },
+        { id: 'pl002', nome: 'GymBro',  descricao: 'O plano mais popular do GymBros.',           preco: 85.60,  duracao: 'mensal', beneficios: ['3560+ academias e estúdios', 'Treinos online ao vivo', 'Leve 4 amigos por mês', 'Personal trainer online', 'Acesso a estúdios premium'],                status: 'ativo', createdAt: daysAgo(365) },
+        { id: 'pl003', nome: 'Black',   descricao: 'Acesso total, sem limites.',                  preco: 145.90, duracao: 'mensal', beneficios: ['5000+ academias e estúdios', 'Treinos online ao vivo', 'Leve amigos ilimitado', 'Personal trainer exclusivo', 'Área VIP', 'Benefícios premium'], status: 'ativo', createdAt: daysAgo(365) }
     );
 }
 
@@ -67,15 +67,34 @@ function seedUsuarios() {
         ['Fernanda','Nunes'],         ['Rodrigo','Castro'],          ['Priscila','Gomes'],
         ['André','Freitas'],          ['Tatiane','Pinto'],           ['Marcelo','Dias'],
         ['Bianca','Cunha'],           ['Gustavo','Ramos'],           ['Vanessa','Monteiro'],
+        ['Leonardo','Cardoso'],       ['Patrícia','Souza'],          ['Henrique','Almeida'],
+        ['Renata','Farias'],          ['Caio','Braga'],              ['Monique','Correia'],
+        ['Fábio','Queiroz'],          ['Letícia','Pires'],           ['Danilo','Medeiros'],
+        ['Aline','Cavalcante'],       ['Sérgio','Rezende'],          ['Cristina','Nogueira'],
+        ['Eduardo','Bastos'],         ['Sabrina','Matos'],           ['Alexandre','Vieira'],
+        ['Nathalia','Teixeira'],      ['Ricardo','Andrade'],         ['Giovanna','Macedo'],
+        ['Marcos','Duarte'],          ['Érika','Campos'],            ['Wellington','Rocha'],
+        ['Luana','Figueiredo'],       ['Leandro','Carmo'],           ['Simone','Borges'],
+        ['Otávio','Cunha'],           ['Débora','Monteiro'],         ['Cláudio','Silveira'],
+        ['Bruna','Paiva'],            ['Fábio','Guimarães'],         ['Rebeca','Moura'],
+        ['Nathan','Dias'],            ['Larissa','Coutinho'],        ['Vitor','Bezerra'],
+        ['Mariana','Tavares'],        ['Arthur','Leal'],             ['Isabelle','Menezes'],
+        ['Thales','Barros'],          ['Camile','Pinheiro'],         ['Adriano','Saraiva'],
+        ['Érica','Neves'],            ['Murilo','Lacerda'],          ['Tamiris','Drummond'],
+        ['Celso','Fonseca'],          ['Jéssica','Xavier'],          ['Patrick','Lemos'],
+        ['Raquel','Azevedo'],         ['Caique','Siqueira'],         ['Ingrid','Brito'],
+        ['Diogo','Vasconcelos'],      ['Thaís','Coelho'],            ['Evandro','Pedroso'],
     ];
-    const planosIds  = ['pl001', 'pl002', 'pl003'];
+    const planosIds   = ['pl001', 'pl002', 'pl003'];
     const planosNomes = ['Starter', 'GymBro', 'Black'];
-    const precos     = [119.90, 219.90, 389.90];
-    const acadIds    = academias.map(a => a.id);
+    const precos      = [64.90, 85.60, 145.90];
+    // Distribuição: 25% Starter, 45% GymBro, 30% Black (mais receita)
+    const planoDistrib = (i) => i % 20 < 5 ? 0 : i % 20 < 14 ? 1 : 2;
+    const acadIds     = academias.map(a => a.id);
 
     nomes.forEach(([nome, sobrenome], i) => {
-        const planoIdx = i % 3;
-        const diasCadastrado = randomBetween(5, 365);
+        const planoIdx = planoDistrib(i);
+        const diasCadastrado = randomBetween(30, 365);
         const user = {
             id: `u${String(i+1).padStart(3,'0')}`,
             nome: `${nome} ${sobrenome}`,
@@ -86,9 +105,9 @@ function seedUsuarios() {
             plano: planosNomes[planoIdx],
             planoId: planosIds[planoIdx],
             academiaId: acadIds[i % acadIds.length],
-            status: i < 27 ? 'ativo' : 'inativo',
+            status: i < 75 ? 'ativo' : 'inativo',
             createdAt: daysAgo(diasCadastrado),
-            imc: i < 18 ? {
+            imc: i < 40 ? {
                 peso: randomBetween(55, 100),
                 altura: (1.58 + Math.random() * 0.32).toFixed(2),
                 objetivo: ['Perder peso','Ganhar massa','Manter forma','Saúde geral'][i % 4],
@@ -97,11 +116,11 @@ function seedUsuarios() {
         };
         usuarios.push(user);
 
-        // Até 6 meses de transações recorrentes
-        const mesesAtras = Math.min(6, Math.ceil(diasCadastrado / 30));
+        // Até 12 meses de transações recorrentes
+        const mesesAtras = Math.min(12, Math.ceil(diasCadastrado / 30));
         for (let m = 0; m < mesesAtras; m++) {
-            const statusTr = (i < 25 && m === 0) ? 'pago'
-                           : (i >= 25 && m === 0) ? 'pendente'
+            const statusTr = (i < 72 && m === 0) ? 'pago'
+                           : (i >= 72 && m === 0) ? 'pendente'
                            : 'pago';
             const dataTransacao = monthsAgo(m);
             dataTransacao.setDate(randomBetween(1, 28));
