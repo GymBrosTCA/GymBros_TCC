@@ -35,7 +35,7 @@
                 </section>
                 <section class="admin-card-body">
                     <section style="font-size:1.8rem;font-weight:700;color:var(--gold);margin-bottom:4px">
-                        R$ <%= p.preco.toFixed(2) %><span style="font-size:0.85rem;color:var(--text-muted)">/<%= p.duracao %></span>
+                        <%= p.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %><span style="font-size:0.85rem;color:var(--text-muted)">/<%= p.duracao %></span>
                     </section>
                     <section class="text-muted" style="font-size:.8rem;margin-bottom:12px"><%= p.descricao %></section>
                     <ul style="list-style:none;margin-bottom:16px">
@@ -62,10 +62,10 @@
                         <% planos.forEach(p => { %>
                         <tr>
                             <td class="fw-600"><%= p.nome %></td>
-                            <td>R$ <%= p.preco.toFixed(2) %></td>
+                            <td><%= p.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></td>
                             <td class="text-muted"><%= p.duracao %></td>
                             <td><span class="badge badge-muted"><%= p.totalAssinantes %></span></td>
-                            <td class="fw-600 text-gold">R$ <%= (p.preco * p.totalAssinantes).toFixed(2) %></td>
+                            <td class="fw-600 text-gold"><%= (p.preco * p.totalAssinantes).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></td>
                             <td><span class="badge <%= p.status==='ativo'?'badge-success':'badge-muted' %>"><%= p.status %></span></td>
                         </tr>
                         <% }) %>

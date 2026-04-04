@@ -9,6 +9,8 @@
 <link rel="stylesheet" href="/css/header.css">
 <link rel="stylesheet" href="/css/footer.css">
 <link rel="stylesheet" href="/css/area-aluno.css">
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 </head>
 <body>
 
@@ -20,7 +22,7 @@
     <section class="aluno-sidebar">
         <section class="aluno-profile">
             <section class="avatar">
-                <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
+                <img src="/images/avatar.png" alt="Avatar do Aluno">
             </section>
             <h2><%= user.nome %></h2>
             <p data-translate="sidebar.role">Aluno GymBros</p>
@@ -29,12 +31,12 @@
             <li><a href="/area-aluno" data-translate="sidebar.painel"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
             <li><a href="/treinos" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
             <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
-            <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/meu-plano" class="active" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
             <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
             <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
             <li><a href="/imc-form" data-translate="sidebar.imc"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
-            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+            <li><a href="/suporte"><i class="fas fa-headset"></i> Suporte</a></li>
         </ul>
     </section>
 
@@ -42,56 +44,117 @@
     <section class="aluno-main">
 
         <section class="dashboard-top">
-            <h1>Meu Plano Atual</h1>
-            <p>Confira informações do seu plano, tempo restante e opções de upgrade ou cancelamento.</p>
+            <h1>Meu Plano</h1>
+            <p>Gerencie sua assinatura, veja benefícios e compare com outros planos.</p>
         </section>
 
-        <section class="cards-container">
-    <!-- PLANO ATUAL -->
-        <section class="card card-gymbro">
-            <h3><%= planoAtual.nome %></h3>
-            <% planoAtual.descricao.forEach(info => { %>
-                <p><%= info %></p>
-            <% }) %>
-            <p class="card-price"><%= planoAtual.preco %></p>
+        <!-- PLANO ATUAL -->
+        <section class="plano-atual-card">
 
-                <section class="progress-bar">
-                    <section class="progress-fill" style="width: <%= planoAtual.progresso %>%;"></section>
+            <section class="plano-atual-top">
+                <section>
+                    <section class="plano-atual-nome">
+                        <i class="fas fa-crown"></i> <%= planoAtual.nome %>
+                    </section>
+                    <section class="plano-atual-desc"><%= planoAtual.descricao %></section>
                 </section>
-                <p class="time-left">Tempo restante: <%= planoAtual.tempoRestanteDias %> dias</p>
-        
-                <section class="plan-actions">
-                    <a href="/planos" class="btn-card btn-cancel">Cancelar Plano</a>
-                    <a href="/compra3" class="btn-card btn-upgrade">Upar de Plano</a>
+                <section>
+                    <section class="plano-atual-preco">
+                        <%= planoAtual.preco %>
+                        <small>/<%= planoAtual.periodo %></small>
+                    </section>
+                    <span class="plano-atual-badge">
+                        <i class="fas fa-check-circle"></i> Plano ativo
+                    </span>
                 </section>
             </section>
-        </section>
-        
-        <!-- OUTROS PLANOS -->
-        <section class="other-plans">
-            <h2>Outros Planos</h2>
-            <section class="cards-container">
-                <% outrosPlanos.forEach(plano => { %>
-                    <section class="card 
-                        <% if(plano.nome === 'STARTER'){ %>card-starter<% } %>
-                        <% if(plano.nome === 'BLACK'){ %>card-black<% } %>">
-                        <h3><%= plano.nome %></h3>
-                        <% plano.descricao.forEach(info => { %>
-                            <p><%= info %></p>
-                        <% }) %>
-                        <p class="card-price"><%= plano.preco %></p>
-                        <a href="/planos" class="btn-card btn-upgrade">Assinar</a>
-                    </section>
+
+            <!-- Benefícios -->
+            <section class="plano-beneficios">
+                <% (planoAtual.beneficios || []).forEach(b => { %>
+                <section class="plano-beneficio-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span><%= b %></span>
+                </section>
                 <% }) %>
             </section>
+
+            <!-- Barra de renovação -->
+            <section class="plano-renew">
+                <section class="plano-renew-labels">
+                    <span><i class="fas fa-calendar-alt"></i> Renovação em <%= planoAtual.renovacao %></span>
+                    <span><%= planoAtual.tempoRestanteDias %> dias restantes</span>
+                </section>
+                <section class="plano-renew-bar">
+                    <section class="plano-renew-fill" id="renew-fill"></section>
+                </section>
+                <section class="plano-renew-note">Seu plano renova automaticamente na data acima.</section>
+            </section>
+
+            <!-- Ações -->
+            <section class="plano-acoes">
+                <a href="/planos" class="plano-btn plano-btn-cancelar">
+                    <i class="fas fa-times-circle"></i> Cancelar Plano
+                </a>
+                <a href="/planos" class="plano-btn plano-btn-upgrade">
+                    <i class="fas fa-rocket"></i> Fazer Upgrade
+                </a>
+            </section>
+
+        </section>
+
+        <!-- OUTROS PLANOS -->
+        <section class="outros-planos-titulo">
+            <i class="fas fa-exchange-alt"></i> Outros Planos Disponíveis
+        </section>
+
+        <section class="outros-planos-grid">
+            <% outrosPlanos.forEach(plano => { %>
+            <section class="plano-card <%= plano.destaque ? 'plano-card-destaque' : '' %>">
+
+                <% if (plano.destaque) { %>
+                <span class="plano-card-ribbon"><i class="fas fa-fire"></i> Mais completo</span>
+                <% } %>
+
+                <section class="plano-card-nome"><%= plano.nome %></section>
+                <section class="plano-card-desc"><%= plano.descricao %></section>
+
+                <section class="plano-card-preco">
+                    <%= plano.preco %>
+                    <small>/<%= plano.periodo %></small>
+                </section>
+
+                <ul class="plano-card-lista">
+                    <% (plano.beneficios || []).forEach(b => { %>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span><%= b %></span>
+                    </li>
+                    <% }) %>
+                </ul>
+
+                <a href="/planos" class="plano-card-btn">
+                    <i class="fas fa-arrow-right"></i> Assinar <%= plano.nome %>
+                </a>
+
+            </section>
+            <% }) %>
         </section>
 
     </section>
 </section>
 
 <%- include('../partials/footer') %>
-<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 <script src="/js/translate.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var fill = document.getElementById('renew-fill');
+    if (fill) {
+        requestAnimationFrame(function () {
+            fill.style.width = '<%= planoAtual.progresso %>%';
+        });
+    }
+});
+</script>
 </body>
 </html>

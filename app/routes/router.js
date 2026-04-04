@@ -225,37 +225,46 @@ router.get('/meu-plano', (req, res) => {
 
     const planoAtual = {
         nome: 'GYMBRO',
-        descricao: [
+        descricao: 'O plano mais popular do GymBros.',
+        beneficios: [
             '3560+ Academias e estúdios',
             'Treinos online ao vivo',
             'Leve 4 amigos por mês',
-            'Personal trainer online'
+            'Personal trainer online',
         ],
-        preco: 'R$ 85,60/mês',
+        preco: 'R$ 85,60',
+        periodo: 'mês',
+        renovacao: '05/05/2025',
         tempoRestanteDias: 21,
-        progresso: 70
+        progresso: 30,
     };
 
     const outrosPlanos = [
         {
             nome: 'STARTER',
-            descricao: [
+            descricao: 'Para quem está começando na vida fitness.',
+            beneficios: [
                 '2300+ Academias e estúdios',
-                'Treinos online e presenciais'
+                'Treinos online e presenciais',
             ],
-            preco: 'R$ 64,90/mês'
+            preco: 'R$ 64,90',
+            periodo: 'mês',
+            destaque: false,
         },
         {
             nome: 'BLACK',
-            descricao: [
+            descricao: 'Acesso total, sem limites.',
+            beneficios: [
                 'Acesso ilimitado em academias parceiras',
                 '+5000 Academias e estúdios',
                 'Treinos online e presenciais',
                 'Aulas exclusivas e personal trainer',
-                'Área VIP e benefícios premium'
+                'Área VIP e benefícios premium',
             ],
-            preco: 'R$ 145,90/mês'
-        }
+            preco: 'R$ 145,90',
+            periodo: 'mês',
+            destaque: true,
+        },
     ];
 
     res.render('pages/meu-plano', { user: req.session.user, planoAtual, outrosPlanos,
