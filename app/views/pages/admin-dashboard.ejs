@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,76 +11,76 @@
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
-<div class="admin-wrapper">
+<section class="admin-wrapper">
     <%- include('../partials/admin-sidebar') %>
-    <div class="admin-content">
+    <section class="admin-content">
         <%- include('../partials/admin-topbar') %>
         <main class="admin-main">
             <h1 class="admin-page-title">Dashboard</h1>
             <p class="admin-page-subtitle">Visão geral em tempo real do GymBros</p>
 
             <!-- KPIs -->
-            <div class="admin-kpi-grid">
-                <div class="admin-kpi">
-                    <div class="admin-kpi-icon"><i class="fas fa-users"></i></div>
-                    <div>
-                        <div class="admin-kpi-label">Total de Usuários</div>
-                        <div class="admin-kpi-value" id="kpi-usuarios"><%= totalUsuarios %></div>
-                        <div class="admin-kpi-sub">cadastrados na plataforma</div>
-                    </div>
-                </div>
-                <div class="admin-kpi">
-                    <div class="admin-kpi-icon success"><i class="fas fa-running"></i></div>
-                    <div>
-                        <div class="admin-kpi-label">Check-ins Hoje</div>
-                        <div class="admin-kpi-value" id="kpi-checkins"><%= ativosHoje %></div>
-                        <div class="admin-kpi-sub">entradas registradas</div>
-                    </div>
-                </div>
-                <div class="admin-kpi">
-                    <div class="admin-kpi-icon"><i class="fas fa-dollar-sign"></i></div>
-                    <div>
-                        <div class="admin-kpi-label">Receita do Mês</div>
-                        <div class="admin-kpi-value" id="kpi-receita">R$ <%= receitaMes %></div>
-                        <div class="admin-kpi-sub">transações pagas</div>
-                    </div>
-                </div>
-                <div class="admin-kpi">
-                    <div class="admin-kpi-icon error"><i class="fas fa-headset"></i></div>
-                    <div>
-                        <div class="admin-kpi-label">Tickets Abertos</div>
-                        <div class="admin-kpi-value" id="kpi-tickets"><%= ticketsAbertosN %></div>
-                        <div class="admin-kpi-sub">chamados pendentes</div>
-                    </div>
-                </div>
-            </div>
+            <section class="admin-kpi-grid">
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon"><i class="fas fa-users"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Total de Usuários</section>
+                        <section class="admin-kpi-value" id="kpi-usuarios"><%= totalUsuarios %></section>
+                        <section class="admin-kpi-sub">cadastrados na plataforma</section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon success"><i class="fas fa-running"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Check-ins Hoje</section>
+                        <section class="admin-kpi-value" id="kpi-checkins"><%= ativosHoje %></section>
+                        <section class="admin-kpi-sub">entradas registradas</section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon"><i class="fas fa-dollar-sign"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Receita do Mês</section>
+                        <section class="admin-kpi-value" id="kpi-receita">R$ <%= receitaMes %></section>
+                        <section class="admin-kpi-sub">transações pagas</section>
+                    </section>
+                </section>
+                <section class="admin-kpi">
+                    <section class="admin-kpi-icon error"><i class="fas fa-headset"></i></section>
+                    <section>
+                        <section class="admin-kpi-label">Tickets Abertos</section>
+                        <section class="admin-kpi-value" id="kpi-tickets"><%= ticketsAbertosN %></section>
+                        <section class="admin-kpi-sub">chamados pendentes</section>
+                    </section>
+                </section>
+            </section>
 
             <!-- Usuários online agora + Últimos cadastros -->
-            <div class="admin-2col" style="margin-bottom:24px">
+            <section class="admin-2col" style="margin-bottom:24px">
                 <!-- Online agora -->
-                <div class="admin-card">
-                    <div class="admin-card-header">
+                <section class="admin-card">
+                    <section class="admin-card-header">
                         <span class="admin-card-title">
                             <span class="online-dot" style="display:inline-block;margin-right:6px"></span>
                             Online Agora
                         </span>
                         <span class="badge badge-success" id="online-count-badge">0</span>
-                    </div>
-                    <div class="admin-card-body no-pad" id="online-list" style="max-height:280px;overflow-y:auto">
-                        <div class="admin-empty" style="padding:32px 20px">
+                    </section>
+                    <section class="admin-card-body no-pad" id="online-list" style="max-height:280px;overflow-y:auto">
+                        <section class="admin-empty" style="padding:32px 20px">
                             <i class="fas fa-satellite-dish" style="font-size:1.8rem;opacity:.2;display:block;margin-bottom:8px"></i>
                             Aguardando atividade...
-                        </div>
-                    </div>
-                </div>
+                        </section>
+                    </section>
+                </section>
 
                 <!-- Últimos cadastros -->
-                <div class="admin-card">
-                    <div class="admin-card-header">
+                <section class="admin-card">
+                    <section class="admin-card-header">
                         <span class="admin-card-title">Últimos Cadastros</span>
                         <a href="/admin/usuarios" class="btn btn-outline btn-sm">Ver todos</a>
-                    </div>
-                    <div class="admin-card-body no-pad">
+                    </section>
+                    <section class="admin-card-body no-pad">
                         <table class="admin-table" id="recent-users-table">
                             <thead><tr><th>Nome</th><th>Plano</th><th>Cadastro</th></tr></thead>
                             <tbody id="recent-users-body">
@@ -93,39 +93,39 @@
                             <% }) %>
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
+                    </section>
+                </section>
+            </section>
 
             <!-- Gráficos -->
-            <div class="admin-charts-grid">
-                <div class="admin-card">
-                    <div class="admin-card-header">
+            <section class="admin-charts-grid">
+                <section class="admin-card">
+                    <section class="admin-card-header">
                         <span class="admin-card-title"><i class="fas fa-chart-line text-gold"></i> Novos Cadastros — Últimos 30 dias</span>
-                    </div>
-                    <div class="admin-card-body">
-                        <div class="chart-wrap"><canvas id="chartCadastros"></canvas></div>
-                    </div>
-                </div>
-                <div class="admin-card">
-                    <div class="admin-card-header">
+                    </section>
+                    <section class="admin-card-body">
+                        <section class="chart-wrap"><canvas id="chartCadastros"></canvas></section>
+                    </section>
+                </section>
+                <section class="admin-card">
+                    <section class="admin-card-header">
                         <span class="admin-card-title"><i class="fas fa-chart-bar text-gold"></i> Check-ins por Dia</span>
-                    </div>
-                    <div class="admin-card-body">
-                        <div class="chart-wrap"><canvas id="chartCheckins"></canvas></div>
-                    </div>
-                </div>
-            </div>
+                    </section>
+                    <section class="admin-card-body">
+                        <section class="chart-wrap"><canvas id="chartCheckins"></canvas></section>
+                    </section>
+                </section>
+            </section>
 
             <!-- Tickets urgentes -->
-            <div class="admin-card" style="margin-top:24px">
-                <div class="admin-card-header">
+            <section class="admin-card" style="margin-top:24px">
+                <section class="admin-card-header">
                     <span class="admin-card-title"><i class="fas fa-exclamation-triangle text-warning"></i> Tickets Urgentes</span>
                     <a href="/admin/suporte" class="btn btn-outline btn-sm">Ver todos</a>
-                </div>
-                <div class="admin-card-body no-pad">
+                </section>
+                <section class="admin-card-body no-pad">
                     <% if (ticketsUrgentes.length === 0) { %>
-                    <div class="admin-empty" style="padding:24px"><i class="fas fa-check-circle" style="opacity:.5;color:var(--success);font-size:1.5rem;display:block;margin-bottom:8px"></i>Nenhum ticket urgente</div>
+                    <section class="admin-empty" style="padding:24px"><i class="fas fa-check-circle" style="opacity:.5;color:var(--success);font-size:1.5rem;display:block;margin-bottom:8px"></i>Nenhum ticket urgente</section>
                     <% } else { %>
                     <table class="admin-table">
                         <thead><tr><th>Usuário</th><th>Assunto</th><th>Há</th></tr></thead>
@@ -140,11 +140,11 @@
                         </tbody>
                     </table>
                     <% } %>
-                </div>
-            </div>
+                </section>
+            </section>
         </main>
-    </div>
-</div>
+    </section>
+</section>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="/js/admin.js"></script>
 <script>
@@ -200,18 +200,18 @@ function updateOnlineList(users) {
     if (badge) badge.textContent = users.length;
     if (!el) return;
     if (!users.length) {
-        el.innerHTML = '<div class="admin-empty" style="padding:32px 20px"><i class="fas fa-satellite-dish" style="font-size:1.8rem;opacity:.2;display:block;margin-bottom:8px"></i>Aguardando atividade...</div>';
+        el.innerHTML = '<section class="admin-empty" style="padding:32px 20px"><i class="fas fa-satellite-dish" style="font-size:1.8rem;opacity:.2;display:block;margin-bottom:8px"></i>Aguardando atividade...</section>';
         return;
     }
     el.innerHTML = users.map(u => `
-        <div class="online-user-row">
-            <div class="online-user-avatar">${u.nome.charAt(0).toUpperCase()}</div>
-            <div class="online-user-info">
-                <div class="fw-600" style="font-size:.82rem">${escHtml(u.nome)}</div>
-                <div class="text-muted" style="font-size:.7rem">${escHtml(u.page)}</div>
-            </div>
+        <section class="online-user-row">
+            <section class="online-user-avatar">${u.nome.charAt(0).toUpperCase()}</section>
+            <section class="online-user-info">
+                <section class="fw-600" style="font-size:.82rem">${escHtml(u.nome)}</section>
+                <section class="text-muted" style="font-size:.7rem">${escHtml(u.page)}</section>
+            </section>
             <span class="online-dot"></span>
-        </div>`).join('');
+        </section>`).join('');
 }
 
 function addOnlineUser(u) {
@@ -222,12 +222,13 @@ function addOnlineUser(u) {
     const empty = el.querySelector('.admin-empty');
     if (empty) empty.remove();
     if (badge) badge.textContent = parseInt(badge.textContent || '0') + 1;
-    const row = document.createElement('div');
-    row.className = 'online-user-row online-user-new';
-    row.dataset.uid = u.id;
-    row.innerHTML = `<div class="online-user-avatar">${u.nome.charAt(0).toUpperCase()}</div><div class="online-user-info"><div class="fw-600" style="font-size:.82rem">${escHtml(u.nome)}</div><div class="text-muted" style="font-size:.7rem">${escHtml(u.page)}</div></div><span class="online-dot"></span>`;
-    el.prepend(row);
-    setTimeout(() => row.classList.remove('online-user-new'), 600);
+    // userRow: self-contained online-user entry (avatar + name + current page)
+    const userRow = document.createElement('section');
+    userRow.className = 'online-user-row online-user-new';
+    userRow.dataset.uid = u.id;
+    userRow.innerHTML = `<section class="online-user-avatar">${u.nome.charAt(0).toUpperCase()}</section><section class="online-user-info"><section class="fw-600" style="font-size:.82rem">${escHtml(u.nome)}</section><section class="text-muted" style="font-size:.7rem">${escHtml(u.page)}</section></section><span class="online-dot"></span>`;
+    el.prepend(userRow);
+    setTimeout(() => userRow.classList.remove('online-user-new'), 600);
 }
 
 function updateUserActivity(u) {

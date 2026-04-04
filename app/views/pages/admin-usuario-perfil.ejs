@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,23 +11,23 @@
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
-<div class="admin-wrapper">
+<section class="admin-wrapper">
     <%- include('../partials/admin-sidebar') %>
-    <div class="admin-content">
+    <section class="admin-content">
         <%- include('../partials/admin-topbar') %>
         <main class="admin-main">
-            <div class="flex gap-10 mb-16">
+            <section class="flex gap-10 mb-16">
                 <a href="/admin/usuarios" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Usuários</a>
                 <h1 class="admin-page-title" style="margin:0"><%= user.nome %></h1>
-            </div>
+            </section>
 
-            <div class="admin-profile-grid">
+            <section class="admin-profile-grid">
                 <!-- Sidebar do perfil -->
-                <div>
-                    <div class="admin-profile-card">
-                        <div class="avatar"><i class="fas fa-user"></i></div>
+                <section>
+                    <section class="admin-profile-card">
+                        <section class="avatar"><i class="fas fa-user"></i></section>
                         <h2><%= user.nome %></h2>
-                        <div class="text-muted" style="font-size:.8rem"><%= user.email %></div>
+                        <section class="text-muted" style="font-size:.8rem"><%= user.email %></section>
                         <span class="badge badge-gold plan-badge"><%= user.plano || '—' %></span>
                         <span class="badge <%= user.status==='ativo'?'badge-success':'badge-muted' %> mt-4" style="display:inline-block"><%= user.status || 'ativo' %></span>
 
@@ -38,41 +38,41 @@
                             <li><span>Academia</span><span><%= (academias.find(a=>a.id===user.academiaId)||{}).nome || '—' %></span></li>
                         </ul>
 
-                        <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">
+                        <section style="display:flex;flex-direction:column;gap:8px;margin-top:16px">
                             <button class="btn btn-danger btn-sm" data-toggle-user="<%= user.id %>">
                                 <i class="fas <%= user.status==='ativo'?'fa-ban':'fa-check' %>"></i>
                                 <%= user.status==='ativo' ? 'Desativar conta' : 'Reativar conta' %>
                             </button>
-                        </div>
-                    </div>
+                        </section>
+                    </section>
 
                     <!-- IMC -->
                     <% if (user.imc) { %>
-                    <div class="admin-card mt-8" style="margin-top:16px">
-                        <div class="admin-card-header"><span class="admin-card-title"><i class="fas fa-weight text-gold"></i> Perfil IMC</span></div>
-                        <div class="admin-card-body">
+                    <section class="admin-card mt-8" style="margin-top:16px">
+                        <section class="admin-card-header"><span class="admin-card-title"><i class="fas fa-weight text-gold"></i> Perfil IMC</span></section>
+                        <section class="admin-card-body">
                             <ul class="admin-detail-list">
                                 <li><span>Peso</span><span><%= user.imc.peso %> kg</span></li>
                                 <li><span>Altura</span><span><%= user.imc.altura %> m</span></li>
                                 <li><span>Objetivo</span><span><%= user.imc.objetivo %></span></li>
                                 <li><span>Lesões</span><span><%= (user.imc.lesoes||[]).join(', ') || 'Nenhuma' %></span></li>
                             </ul>
-                        </div>
-                    </div>
+                        </section>
+                    </section>
                     <% } %>
-                </div>
+                </section>
 
                 <!-- Conteúdo principal -->
-                <div>
+                <section>
                     <!-- Check-ins recentes -->
-                    <div class="admin-card" style="margin-bottom:16px">
-                        <div class="admin-card-header">
+                    <section class="admin-card" style="margin-bottom:16px">
+                        <section class="admin-card-header">
                             <span class="admin-card-title"><i class="fas fa-map-marker-check text-gold"></i> Check-ins Recentes</span>
                             <span class="badge badge-muted"><%= userCheckins.length %> registros</span>
-                        </div>
-                        <div class="admin-card-body no-pad">
+                        </section>
+                        <section class="admin-card-body no-pad">
                             <% if (!userCheckins.length) { %>
-                            <div class="admin-empty"><i class="fas fa-map-marker-slash"></i>Nenhum check-in registrado</div>
+                            <section class="admin-empty"><i class="fas fa-map-marker-slash"></i>Nenhum check-in registrado</section>
                             <% } else { %>
                             <table class="admin-table">
                                 <thead><tr><th>Academia</th><th>Data</th><th>Hora</th></tr></thead>
@@ -87,17 +87,17 @@
                                 </tbody>
                             </table>
                             <% } %>
-                        </div>
-                    </div>
+                        </section>
+                    </section>
 
                     <!-- Histórico financeiro -->
-                    <div class="admin-card" style="margin-bottom:16px">
-                        <div class="admin-card-header">
+                    <section class="admin-card" style="margin-bottom:16px">
+                        <section class="admin-card-header">
                             <span class="admin-card-title"><i class="fas fa-receipt text-gold"></i> Histórico Financeiro</span>
-                        </div>
-                        <div class="admin-card-body no-pad">
+                        </section>
+                        <section class="admin-card-body no-pad">
                             <% if (!userTransacoes.length) { %>
-                            <div class="admin-empty"><i class="fas fa-receipt"></i>Sem transações</div>
+                            <section class="admin-empty"><i class="fas fa-receipt"></i>Sem transações</section>
                             <% } else { %>
                             <table class="admin-table">
                                 <thead><tr><th>Plano</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
@@ -115,17 +115,17 @@
                                 </tbody>
                             </table>
                             <% } %>
-                        </div>
-                    </div>
+                        </section>
+                    </section>
 
                     <!-- Tickets de suporte -->
-                    <div class="admin-card">
-                        <div class="admin-card-header">
+                    <section class="admin-card">
+                        <section class="admin-card-header">
                             <span class="admin-card-title"><i class="fas fa-headset text-gold"></i> Tickets de Suporte</span>
-                        </div>
-                        <div class="admin-card-body no-pad">
+                        </section>
+                        <section class="admin-card-body no-pad">
                             <% if (!userTickets.length) { %>
-                            <div class="admin-empty"><i class="fas fa-check-circle"></i>Sem chamados</div>
+                            <section class="admin-empty"><i class="fas fa-check-circle"></i>Sem chamados</section>
                             <% } else { %>
                             <table class="admin-table">
                                 <thead><tr><th>Assunto</th><th>Tipo</th><th>Abertura</th><th>Status</th><th></th></tr></thead>
@@ -142,13 +142,13 @@
                                 </tbody>
                             </table>
                             <% } %>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        </section>
+                    </section>
+                </section>
+            </section>
         </main>
-    </div>
-</div>
+    </section>
+</section>
 <script src="/js/admin.js"></script>
 </body>
 </html>

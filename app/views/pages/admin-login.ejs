@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -118,58 +118,58 @@
 </head>
 <body class="admin-body" style="display:block">
 
-<div class="login-bg">
-    <div class="login-bg-grid"></div>
-    <div class="login-bg-glow1"></div>
-    <div class="login-bg-glow2"></div>
-</div>
+<section class="login-bg">
+    <section class="login-bg-grid"></section>
+    <section class="login-bg-glow1"></section>
+    <section class="login-bg-glow2"></section>
+</section>
 
-<div class="admin-login-wrap" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">
-    <div class="admin-login-box">
-        <div class="admin-login-logo" style="text-align:center;margin-bottom:32px">
+<section class="admin-login-wrap" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">
+    <section class="admin-login-box">
+        <section class="admin-login-logo" style="text-align:center;margin-bottom:32px">
             <img src="/images/logo.png" alt="GymBros">
             <h1 class="text-gold">GymBros</h1>
             <p>Painel Administrativo</p>
-        </div>
+        </section>
 
         <% if (erro) { %>
-        <div class="admin-login-error" style="margin-bottom:20px">
+        <section class="admin-login-error" style="margin-bottom:20px">
             <i class="fas fa-exclamation-circle"></i> <%= erro %>
-        </div>
+        </section>
         <% } %>
 
         <form method="POST" action="/admin/login">
             <input type="hidden" name="next" value="<%= next %>">
 
-            <div class="admin-form-group">
+            <section class="admin-form-group">
                 <label>E-mail</label>
-                <div style="position:relative;margin-top:5px">
+                <section style="position:relative;margin-top:5px">
                     <i class="fas fa-envelope" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#555;font-size:0.8rem"></i>
                     <input type="email" name="email" class="admin-input" style="width:100%;padding-left:36px"
                         placeholder="admin@gymbros.com" required autofocus>
-                </div>
-            </div>
-            <div class="admin-form-group" style="margin-bottom:24px">
+                </section>
+            </section>
+            <section class="admin-form-group" style="margin-bottom:24px">
                 <label>Senha</label>
-                <div style="position:relative;margin-top:5px">
+                <section style="position:relative;margin-top:5px">
                     <i class="fas fa-lock" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#555;font-size:0.8rem"></i>
                     <input type="password" name="password" class="admin-input" style="width:100%;padding-left:36px"
                         placeholder="••••••••" required>
-                </div>
-            </div>
+                </section>
+            </section>
 
             <button type="submit" class="btn btn-gold w-100" style="justify-content:center">
                 <i class="fas fa-sign-in-alt"></i> Entrar no Painel
             </button>
         </form>
 
-        <div class="divider"><span>acesso restrito</span></div>
+        <section class="divider"><span>acesso restrito</span></section>
 
-        <div class="admin-login-footer">
+        <section class="admin-login-footer">
             <a href="/"><i class="fas fa-arrow-left" style="font-size:0.7rem;margin-right:4px"></i>Voltar ao site</a>
-        </div>
-    </div>
-</div>
+        </section>
+    </section>
+</section>
 
 </body>
 </html>

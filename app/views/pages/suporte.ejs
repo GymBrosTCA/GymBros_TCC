@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -225,24 +225,24 @@ body.light-mode .chat-textarea  { background: #DEDAD6; border-color: #CCC9C5; co
     <section class="aluno-main">
 
         <!-- Header -->
-        <div class="suporte-header">
-            <div class="suporte-header-icon"><i class="fas fa-headset"></i></div>
-            <div>
+        <section class="suporte-header">
+            <section class="suporte-header-icon"><i class="fas fa-headset"></i></section>
+            <section>
                 <h1>Central de Suporte</h1>
                 <p>Abra chamados e acompanhe o status do seu atendimento</p>
-            </div>
-        </div>
+            </section>
+        </section>
 
         <!-- Abrir chamado -->
-        <div class="suporte-card">
-            <div class="suporte-card-title"><i class="fas fa-plus-circle"></i> Abrir Novo Chamado</div>
+        <section class="suporte-card">
+            <section class="suporte-card-title"><i class="fas fa-plus-circle"></i> Abrir Novo Chamado</section>
             <form id="form-ticket">
-                <div class="suporte-form-row">
-                    <div>
+                <section class="suporte-form-row">
+                    <section>
                         <label class="suporte-label">Assunto *</label>
                         <input type="text" id="ticket-assunto" class="suporte-input" placeholder="Descreva brevemente o problema" required>
-                    </div>
-                    <div>
+                    </section>
+                    <section>
                         <label class="suporte-label">Tipo</label>
                         <select id="ticket-tipo" class="suporte-select">
                             <option value="Problema no app">Problema no app</option>
@@ -250,58 +250,58 @@ body.light-mode .chat-textarea  { background: #DEDAD6; border-color: #CCC9C5; co
                             <option value="Problema na academia">Problema na academia</option>
                             <option value="Outro">Outro</option>
                         </select>
-                    </div>
-                </div>
-                <div style="margin-bottom:16px">
+                    </section>
+                </section>
+                <section style="margin-bottom:16px">
                     <label class="suporte-label">Descrição *</label>
                     <textarea id="ticket-descricao" class="suporte-textarea" rows="3" placeholder="Descreva detalhadamente o que aconteceu..." required></textarea>
-                </div>
+                </section>
                 <button type="submit" class="btn-suporte-submit">
                     <i class="fas fa-paper-plane"></i> Enviar Chamado
                 </button>
             </form>
-        </div>
+        </section>
 
         <!-- Lista de tickets -->
-        <div class="suporte-card">
-            <div class="suporte-card-title"><i class="fas fa-list"></i> Meus Chamados</div>
-            <div id="tickets-list">
+        <section class="suporte-card">
+            <section class="suporte-card-title"><i class="fas fa-list"></i> Meus Chamados</section>
+            <section id="tickets-list">
                 <p style="opacity:.4;font-size:.85rem;text-align:center;padding:20px">Carregando chamados...</p>
-            </div>
-        </div>
+            </section>
+        </section>
 
         <!-- Chat de um ticket -->
-        <div class="suporte-chat-wrap" id="suporte-chat-wrap">
-            <div class="suporte-chat-card">
-                <div class="chat-header">
-                    <div class="chat-header-left">
-                        <div class="chat-header-avatar" id="chat-avatar-letter">S</div>
-                        <div>
-                            <div class="chat-header-title" id="chat-ticket-title">Chat do Chamado</div>
-                            <div class="chat-header-sub" id="chat-ticket-status">suporte GymBros</div>
-                        </div>
-                    </div>
+        <section class="suporte-chat-wrap" id="suporte-chat-wrap">
+            <section class="suporte-chat-card">
+                <section class="chat-header">
+                    <section class="chat-header-left">
+                        <section class="chat-header-avatar" id="chat-avatar-letter">S</section>
+                        <section>
+                            <section class="chat-header-title" id="chat-ticket-title">Chat do Chamado</section>
+                            <section class="chat-header-sub" id="chat-ticket-status">suporte GymBros</section>
+                        </section>
+                    </section>
                     <button class="chat-close-btn" onclick="closeChat()"><i class="fas fa-times"></i></button>
-                </div>
+                </section>
 
-                <div class="chat-msgs" id="chat-msgs">
-                    <div class="typing-indicator" id="typing-indicator">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
-                </div>
+                <section class="chat-msgs" id="chat-msgs">
+                    <section class="typing-indicator" id="typing-indicator">
+                        <section class="typing-dot"></section>
+                        <section class="typing-dot"></section>
+                        <section class="typing-dot"></section>
+                    </section>
+                </section>
 
-                <div class="chat-resolved-bar" id="chat-resolved-bar" style="display:none">
+                <section class="chat-resolved-bar" id="chat-resolved-bar" style="display:none">
                     <i class="fas fa-circle-check"></i> Chamado resolvido — obrigado pelo contato!
-                </div>
+                </section>
 
-                <div class="chat-input-row" id="chat-input-row">
+                <section class="chat-input-row" id="chat-input-row">
                     <textarea id="chat-texto" class="chat-textarea" placeholder="Digite sua mensagem... (Enter para enviar)"></textarea>
                     <button class="chat-send-btn" id="chat-send"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
-        </div>
+                </section>
+            </section>
+        </section>
 
     </section>
 </section>
@@ -327,18 +327,18 @@ async function loadTickets() {
             return;
         }
         const icones = { 'Problema no app':'fa-mobile-alt', 'Dúvida sobre plano':'fa-file-alt', 'Problema na academia':'fa-dumbbell', 'Outro':'fa-question-circle' };
-        el.innerHTML = '<div class="ticket-list">' + lista.map(t => `
-            <div class="ticket-item" onclick="openChat('${t.id}','${escHtml(t.assunto)}','${t.status}')">
-                <div class="ticket-item-left">
-                    <div class="ticket-avatar"><i class="fas ${icones[t.tipo]||'fa-ticket'}"></i></div>
-                    <div>
-                        <div class="ticket-title">${escHtml(t.assunto)}</div>
-                        <div class="ticket-meta">#${t.id} · ${escHtml(t.tipo)} · ${new Date(t.createdAt).toLocaleDateString('pt-BR')}</div>
-                    </div>
-                </div>
+        el.innerHTML = '<section class="ticket-list">' + lista.map(t => `
+            <section class="ticket-item" onclick="openChat('${t.id}','${escHtml(t.assunto)}','${t.status}')">
+                <section class="ticket-item-left">
+                    <section class="ticket-avatar"><i class="fas ${icones[t.tipo]||'fa-ticket'}"></i></section>
+                    <section>
+                        <section class="ticket-title">${escHtml(t.assunto)}</section>
+                        <section class="ticket-meta">#${t.id} · ${escHtml(t.tipo)} · ${new Date(t.createdAt).toLocaleDateString('pt-BR')}</section>
+                    </section>
+                </section>
                 <span class="ticket-status ${t.status}">${t.status.replace('_',' ')}</span>
-            </div>
-        `).join('') + '</div>';
+            </section>
+        `).join('') + '</section>';
     } catch(e) { console.error(e); }
 }
 
@@ -424,7 +424,7 @@ async function loadMessages() {
 function bubbleHtml(m) {
     const time   = new Date(m.criadaEm).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
     const sender = m.remetente === 'admin' ? 'Suporte GymBros' : 'Você';
-    return `<div class="bubble ${m.remetente}"><div class="bubble-body">${escHtml(m.texto)}</div><div class="bubble-meta">${sender} · ${time}</div></div>`;
+    return `<section class="bubble ${m.remetente}"><section class="bubble-body">${escHtml(m.texto)}</section><section class="bubble-meta">${sender} · ${time}</section></section>`;
 }
 
 function appendBubble(m) {

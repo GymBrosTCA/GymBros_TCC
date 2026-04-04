@@ -1,19 +1,19 @@
-<aside class="admin-sidebar" id="admin-sidebar">
-    <div class="admin-sidebar-brand">
+﻿<aside class="admin-sidebar" id="admin-sidebar">
+    <section class="admin-sidebar-brand">
         <img src="/images/logo.png" alt="GymBros">
-        <div>
+        <section>
             <span>GymBros</span>
             <small>Admin Panel</small>
-        </div>
-    </div>
+        </section>
+    </section>
 
     <nav class="admin-nav">
-        <div class="admin-nav-section">Principal</div>
+        <section class="admin-nav-section">Principal</section>
         <a href="/admin/dashboard" class="admin-nav-item <%= page==='dashboard' ? 'active' : '' %>">
             <i class="fas fa-chart-pie"></i> Dashboard
         </a>
 
-        <div class="admin-nav-section">Gestão</div>
+        <section class="admin-nav-section">Gestão</section>
         <a href="/admin/usuarios" class="admin-nav-item <%= page==='usuarios' ? 'active' : '' %>">
             <i class="fas fa-users"></i> Usuários
         </a>
@@ -27,7 +27,7 @@
             <i class="fas fa-map-marker-check"></i> Check-ins
         </a>
 
-        <div class="admin-nav-section">Operações</div>
+        <section class="admin-nav-section">Operações</section>
         <a href="/admin/financeiro" class="admin-nav-item <%= page==='financeiro' ? 'active' : '' %>">
             <i class="fas fa-dollar-sign"></i> Financeiro
         </a>
@@ -41,21 +41,21 @@
             <i class="fas fa-bell"></i> Notificações
         </a>
 
-        <div class="admin-nav-section">Analytics</div>
+        <section class="admin-nav-section">Analytics</section>
         <a href="/admin/relatorios" class="admin-nav-item <%= page==='relatorios' ? 'active' : '' %>">
             <i class="fas fa-file-chart-line"></i> Relatórios
         </a>
 
-        <div class="admin-nav-section">Sistema</div>
+        <section class="admin-nav-section">Sistema</section>
         <a href="/admin/configuracoes" class="admin-nav-item <%= page==='configuracoes' ? 'active' : '' %>">
             <i class="fas fa-cog"></i> Configurações
         </a>
     </nav>
 
-    <div class="admin-sidebar-footer">
-        <div>GymBros v<%= adminConfig.version %></div>
+    <section class="admin-sidebar-footer">
+        <section>GymBros v<%= adminConfig.version %></section>
         <% if (adminConfig.maintenance) { %>
-        <div class="text-warning mt-4"><i class="fas fa-tools"></i> Manutenção ativa</div>
+        <section class="text-warning mt-4"><i class="fas fa-tools"></i> Manutenção ativa</section>
         <% } %>
-    </div>
+    </section>
 </aside>

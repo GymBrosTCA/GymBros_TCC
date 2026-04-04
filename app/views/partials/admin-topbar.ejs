@@ -1,33 +1,33 @@
 <header class="admin-topbar">
-    <div class="flex gap-10">
+    <section class="flex gap-10">
         <button id="admin-sidebar-toggle" class="btn btn-outline btn-icon" style="display:none" title="Menu">
             <i class="fas fa-bars"></i>
         </button>
         <span class="admin-topbar-title"><%= title %></span>
-    </div>
-    <div class="admin-topbar-right">
+    </section>
+    <section class="admin-topbar-right">
         <!-- Notification Bell -->
-        <div class="admin-notif-wrap" id="notif-wrap">
+        <section class="admin-notif-wrap" id="notif-wrap">
             <button class="admin-notif-btn" id="notif-btn" title="Notificações">
                 <i class="fas fa-bell"></i>
                 <span class="admin-notif-badge" id="notif-badge" style="display:none">0</span>
             </button>
-            <div class="admin-notif-panel" id="notif-panel">
-                <div class="admin-notif-header">
+            <section class="admin-notif-panel" id="notif-panel">
+                <section class="admin-notif-header">
                     <span>Atividade em tempo real</span>
                     <button onclick="clearNotifs()" class="admin-notif-clear">Limpar</button>
-                </div>
-                <div class="admin-notif-list" id="notif-list">
-                    <div class="admin-notif-empty">Nenhuma atividade ainda</div>
-                </div>
-            </div>
-        </div>
+                </section>
+                <section class="admin-notif-list" id="notif-list">
+                    <section class="admin-notif-empty">Nenhuma atividade ainda</section>
+                </section>
+            </section>
+        </section>
 
         <!-- Online users indicator -->
-        <div class="admin-online-indicator" id="online-indicator" title="Usuários online agora">
+        <section class="admin-online-indicator" id="online-indicator" title="Usuários online agora">
             <span class="online-dot"></span>
             <span id="online-count">0</span> online
-        </div>
+        </section>
 
         <span class="admin-topbar-admin">
             <strong><%= admin.email %></strong>
@@ -35,7 +35,7 @@
         <a href="/admin/logout" class="btn admin-btn-logout">
             <i class="fas fa-sign-out-alt"></i> Sair
         </a>
-    </div>
+    </section>
 </header>
 <script>
 if (window.innerWidth <= 768) {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,17 +11,17 @@
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
-<div class="admin-wrapper">
+<section class="admin-wrapper">
     <%- include('../partials/admin-sidebar') %>
-    <div class="admin-content">
+    <section class="admin-content">
         <%- include('../partials/admin-topbar') %>
         <main class="admin-main">
             <h1 class="admin-page-title">Receitas</h1>
-            <div class="flex gap-10 mb-16" style="margin-bottom:16px">
+            <section class="flex gap-10 mb-16" style="margin-bottom:16px">
                 <a href="/admin/financeiro" class="btn btn-outline btn-sm">Visão Geral</a>
                 <a href="/admin/financeiro/receitas" class="btn btn-gold btn-sm">Receitas</a>
                 <a href="/admin/financeiro/inadimplentes" class="btn btn-outline btn-sm">Inadimplentes</a>
-            </div>
+            </section>
 
             <form method="GET" action="/admin/financeiro/receitas" class="admin-toolbar">
                 <select name="status" class="admin-select">
@@ -34,9 +34,9 @@
                 <span class="text-muted" style="margin-left:auto;font-size:.82rem"><%= total %> transações</span>
             </form>
 
-            <div class="admin-card">
-                <div class="admin-card-body no-pad">
-                    <div class="admin-table-wrap">
+            <section class="admin-card">
+                <section class="admin-card-body no-pad">
+                    <section class="admin-table-wrap">
                         <table class="admin-table">
                             <thead><tr><th>Usuário</th><th>Plano</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
                             <tbody>
@@ -53,19 +53,19 @@
                             <% }) %>
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
+                    </section>
+                </section>
+            </section>
             <% if (pages > 1) { %>
-            <div class="admin-pagination">
+            <section class="admin-pagination">
                 <% for (let i = 1; i <= pages; i++) { %>
                 <a href="/admin/financeiro/receitas?status=<%= status %>&page=<%= i %>" class="<%= i===currentPage?'active':'' %>"><%= i %></a>
                 <% } %>
-            </div>
+            </section>
             <% } %>
         </main>
-    </div>
-</div>
+    </section>
+</section>
 <script src="/js/admin.js"></script>
 </body>
 </html>

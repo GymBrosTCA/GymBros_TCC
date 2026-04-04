@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,24 +11,24 @@
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
-<div class="admin-wrapper">
+<section class="admin-wrapper">
     <%- include('../partials/admin-sidebar') %>
-    <div class="admin-content">
+    <section class="admin-content">
         <%- include('../partials/admin-topbar') %>
         <main class="admin-main">
-            <div class="flex-between mb-16">
-                <div>
+            <section class="flex-between mb-16">
+                <section>
                     <h1 class="admin-page-title">Academias</h1>
                     <p class="admin-page-subtitle"><%= academias.length %> academias cadastradas</p>
-                </div>
+                </section>
                 <button class="btn btn-gold" data-modal-open="modal-academia">
                     <i class="fas fa-plus"></i> Nova Academia
                 </button>
-            </div>
+            </section>
 
-            <div class="admin-card">
-                <div class="admin-card-body no-pad">
-                    <div class="admin-table-wrap">
+            <section class="admin-card">
+                <section class="admin-card-body no-pad">
+                    <section class="admin-table-wrap">
                         <table class="admin-table">
                             <thead>
                                 <tr><th>Nome</th><th>CNPJ</th><th>Cidade</th><th>Responsável</th><th>Alunos</th><th>Status</th><th>Ações</th></tr>
@@ -43,72 +43,72 @@
                                 <td><span class="badge badge-muted"><%= a.totalAlunos %></span></td>
                                 <td><span class="badge <%= a.status==='ativa'?'badge-success':'badge-muted' %>"><%= a.status %></span></td>
                                 <td>
-                                    <div class="flex gap-10">
+                                    <section class="flex gap-10">
                                         <button class="btn btn-danger btn-sm btn-icon" data-toggle-academia="<%= a.id %>" title="<%= a.status==='ativa'?'Desativar':'Ativar' %>">
                                             <i class="fas <%= a.status==='ativa'?'fa-ban':'fa-check' %>"></i>
                                         </button>
-                                    </div>
+                                    </section>
                                 </td>
                             </tr>
                             <% }) %>
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
+                    </section>
+                </section>
+            </section>
         </main>
-    </div>
-</div>
+    </section>
+</section>
 
 <!-- Modal Nova Academia -->
-<div class="admin-modal-backdrop" id="modal-academia">
-    <div class="admin-modal">
-        <div class="admin-modal-header">
+<section class="admin-modal-backdrop" id="modal-academia">
+    <section class="admin-modal">
+        <section class="admin-modal-header">
             <span class="admin-modal-title"><i class="fas fa-dumbbell text-gold"></i> Nova Academia</span>
             <button class="admin-modal-close" data-modal-close="modal-academia"><i class="fas fa-times"></i></button>
-        </div>
+        </section>
         <form id="form-academia">
-            <div class="admin-2col">
-                <div class="admin-form-group">
+            <section class="admin-2col">
+                <section class="admin-form-group">
                     <label>Nome *</label>
                     <input type="text" name="nome" class="admin-input" required placeholder="Smart Fit Centro">
-                </div>
-                <div class="admin-form-group">
+                </section>
+                <section class="admin-form-group">
                     <label>CNPJ *</label>
                     <input type="text" name="cnpj" class="admin-input" required placeholder="00.000.000/0001-00">
-                </div>
-            </div>
-            <div class="admin-form-group">
+                </section>
+            </section>
+            <section class="admin-form-group">
                 <label>Endereço</label>
                 <input type="text" name="endereco" class="admin-input" placeholder="Rua das Flores, 123">
-            </div>
-            <div class="admin-2col">
-                <div class="admin-form-group">
+            </section>
+            <section class="admin-2col">
+                <section class="admin-form-group">
                     <label>Cidade</label>
                     <input type="text" name="cidade" class="admin-input" placeholder="São Paulo">
-                </div>
-                <div class="admin-form-group">
+                </section>
+                <section class="admin-form-group">
                     <label>CEP</label>
                     <input type="text" name="cep" class="admin-input" placeholder="00000-000">
-                </div>
-            </div>
-            <div class="admin-2col">
-                <div class="admin-form-group">
+                </section>
+            </section>
+            <section class="admin-2col">
+                <section class="admin-form-group">
                     <label>Responsável</label>
                     <input type="text" name="responsavel" class="admin-input" placeholder="Nome do responsável">
-                </div>
-                <div class="admin-form-group">
+                </section>
+                <section class="admin-form-group">
                     <label>Telefone</label>
                     <input type="text" name="telefone" class="admin-input" placeholder="(11) 0000-0000">
-                </div>
-            </div>
-            <div class="admin-modal-footer">
+                </section>
+            </section>
+            <section class="admin-modal-footer">
                 <button type="button" class="btn btn-outline" data-modal-close="modal-academia">Cancelar</button>
                 <button type="submit" class="btn btn-gold"><i class="fas fa-save"></i> Salvar Academia</button>
-            </div>
+            </section>
         </form>
-    </div>
-</div>
+    </section>
+</section>
 
 <script src="/js/admin.js"></script>
 </body>
