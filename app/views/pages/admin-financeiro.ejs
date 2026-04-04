@@ -5,7 +5,9 @@
     <title>Financeiro — GymBros Admin</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" href="/images/favicon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
@@ -87,6 +89,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="/js/admin.js"></script>
 <script>
+Chart.getChart(document.getElementById('chartReceita'))?.destroy();
 new Chart(document.getElementById('chartReceita'), {
     type: 'line',
     data: {

@@ -5,7 +5,9 @@
     <title>Ticket #<%= ticket.id %> — GymBros Admin</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" href="/images/favicon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
@@ -178,36 +180,37 @@ if (chatForm) {
     });
 }
 
-// ── SSE: mensagens em tempo real ──────────────────────────────────────────────
-const sseUrl = `/api/suporte/tickets/${TICKET_ID}/stream`;
-const sse = new EventSource(sseUrl);
+// ── SSE: mensagens em tempo real via stream do admin ─────────────────────────
+// Reutiliza a conexão SSE já aberta pelo admin.js (window._adminSSE)
+// em vez de criar uma nova conexão para o endpoint do aluno (que retornaria 401)
+if (window._adminSSE) {
+    window._adminSSE.addEventListener('ticket_message', function(e) {
+        const d = JSON.parse(e.data);
+        if (String(d.ticketId) !== String(TICKET_ID)) return; // outro ticket
+        showTyping();
+        setTimeout(() => {
+            hideTyping();
+            appendBubble({ texto: d.texto, remetente: 'usuario', criadaEm: new Date().toISOString() }, 'usuario', true);
+            scrollChat();
+            toast('Nova mensagem de <%= ticket.userName %>', 'info', 2500);
+        }, 500);
+    });
 
-sse.addEventListener('new_message', function(e) {
-    const msg = JSON.parse(e.data);
-    if (msg.remetente === 'admin') return; // já foi adicionado pelo envio
-    // Mostra typing por 400ms antes da mensagem
-    showTyping();
-    setTimeout(() => {
-        hideTyping();
-        appendBubble(msg, 'usuario', true);
-        scrollChat();
-        // Notificação sonora visual
-        toast('Nova mensagem de ' + '<%= ticket.userName %>', 'info', 2500);
-    }, 500);
-});
+    window._adminSSE.addEventListener('ticket_update', function(e) {
+        const d = JSON.parse(e.data);
+        if (String(d.ticketId) !== String(TICKET_ID)) return;
+        const pill = document.querySelector('.ticket-status-pill');
+        if (pill) { pill.textContent = d.status.replace('_',' '); pill.className = 'ticket-status-pill ' + d.status; }
+    });
 
-sse.addEventListener('status_change', function(e) {
-    const d = JSON.parse(e.data);
-    document.querySelector('.ticket-status-pill').textContent = d.status.replace('_',' ');
-    document.querySelector('.ticket-status-pill').className = 'ticket-status-pill ' + d.status;
-});
-
-sse.onerror = function() {
-    document.getElementById('realtime-status').textContent = 'Reconectando...';
-};
-sse.onopen = function() {
     document.getElementById('realtime-status').textContent = 'Conectado ao chat';
-};
+    window._adminSSE.addEventListener('error', function() {
+        document.getElementById('realtime-status').textContent = 'Reconectando...';
+    });
+    window._adminSSE.addEventListener('open', function() {
+        document.getElementById('realtime-status').textContent = 'Conectado ao chat';
+    });
+}
 
 function showTyping() {
     const t = document.getElementById('typing-indicator');

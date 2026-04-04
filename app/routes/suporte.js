@@ -6,7 +6,7 @@
 const express  = require('express');
 const router   = express.Router();
 const { tickets, mensagens, notificacoes, nextId } = require('../data');
-const { broadcast, broadcastTicket, addTicketClient } = require('../events');
+const { broadcast, broadcastTicket, addTicketClient, addStudentClient } = require('../events');
 
 // Middleware: exige sessão de aluno
 router.use((req, res, next) => {
@@ -86,6 +86,16 @@ router.get('/tickets/:id/stream', (req, res) => {
     res.flushHeaders();
     res.write(':ok\n\n');
     addTicketClient(ticket.id, res);
+    const ping = setInterval(() => { try { res.write(':ping\n\n'); } catch (_) { clearInterval(ping); } }, 20000);
+    res.on('close', () => clearInterval(ping));
+});
+
+// ── SSE: notificações push do admin ──────────────────────────────────────────
+router.get('/notificacoes/stream', (req, res) => {
+    res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive', 'X-Accel-Buffering': 'no' });
+    res.flushHeaders();
+    res.write(':ok\n\n');
+    addStudentClient(res);
     const ping = setInterval(() => { try { res.write(':ping\n\n'); } catch (_) { clearInterval(ping); } }, 20000);
     res.on('close', () => clearInterval(ping));
 });

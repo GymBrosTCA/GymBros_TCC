@@ -20,7 +20,7 @@
     <section class="aluno-sidebar">
         <section class="aluno-profile">
             <section class="avatar">
-                <img src="/images/avatar.png" alt="Avatar do Aluno">
+                <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
             </section>
             <h2><%= user.nome %></h2>
             <p data-translate="sidebar.role">Aluno GymBros</p>
@@ -34,7 +34,7 @@
             <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
             <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
             <li><a href="/imc-form" data-translate="sidebar.imc"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
-            <li><a href="/suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
         </ul>
     </section>
 
@@ -113,11 +113,14 @@
 </section>
 
 <%- include('../partials/footer') %>
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>window.GYMBROS_USER_ID = '<%= user.cpf %>';</script>
 <script>
-const EVO_KEY     = 'gymbros_evolucao';
-const TREINOS_KEY = 'gymbros_treinos_registrados';
+const _uid        = (window.GYMBROS_USER_ID || 'guest').replace(/\D/g, '');
+const EVO_KEY     = `gymbros_evolucao_${_uid}`;
+const TREINOS_KEY = `gymbros_treinos_${_uid}`;
 
 // Carrega dados dos dois storages
 function getHistorico() {
@@ -155,6 +158,7 @@ if (snapIMC.length >= 1) {
     const pesos  = snapIMC.map(e => parseFloat(e.dados.peso));
     document.getElementById('labelPeso').textContent = `${snapIMC.length} registro(s)`;
 
+    Chart.getChart(document.getElementById('graficoPeso'))?.destroy();
     new Chart(ctxPeso, {
         type: 'line',
         data: {
@@ -220,6 +224,7 @@ if (treinos.length > 0) {
     const datSem = Object.values(semanas);
     document.getElementById('labelTreinos').textContent = `últimas 8 semanas`;
 
+    Chart.getChart(document.getElementById('graficoTreinos'))?.destroy();
     new Chart(ctxTreinos, {
         type: 'bar',
         data: {

@@ -15,6 +15,12 @@
 <body>
   <section class="wrapper">
     <form id="registerForm" autocomplete="off">
+      <% if (typeof user !== 'undefined' && user) { %>
+      <div style="background:#1a1a1a;border-left:4px solid #C98B1D;color:#ccc;padding:10px 14px;font-size:.85rem;margin-bottom:14px;border-radius:6px;">
+        <strong style="color:#C98B1D;">Você está logado como <%= user.nome %>.</strong><br>
+        Criar uma nova conta não afetará sua sessão atual.
+      </div>
+      <% } %>
       <h1>Registrar</h1>
       <span class="success-message"></span>
 
@@ -73,6 +79,7 @@
     <a href="/"><img src="/images/logo-form.png" class="logo" alt="Logo GymBros"></a>
   </section>
 
+  <script>window.GYMBROS_ALREADY_LOGGED_IN = <%= (typeof user !== 'undefined' && user) ? 'true' : 'false' %>;</script>
   <script src="/js/forms.js" type="module"></script>
 </body>
 </html>

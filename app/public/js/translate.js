@@ -25,6 +25,7 @@ const DICT = {
     'sidebar.ai':       { pt: 'Personal Trainer IA', en: 'AI Personal Trainer', es: 'Entrenador IA' },
     'sidebar.avaliacao':{ pt: 'Avaliação Corporal', en: 'Body Assessment', es: 'Evaluación Corporal' },
     'sidebar.imc':      { pt: 'Meu Perfil IMC', en: 'My BMI Profile', es: 'Mi Perfil IMC' },
+    'sidebar.suporte':  { pt: 'Suporte', en: 'Support', es: 'Soporte' },
     'sidebar.role':     { pt: 'Aluno GymBros', en: 'GymBros Member', es: 'Miembro GymBros' },
 
     'btn.login':       { pt: 'Entrar',       en: 'Log in',       es: 'Ingresar' },
