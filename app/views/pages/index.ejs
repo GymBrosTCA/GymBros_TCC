@@ -7,7 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <%- include('../partials/seo') %>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/style-mobile.css" media="only screen and (max-width: 768px)">
@@ -35,7 +37,7 @@
         <img src="/images/banner.png" alt="">
     </section>
     <section class="banner2">
-        <img src="/images/banner2.png" alt="">
+        <img src="/images/banner2.png" alt="" loading="lazy">
         <section class="text-banner">
             <h1>POR QUE <br>SE INSCREVER?</h1>
             <p>
@@ -49,30 +51,30 @@
     
     <section class="img-modalidades">
     <section class="modalidade">
-        <img src="/images/aerobico.png" alt="">
+        <img src="/images/aerobico.png" alt="" loading="lazy">
         <span>AERÓBICO</span>
     </section>
     <section class="modalidade">
-        <img src="/images/musculacao.png" alt="">
+        <img src="/images/musculacao.png" alt="" loading="lazy">
         <span>MUSCULAÇÃO</span>
     </section>
     <section class="modalidade">
-        <img src="/images/natacao.png" alt="">
+        <img src="/images/natacao.png" alt="" loading="lazy">
         <span>NATAÇÃO</span>
     </section>
 </section>
 
 <section class="img-modalidades">
     <section class="modalidade">
-        <img src="/images/marciais.png" alt="">
+        <img src="/images/marciais.png" alt="" loading="lazy">
         <span>ARTES MARCIAIS</span>
     </section>
     <section class="modalidade">
-        <img src="/images/fitdance.png" alt="">
+        <img src="/images/fitdance.png" alt="" loading="lazy">
         <span>FITDANCE</span>
     </section>
     <section class="modalidade">
-        <img src="/images/meditacao.png" alt="">
+        <img src="/images/meditacao.png" alt="" loading="lazy">
         <span>MEDITAÇÃO</span>
     </section>
 </section>
@@ -81,16 +83,16 @@
         <h2>Academias Parceiras</h2>
         <section class="carrossel-wrapper">
           <section class="carrossel" id="carrossel">
-            <img src="/images/parceiro1.png" alt="Parceiro 1">
-            <img src="/images/parceiro2.png" alt="Parceiro 2">
-            <img src="/images/parceiro3.png" alt="Parceiro 3">
-            <img src="/images/parceiro4.png" alt="Parceiro 4">
-            <img src="/images/parceiro5.png" alt="Parceiro 5">
-            <img src="/images/parceiro6.png" alt="Parceiro 6">
-            <img src="/images/parceiro7.png" alt="Parceiro 7">
-            <img src="/images/parceiro8.png" alt="Parceiro 8">
-            <img src="/images/parceiro9.png" alt="Parceiro 9">
-            <img src="/images/parceiro10.png" alt="Parceiro 10">
+            <img src="/images/parceiro1.png" alt="Parceiro 1" loading="lazy">
+            <img src="/images/parceiro2.png" alt="Parceiro 2" loading="lazy">
+            <img src="/images/parceiro3.png" alt="Parceiro 3" loading="lazy">
+            <img src="/images/parceiro4.png" alt="Parceiro 4" loading="lazy">
+            <img src="/images/parceiro5.png" alt="Parceiro 5" loading="lazy">
+            <img src="/images/parceiro6.png" alt="Parceiro 6" loading="lazy">
+            <img src="/images/parceiro7.png" alt="Parceiro 7" loading="lazy">
+            <img src="/images/parceiro8.png" alt="Parceiro 8" loading="lazy">
+            <img src="/images/parceiro9.png" alt="Parceiro 9" loading="lazy">
+            <img src="/images/parceiro10.png" alt="Parceiro 10" loading="lazy">
           </section>
         </section>
       </section>      

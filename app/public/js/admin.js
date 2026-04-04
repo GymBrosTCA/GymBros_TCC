@@ -37,6 +37,8 @@
     sse.onerror = function() {
         // Silent reconnect — browser handles automatically
     };
+
+    window.addEventListener('beforeunload', function() { sse.close(); }, { once: true });
 })();
 
 // ── Notificações (notification center) ───────────────────────────────────────
@@ -212,7 +214,28 @@ if (formNotif) {
             await adminFetch('/api/admin/notificacoes', { method: 'POST', body: JSON.stringify(fd) });
             toast('Notificação enviada!', 'success');
             formNotif.reset();
-            setTimeout(() => location.reload(), 1000);
+            // Adiciona ao histórico dinâmicamente sem recarregar a página
+            const hist = document.querySelector('.admin-card-body.no-pad');
+            if (hist) {
+                const empty = hist.querySelector('.admin-empty');
+                if (empty) empty.remove();
+                const tipoBadge = fd.tipo === 'alerta' ? 'badge-warning' : fd.tipo === 'promocao' ? 'badge-gold' : 'badge-info';
+                const destLabel = fd.destinatarios === 'todos' ? 'Todos' : 'Plano específico';
+                const div = document.createElement('div');
+                div.style.cssText = 'padding:14px 16px;border-bottom:1px solid var(--border);animation:fadeIn .3s ease';
+                div.innerHTML = `
+                    <div class="flex-between">
+                        <span class="fw-600" style="font-size:.875rem">${escHtml(fd.titulo)}</span>
+                        <span class="badge ${tipoBadge}">${escHtml(fd.tipo)}</span>
+                    </div>
+                    <div class="text-muted" style="font-size:.8rem;margin-top:4px">${escHtml(fd.mensagem)}</div>
+                    <div class="text-muted" style="font-size:.72rem;margin-top:6px">
+                        <i class="fas fa-users"></i> ${destLabel} •
+                        <i class="fas fa-clock"></i> ${new Date().toLocaleDateString('pt-BR')} •
+                        <i class="fas fa-eye"></i> 0 leituras
+                    </div>`;
+                hist.insertBefore(div, hist.firstChild);
+            }
         } catch (err) { toast(err.message, 'error'); }
     });
 }

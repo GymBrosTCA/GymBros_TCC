@@ -20,7 +20,7 @@
     <section class="aluno-sidebar">
         <section class="aluno-profile">
             <section class="avatar">
-                <img src="/images/avatar.png" alt="Avatar do Aluno">
+                <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
             </section>
             <h2><%= user.nome %></h2>
             <p data-translate="sidebar.role">Aluno GymBros</p>
@@ -34,7 +34,7 @@
             <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
             <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
             <li><a href="/imc-form" data-translate="sidebar.imc"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
-            <li><a href="/suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
         </ul>
     </section>
 
@@ -90,7 +90,8 @@
 </section>
 
 <%- include('../partials/footer') %>
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 <script src="/js/translate.js"></script>
 </body>
 </html>

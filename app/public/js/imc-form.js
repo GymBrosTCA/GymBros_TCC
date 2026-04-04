@@ -480,7 +480,7 @@ async function submitForm() {
             saveProfile(payload);
 
             // Registra snapshot no histórico de evolução
-            const historico = JSON.parse(localStorage.getItem('gymbros_evolucao') || '[]');
+            const historico = JSON.parse(localStorage.getItem(`gymbros_evolucao_${_uid}`) || '[]');
             historico.push({
                 tipo: 'imc',
                 data: new Date().toLocaleDateString('pt-BR'),
@@ -493,7 +493,9 @@ async function submitForm() {
                     objetivo: payload.objetivo
                 }
             });
-            localStorage.setItem('gymbros_evolucao', JSON.stringify(historico));
+            // Cap to last 100 entries to prevent unbounded localStorage growth
+            if (historico.length > 100) historico.splice(0, historico.length - 100);
+            localStorage.setItem(`gymbros_evolucao_${_uid}`, JSON.stringify(historico));
 
             document.getElementById('submit-success').textContent = '✓ Perfil salvo com sucesso!';
 

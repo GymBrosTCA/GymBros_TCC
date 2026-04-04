@@ -5,7 +5,9 @@
     <title>Suporte — GymBros Admin</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" href="/images/favicon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
@@ -25,19 +27,19 @@
             <div class="suporte-filter-bar">
                 <a href="/admin/suporte" class="suporte-filter-btn <%= !status?'active':'' %>">
                     <i class="fas fa-inbox"></i> Todos
-                    <span class="filter-count"><%= lista.length %></span>
+                    <span class="filter-count"><%= counts.todos %></span>
                 </a>
                 <a href="/admin/suporte?status=aberto" class="suporte-filter-btn <%= status==='aberto'?'active':'' %> warn">
                     <i class="fas fa-circle-exclamation"></i> Abertos
-                    <span class="filter-count"><%= lista.filter(t=>t.status==='aberto').length %></span>
+                    <span class="filter-count"><%= counts.aberto %></span>
                 </a>
                 <a href="/admin/suporte?status=em_atendimento" class="suporte-filter-btn <%= status==='em_atendimento'?'active':'' %> info">
                     <i class="fas fa-headset"></i> Em Atendimento
-                    <span class="filter-count"><%= lista.filter(t=>t.status==='em_atendimento').length %></span>
+                    <span class="filter-count"><%= counts.em_atendimento %></span>
                 </a>
                 <a href="/admin/suporte?status=resolvido" class="suporte-filter-btn <%= status==='resolvido'?'active':'' %> ok">
                     <i class="fas fa-circle-check"></i> Resolvidos
-                    <span class="filter-count"><%= lista.filter(t=>t.status==='resolvido').length %></span>
+                    <span class="filter-count"><%= counts.resolvido %></span>
                 </a>
             </div>
 

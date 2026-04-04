@@ -194,6 +194,7 @@ if (registerForm) {
                 return;
             }
 
+            // Redirect to login regardless — creating a new account never touches the current session
             successEl.textContent = data.mensagem;
             setTimeout(() => { window.location.href = '/login'; }, 1500);
         } catch (err) {

@@ -21,7 +21,7 @@
     <section class="aluno-sidebar">
         <section class="aluno-profile">
             <section class="avatar">
-                <img src="/images/avatar.png" alt="Avatar do Aluno">
+                <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
             </section>
             <h2><%= user.nome %></h2>
             <p data-translate="sidebar.role">Aluno GymBros</p>
@@ -35,7 +35,7 @@
             <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
             <li><a href="/ai/avaliacao" class="active" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
             <li><a href="/imc-form" data-translate="sidebar.imc"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
-            <li><a href="/suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
         </ul>
     </section>
 
@@ -175,8 +175,11 @@
 </section>
 
 <%- include('../partials/footer') %>
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+<script>window.GYMBROS_USER_ID = '<%= user.cpf %>';</script>
 <script>
+const _uid = (window.GYMBROS_USER_ID || 'guest').replace(/\D/g, '');
 // Converte arquivo para base64
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
@@ -192,13 +195,15 @@ function setupSlot(inputId, slotId, previewId) {
     const input   = document.getElementById(inputId);
     const slot    = document.getElementById(slotId);
     const preview = document.getElementById(previewId);
+    let currentBlobUrl = null;
 
     input.addEventListener('change', () => {
         const file = input.files[0];
         if (!file) return;
 
-        const url = URL.createObjectURL(file);
-        preview.src = url;
+        if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+        currentBlobUrl = URL.createObjectURL(file);
+        preview.src = currentBlobUrl;
         slot.classList.add('has-image');
         updateButton();
     });
@@ -288,14 +293,14 @@ async function salvarAvaliacao(resultado) {
     } catch (e) { console.warn('Não foi possível salvar avaliação na sessão.', e); }
 
     // Salva no localStorage para o histórico de evolução
-    const historico = JSON.parse(localStorage.getItem('gymbros_evolucao') || '[]');
+    const historico = JSON.parse(localStorage.getItem(`gymbros_evolucao_${_uid}`) || '[]');
     historico.push({
         tipo: 'avaliacao',
         data: dataHoje,
         timestamp: Date.now(),
         dados: resultado
     });
-    localStorage.setItem('gymbros_evolucao', JSON.stringify(historico));
+    localStorage.setItem(`gymbros_evolucao_${_uid}`, JSON.stringify(historico));
 }
 
 function renderResultado(r) {

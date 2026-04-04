@@ -6,7 +6,7 @@
 const express   = require('express');
 const router    = express.Router();
 const { usuarios, academias, planos, checkins, transacoes, tickets, mensagens, notificacoes, adminConfig, onlineUsers, nextId } = require('../data');
-const { addAdminClient, broadcast, broadcastTicket } = require('../events');
+const { addAdminClient, broadcast, broadcastTicket, broadcastToStudents } = require('../events');
 
 // Protege toda a API admin
 router.use((req, res, next) => {
@@ -224,6 +224,7 @@ router.post('/notificacoes', (req, res) => {
     const nova = { id: nextId('no'), titulo, mensagem: msg, tipo: tipo || 'informativo', destinatarios: destinatarios || 'todos', criadaEm: new Date(), lidas: [] };
     notificacoes.push(nova);
     broadcast('admin_notification', { titulo, mensagem: msg, tipo: nova.tipo });
+    broadcastToStudents('admin_notification', { titulo, mensagem: msg, tipo: nova.tipo });
     res.status(201).json({ mensagem: 'Notificação enviada.', notificacao: nova });
 });
 

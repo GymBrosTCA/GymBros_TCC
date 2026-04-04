@@ -21,7 +21,7 @@
     <section class="aluno-sidebar">
         <section class="aluno-profile">
             <section class="avatar">
-                <img src="/images/avatar.png" alt="Avatar do Aluno">
+                <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
             </section>
             <h2><%= user.nome %></h2>
             <p data-translate="sidebar.role">Aluno GymBros</p>
@@ -35,72 +35,153 @@
             <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
             <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
             <li><a href="/imc-form" data-translate="sidebar.imc"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
-            <li><a href="/suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
         </ul>
     </section>
 
     <!-- CONTEÚDO PRINCIPAL -->
     <section class="aluno-main">
+
         <section class="dashboard-top">
             <h1>Configurações</h1>
-            <p>Atualize seus dados, senha e plano</p>
+            <p>Gerencie seu perfil, segurança e preferências</p>
         </section>
 
-        <section class="config-forms">
+        <section class="cfg-grid">
 
-            <!-- DADOS PESSOAIS -->
-            <section class="config-card">
-                <h2>Dados Pessoais</h2>
-                <form id="form-dados">
-                    <label for="nome">Nome</label>
-                    <input type="text" id="nome" name="nome" value="<%= user.nome %>" required>
-                    
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" value="<%= user.email %>" required>
+            <!-- ── CARD PERFIL ──────────────────────────────── -->
+            <section class="cfg-card" id="cfg-perfil">
+                <header class="cfg-card-header">
+                    <span class="cfg-card-icon"><i class="fas fa-user"></i></span>
+                    <h2>Perfil</h2>
+                </header>
 
-                    <button type="submit" class="btn-save data">Salvar Alterações</button>
-                    <p class="form-message"></p>
+                <!-- Avatar upload -->
+                <section class="cfg-avatar-wrap">
+                    <section class="cfg-avatar-ring" id="avatarRing" title="Clique para trocar a foto">
+                        <img id="cfg-avatar-preview" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Foto de perfil">
+                        <section class="cfg-avatar-overlay">
+                            <i class="fas fa-camera"></i>
+                        </section>
+                    </section>
+                    <input type="file" id="cfg-avatar-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+                    <p class="cfg-avatar-hint">JPEG, PNG ou WebP · máx. 5 MB</p>
+                    <button class="cfg-btn cfg-btn-gold" id="cfg-avatar-btn" style="display:none">
+                        <i class="fas fa-upload"></i> Salvar foto
+                    </button>
+                    <p class="cfg-feedback" id="cfg-avatar-msg"></p>
+                </section>
+
+                <!-- Dados pessoais -->
+                <form id="form-dados" class="cfg-form">
+                    <section class="cfg-field">
+                        <label for="cfg-nome">Nome completo</label>
+                        <input type="text" id="cfg-nome" name="nome" value="<%= user.nome %>" required>
+                    </section>
+                    <section class="cfg-field">
+                        <label for="cfg-email">E-mail</label>
+                        <input type="email" id="cfg-email" name="email" value="<%= user.email %>" required>
+                    </section>
+                    <button type="submit" class="cfg-btn cfg-btn-gold">
+                        <i class="fas fa-save"></i> <span class="cfg-btn-text">Salvar alterações</span>
+                    </button>
+                    <p class="cfg-feedback" id="cfg-dados-msg"></p>
                 </form>
             </section>
 
-            <!-- SENHA -->
-            <section class="config-card">
-                <h2>Alterar Senha</h2>
-                <form id="form-senha">
-                    <label for="senhaAtual">Senha Atual</label>
-                    <input type="password" id="senhaAtual" name="senhaAtual" required>
+            <!-- ── CARD SEGURANÇA ───────────────────────────── -->
+            <section class="cfg-card" id="cfg-seguranca">
+                <header class="cfg-card-header">
+                    <span class="cfg-card-icon"><i class="fas fa-lock"></i></span>
+                    <h2>Segurança</h2>
+                </header>
 
-                    <label for="novaSenha">Nova Senha</label>
-                    <input type="password" id="novaSenha" name="novaSenha" required>
-
-                    <button type="submit" class="btn-save password">Alterar Senha</button>
-                    <p class="form-message"></p>
+                <form id="form-senha" class="cfg-form">
+                    <section class="cfg-field">
+                        <label for="cfg-senha-atual">Senha atual</label>
+                        <section class="cfg-input-wrap">
+                            <input type="password" id="cfg-senha-atual" name="senhaAtual" required autocomplete="current-password">
+                            <button type="button" class="cfg-eye" data-target="cfg-senha-atual"><i class="fas fa-eye"></i></button>
+                        </section>
+                    </section>
+                    <section class="cfg-field">
+                        <label for="cfg-nova-senha">Nova senha</label>
+                        <section class="cfg-input-wrap">
+                            <input type="password" id="cfg-nova-senha" name="novaSenha" required autocomplete="new-password" minlength="6">
+                            <button type="button" class="cfg-eye" data-target="cfg-nova-senha"><i class="fas fa-eye"></i></button>
+                        </section>
+                    </section>
+                    <section class="cfg-field">
+                        <label for="cfg-confirma-senha">Confirmar nova senha</label>
+                        <section class="cfg-input-wrap">
+                            <input type="password" id="cfg-confirma-senha" name="confirmarSenha" required autocomplete="new-password" minlength="6">
+                            <button type="button" class="cfg-eye" data-target="cfg-confirma-senha"><i class="fas fa-eye"></i></button>
+                        </section>
+                    </section>
+                    <button type="submit" class="cfg-btn cfg-btn-outline">
+                        <i class="fas fa-key"></i> <span class="cfg-btn-text">Alterar senha</span>
+                    </button>
+                    <p class="cfg-feedback" id="cfg-senha-msg"></p>
                 </form>
             </section>
 
-            <!-- PLANO -->
-            <section class="config-card">
-                <h2>Alterar Plano</h2>
-                <form id="form-plano">
-                    <label for="plano">Plano Atual</label>
-                    <select id="plano" name="plano">
-                        <option value="starter" <%= user.plano === 'starter' ? 'selected' : '' %>>Starter</option>
-                        <option value="gymbro" <%= user.plano === 'gymbro' ? 'selected' : '' %>>GymBro</option>
-                        <option value="black" <%= user.plano === 'black' ? 'selected' : '' %>>Black</option>
-                    </select>
+            <!-- ── CARD PREFERÊNCIAS ────────────────────────── -->
+            <section class="cfg-card" id="cfg-prefs">
+                <header class="cfg-card-header">
+                    <span class="cfg-card-icon"><i class="fas fa-sliders-h"></i></span>
+                    <h2>Preferências</h2>
+                </header>
 
-                    <button type="submit" class="btn-save plan">Atualizar Plano</button>
-                    <p class="form-message"></p>
-                </form>
+                <section class="cfg-pref-list">
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>Tema</strong>
+                            <span>Aparência escura ou clara da interface</span>
+                        </section>
+                        <button class="cfg-toggle" id="pref-theme" aria-label="Alternar tema">
+                            <span class="cfg-toggle-knob"></span>
+                        </button>
+                    </section>
+
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>Idioma</strong>
+                            <span>Português, English ou Español</span>
+                        </section>
+                        <select class="cfg-select" id="pref-lang">
+                            <option value="pt">🇧🇷 Português</option>
+                            <option value="en">🇺🇸 English</option>
+                            <option value="es">🇪🇸 Español</option>
+                        </select>
+                    </section>
+
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>Notificações push</strong>
+                            <span>Avisos de promoções e novidades</span>
+                        </section>
+                        <button class="cfg-toggle" id="pref-notif" aria-label="Alternar notificações">
+                            <span class="cfg-toggle-knob"></span>
+                        </button>
+                    </section>
+                </section>
+
+                <section class="cfg-danger-zone">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Zona de perigo</h3>
+                    <a href="/logout" class="cfg-btn cfg-btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Sair da conta
+                    </a>
+                </section>
             </section>
 
-        </section>
+        </section><!-- /cfg-grid -->
 
     </section>
 </section>
 
 <%- include('../partials/footer') %>
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 <script src="/js/config.js"></script>
 <script src="/js/translate.js"></script>
 </body>

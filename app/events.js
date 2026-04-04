@@ -39,4 +39,21 @@ function broadcastTicket(ticketId, type, data) {
     }
 }
 
-module.exports = { addAdminClient, broadcast, addTicketClient, broadcastTicket };
+// ── SSE clients: student notifications ───────────────────────────────────────
+const studentClients = new Set();
+
+function addStudentClient(res) {
+    studentClients.add(res);
+    res.on('close', () => studentClients.delete(res));
+}
+
+function broadcastToStudents(type, data) {
+    if (studentClients.size === 0) return;
+    const payload = `event: ${type}\ndata: ${JSON.stringify(data)}\n\n`;
+    for (const client of studentClients) {
+        try { client.write(payload); }
+        catch (_) { studentClients.delete(client); }
+    }
+}
+
+module.exports = { addAdminClient, broadcast, addTicketClient, broadcastTicket, addStudentClient, broadcastToStudents };

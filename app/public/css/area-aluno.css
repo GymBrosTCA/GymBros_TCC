@@ -28,7 +28,7 @@ body {
    SIDEBAR
    ========================= */
 .aluno-sidebar {
-    flex: 0 0 220px;
+    flex: 0 0 250px;
     background: #1f1f1f;
     border-radius: 15px;
     padding: 2rem 1rem;
@@ -49,13 +49,16 @@ body {
 
 .aluno-profile h2 {
     color: #FFD700;
-    font-size: 1.8rem;
+    font-size: 1rem;
     margin-bottom: 0.2rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .aluno-profile p {
     color: #bbb;
-    font-size: 1.3rem;
+    font-size: 0.78rem;
 }
 
 /* MENU SIDEBAR */
@@ -72,11 +75,14 @@ body {
     align-items: center;
     gap: 0.6rem;
     font-weight: bold;
-    font-size: 1.5rem;
+    font-size: 0.9rem;
     color: #fff;
-    padding: 0.4rem 0.6rem;
+    padding: 0.5rem 0.75rem;
     border-radius: 8px;
     transition: all 0.3s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .aluno-menu li a:hover {

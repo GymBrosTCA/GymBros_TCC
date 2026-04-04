@@ -271,6 +271,7 @@ button { cursor: pointer; font-family: inherit; }
 .admin-toast.success { border-left-color: var(--success); }
 .admin-toast.error   { border-left-color: var(--error); }
 @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeIn   { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ── Profile card ─────────────────────────────────────────── */
 .admin-profile-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; align-items: start; }

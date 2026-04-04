@@ -1,8 +1,34 @@
 // router.js
 const express = require('express');
-const router = express.Router();
-const path = require('path');
+const router  = express.Router();
+const path    = require('path');
+const fs      = require('fs');
+const multer  = require('multer');
 const { body, validationResult } = require('express-validator');
+
+// ── Multer: upload de foto de perfil ──────────────────────────────────────────
+const photoStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = path.join(__dirname, '../../uploads/profile_photos');
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const uid = (req.session.user?.cpf || 'unknown').replace(/\D/g, '');
+        const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+        cb(null, `avatar_${uid}${ext}`);
+    },
+});
+const photoUpload = multer({
+    storage: photoStorage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (!['image/jpeg','image/png','image/webp'].includes(file.mimetype)) {
+            return cb(new Error('Formato inválido. Use JPEG, PNG ou WebP.'));
+        }
+        cb(null, true);
+    },
+});
 
 // Store central compartilhado com admin
 const { usuarios, onlineUsers } = require('../data');
@@ -15,6 +41,9 @@ router.use((req, res, next) => {
         const uid  = user.id || user.cpf;
         const isNew = !onlineUsers.has(uid);
         onlineUsers.set(uid, { nome: user.nome, email: user.email, page: req.path, lastSeen: Date.now() });
+        // Atualiza lastSeen no objeto do usuário para aparecer primeiro no admin
+        const userObj = usuarios.find(u => u.id === uid || u.cpf === uid);
+        if (userObj) userObj.lastSeen = Date.now();
         if (isNew) {
             broadcast('user_online', { id: uid, nome: user.nome, email: user.email, page: req.path, lastSeen: Date.now() });
         } else {
@@ -66,8 +95,7 @@ router.get('/login', (req, res) => res.render('pages/login', { seo: {
 }}));
 
 router.get('/register', (req, res) => {
-    if (req.session.user) return res.redirect('/area-aluno');
-    res.render('pages/register', { seo: {
+    res.render('pages/register', { user: req.session.user || null, seo: {
         title:         'Cadastro — GymBros',
         description:   'Crie sua conta GymBros gratuitamente e acesse academias parceiras, treinos online e o personal trainer IA GymBot.',
         keywords:      'cadastro gymbros, criar conta, registrar gymbros',
@@ -322,6 +350,27 @@ router.post('/config/alterar-plano', (req, res) => {
     return res.json({ mensagem: 'Plano atualizado com sucesso!' });
 });
 
+// Upload de foto de perfil
+router.post('/api/student/profile-photo', (req, res, next) => {
+    if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
+    next();
+}, photoUpload.single('photo'), (req, res) => {
+    if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado.' });
+
+    const photoUrl = `/uploads/profile_photos/${req.file.filename}`;
+    const user = req.session.user;
+    user.profile_photo = photoUrl;
+
+    const stored = usuarios.find(u => u.cpf === user.cpf || u.id === user.id);
+    if (stored) stored.profile_photo = photoUrl;
+    req.session.user = user;
+
+    return res.json({ mensagem: 'Foto atualizada com sucesso!', photoUrl });
+}, (err, _req, res, _next) => {
+    // multer error handler
+    return res.status(400).json({ erro: err.message });
+});
+
 
 
 router.post('/imc-save', (req, res) => {
@@ -457,9 +506,16 @@ router.get('/admin-usuarios', (req, res) => {
 
 // Logout
 router.get('/logout', (req, res) => {
+    const uid = (req.session.user?.cpf || '').replace(/\D/g, '');
     req.session.destroy(err => {
         if (err) console.error(err);
-        res.redirect('/login');
+        // Serve a tiny HTML page that clears user-namespaced localStorage keys then redirects
+        res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><script>
+try {
+    ['gymbros_treinos_${uid}','gymbros_evolucao_${uid}','gymbros_imc_profile_${uid}'].forEach(k => localStorage.removeItem(k));
+} catch(e){}
+location.href='/login';
+</script></body></html>`);
     });
 });
 
@@ -512,7 +568,7 @@ router.post('/register',
       return res.status(400).json({ erros: [{ param: 'email', msg: 'E-mail já cadastrado.' }] });
     }
 
-    usuarios.push({ nome, cpf, email, cep, password });
+    usuarios.push({ nome, cpf, email, cep, password, createdAt: new Date(), status: 'ativo', plano: null, planoId: null });
     console.log("Usuário registrado:", nome);
 
     return res.status(200).json({ mensagem: 'Cadastro realizado com sucesso! Redirecionando para o login...' });

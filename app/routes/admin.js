@@ -77,7 +77,9 @@ router.get('/dashboard', (req, res) => {
     const checkinsPorDiaSemana = diasSemana.map((_, d) => checkins.filter(c => c.diaSemana === d).length);
 
     // Tabelas
-    const ultimosCadastros = [...usuarios].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+    const ultimosCadastros = [...usuarios]
+        .sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0) || new Date(b.createdAt||0) - new Date(a.createdAt||0))
+        .slice(0, 5);
     const ticketsUrgentes  = tickets.filter(t => t.status === 'aberto' && (Date.now() - t.createdAt) > 86_400_000).slice(0, 5);
 
     res.render('pages/admin-dashboard', adminLocals({
@@ -248,12 +250,18 @@ router.get('/financeiro/inadimplentes', (req, res) => {
 // ── SUPORTE ───────────────────────────────────────────────────────────────────
 router.get('/suporte', (req, res) => {
     const { status = '' } = req.query;
-    let lista = [...tickets].sort((a, b) => a.createdAt - b.createdAt);
-    if (status) lista = lista.filter(t => t.status === status);
+    const todos = [...tickets].sort((a, b) => b.createdAt - a.createdAt);
+    const lista = status ? todos.filter(t => t.status === status) : todos;
+    const counts = {
+        todos:          todos.length,
+        aberto:         todos.filter(t => t.status === 'aberto').length,
+        em_atendimento: todos.filter(t => t.status === 'em_atendimento').length,
+        resolvido:      todos.filter(t => t.status === 'resolvido').length,
+    };
 
     res.render('pages/admin-suporte', adminLocals({
         title: 'Suporte', page: 'suporte', admin: req.session.admin,
-        lista, status,
+        lista, status, counts,
     }));
 });
 
@@ -287,7 +295,11 @@ router.get('/relatorios', (req, res) => {
     for (let i = 5; i >= 0; i--) {
         const d = new Date(); d.setMonth(d.getMonth() - i);
         meses.push(d.toLocaleString('pt-BR', { month: 'short' }));
-        crescimento.push(usuarios.filter(u => u.createdAt.getMonth() === d.getMonth() && u.createdAt.getFullYear() === d.getFullYear()).length);
+        crescimento.push(usuarios.filter(u => {
+            if (!u.createdAt) return false;
+            const ca = new Date(u.createdAt);
+            return ca.getMonth() === d.getMonth() && ca.getFullYear() === d.getFullYear();
+        }).length);
     }
 
     // Distribuição por plano

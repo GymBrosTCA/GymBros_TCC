@@ -5,7 +5,9 @@
     <title>Relatórios — GymBros Admin</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" href="/images/favicon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body class="admin-body">
@@ -80,6 +82,7 @@
 const baseOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#9A9A9A', font: { size: 11 } } } }, scales: { x: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A' } }, y: { grid: { color: '#2A2A2A' }, ticks: { color: '#9A9A9A' }, beginAtZero: true } } };
 
 const crescData = <%- crescimento %>;
+Chart.getChart(document.getElementById('chartCrescimento'))?.destroy();
 new Chart(document.getElementById('chartCrescimento'), {
     type: 'line',
     data: { labels: <%- meses %>, datasets: [{ label: 'Novos usuários', data: crescData, borderColor: '#C98B1D', backgroundColor: 'rgba(201,139,29,0.1)', tension: 0.4, fill: true }] },
@@ -87,6 +90,7 @@ new Chart(document.getElementById('chartCrescimento'), {
 });
 
 const distData = <%- distPlano %>;
+Chart.getChart(document.getElementById('chartPlanos'))?.destroy();
 new Chart(document.getElementById('chartPlanos'), {
     type: 'doughnut',
     data: {
@@ -97,6 +101,7 @@ new Chart(document.getElementById('chartPlanos'), {
 });
 
 const acadData = <%- acadAtivas %>;
+Chart.getChart(document.getElementById('chartAcademias'))?.destroy();
 new Chart(document.getElementById('chartAcademias'), {
     type: 'bar',
     data: {

@@ -1,13 +1,20 @@
 require('dotenv').config();
 const express = require("express");
 const session = require('express-session');
+const path    = require('path');
+const fs      = require('fs');
 const app = express();
 const port = 3000;
+
+// Garante que o diretório de uploads existe
+const uploadDir = path.join(__dirname, 'uploads', 'profile_photos');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 // ===========================
 // MIDDLEWARES
 // ===========================
 app.use(express.static("app/public"));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.set("view engine", "ejs");
 app.set("views", "./app/views");
