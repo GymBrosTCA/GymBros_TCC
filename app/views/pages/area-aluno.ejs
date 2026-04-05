@@ -63,10 +63,7 @@
 
             <section class="card card-green">
                 <h3>Meu Plano</h3>
-                <section class="progress-bar">
-                    <section class="progress-fill" style="width: 80%;"></section>
-                </section>
-                <span class="card-value">80%</span>
+                <span class="card-value"><%= user.plano || 'Sem plano' %></span>
                 <a href="/meu-plano" class="btn-card">Ver Plano</a>
             </section>
         </section>

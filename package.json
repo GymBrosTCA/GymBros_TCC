@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@google/genai": "^1.48.0",
+    "bwip-js": "^4.9.0",
     "dotenv": "^17.4.0",
     "ejs": "^3.1.6",
     "express": "^4.17.3",
@@ -18,7 +19,10 @@
     "express-validator": "^7.2.1",
     "groq-sdk": "^1.1.2",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.1.1"
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.4",
+    "pdfkit": "^0.18.0",
+    "qrcode": "^1.5.4"
   },
   "keywords": [],
   "description": "",

@@ -813,11 +813,16 @@ main {
 .btn-secundario:hover { border-color: #C98B1D; color: #C98B1D; background: rgba(201,139,29,0.04); }
 
 /* ==============================
-   CAMPO INVÁLIDO / SHAKE
+   CAMPO INVÁLIDO / VÁLIDO / SHAKE
    ============================== */
 .campo-invalido {
     border-color: #e74c3c !important;
-    box-shadow: 0 0 0 3px rgba(231,76,60,0.1) !important;
+    box-shadow: 0 0 0 3px rgba(231,76,60,0.12) !important;
+}
+
+.campo-valido {
+    border-color: #27ae60 !important;
+    box-shadow: 0 0 0 3px rgba(39,174,96,0.12) !important;
 }
 
 @keyframes shake {
@@ -827,6 +832,62 @@ main {
 }
 
 .campo-shake { animation: shake 0.4s ease; }
+
+/* ── Input with brand icon ── */
+.input-with-brand {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-brand .form-input {
+    padding-right: 4rem;
+    width: 100%;
+}
+
+.card-brand-icon {
+    position: absolute;
+    right: 1.2rem;
+    font-size: 2rem;
+    color: #555;
+    pointer-events: none;
+    line-height: 1;
+}
+
+/* ── PIX QR image ── */
+.pix-qr-img {
+    width: 14rem;
+    height: 14rem;
+    object-fit: contain;
+    border-radius: 0.8rem;
+}
+
+.pix-qr-loading {
+    font-size: 3rem;
+    color: #C98B1D;
+}
+
+/* ── Regenerar button ── */
+.btn-regenerar {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem 2.2rem;
+    background: transparent;
+    border: 2px solid #C98B1D;
+    color: #C98B1D;
+    border-radius: 0.8rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    margin-top: 1rem;
+}
+
+.btn-regenerar:hover {
+    background: #C98B1D;
+    color: #fff;
+}
 
 /* ==============================
    RESPONSIVE

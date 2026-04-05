@@ -1,10 +1,13 @@
 // router.js
-const express = require('express');
-const router  = express.Router();
-const path    = require('path');
-const fs      = require('fs');
-const multer  = require('multer');
+const express    = require('express');
+const router     = express.Router();
+const path       = require('path');
+const fs         = require('fs');
+const multer     = require('multer');
+const QRCode     = require('qrcode');
 const { body, validationResult } = require('express-validator');
+const { enviarBoleto }   = require('../services/email');
+const { gerarBoletoPDF } = require('../services/pdf');
 
 // ── Multer: upload de foto de perfil ──────────────────────────────────────────
 const photoStorage = multer.diskStorage({
@@ -163,7 +166,10 @@ router.get('/compra3', (req, res) => res.render('pages/compra3', { seo: {
 
 // Pagamento
 router.get('/pagamento', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+    if (!req.session.user) {
+        const plano = req.query.plano ? `?plano=${encodeURIComponent(req.query.plano)}` : '';
+        return res.redirect(`/login?next=/pagamento${plano}`);
+    }
     const slug = (req.query.plano || 'gymbro').toLowerCase();
     const plano = PLANOS_PAGAMENTO[slug] || PLANOS_PAGAMENTO.gymbro;
     res.render('pages/pagamento', {
@@ -213,7 +219,108 @@ router.post('/api/pagamento', (req, res) => {
     }
     req.session.user = { ...user, plano: planoNome, planoId, status: 'ativo' };
 
+    // Notifica admin via SSE
+    const { notificacoes } = require('../data');
+    const notif = {
+        id:           nextId('no'),
+        titulo:       `Nova compra — ${planoNome}`,
+        mensagem:     `${user.nome} assinou o plano ${planoNome} via ${metodo} — R$ ${Number(valor).toFixed(2).replace('.', ',')}`,
+        tipo:         'compra',
+        destinatarios:'admin',
+        criadaEm:    new Date(),
+        lidas:        [],
+    };
+    notificacoes.push(notif);
+    broadcast('nova_compra', {
+        transacaoId: transacao.id,
+        userName:    user.nome,
+        userEmail:   user.email,
+        planoNome,
+        valor:       Number(valor),
+        metodo,
+        status,
+        data:        transacao.data,
+    });
+
     return res.json({ ok: true, status, transacaoId: transacao.id });
+});
+
+// ── GET /api/pix/qr — gera QR Code PIX ───────────────────────────────────────
+router.get('/api/pix/qr', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
+
+    const { planoId, valor } = req.query;
+    const valorNum = Number(valor) || 0;
+    const valorStr = valorNum.toFixed(2);
+
+    // EMV PIX payload simplificado (demo)
+    function pixField(id, value) {
+        const len = String(value.length).padStart(2, '0');
+        return `${id}${len}${value}`;
+    }
+    const merchantInfo = pixField('00', 'br.gov.bcb.pix') +
+                         pixField('01', 'gymbros@pix.com.br');
+    const payload =
+        pixField('00', '01') +
+        pixField('26', merchantInfo) +
+        pixField('52', '0000') +
+        pixField('53', '986') +
+        pixField('54', valorStr) +
+        pixField('58', 'BR') +
+        pixField('59', 'GYMBROS TCC') +
+        pixField('60', 'Sao Paulo') +
+        pixField('62', pixField('05', planoId || 'pl002'));
+
+    // CRC16 simplificado (apenas para demo — não é CRC real)
+    const crc = '0000';
+    const fullPayload = payload + pixField('63', crc);
+
+    try {
+        const dataUrl = await QRCode.toDataURL(fullPayload, { width: 220, margin: 1 });
+        const expiraEm = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos
+        res.json({ ok: true, dataUrl, pixPayload: fullPayload, expiraEm });
+    } catch (err) {
+        console.error('[pix/qr]', err);
+        res.status(500).json({ ok: false, erro: 'Erro ao gerar QR Code.' });
+    }
+});
+
+// ── POST /api/boleto — gera boleto PDF e envia e-mail ─────────────────────────
+router.post('/api/boleto', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
+
+    const { planoNome, valor } = req.body;
+    const user = req.session.user;
+
+    const linhaDigitavel = '23790.00009 01020.269702 03010.247409 8 94350000006490';
+    const vencimento = new Date();
+    vencimento.setDate(vencimento.getDate() + 3);
+    const vencimentoStr = vencimento.toLocaleDateString('pt-BR');
+
+    try {
+        const pdfBuffer = await gerarBoletoPDF({
+            nome:          user.nome,
+            email:         user.email,
+            planoNome,
+            valor:         Number(valor),
+            linhaDigitavel,
+            vencimento:    vencimentoStr,
+        });
+
+        await enviarBoleto({
+            to:            user.email,
+            nome:          user.nome,
+            planoNome,
+            valor:         Number(valor),
+            linhaDigitavel,
+            pdfBuffer,
+        });
+
+        res.json({ ok: true, linhaDigitavel, vencimento: vencimentoStr, emailEnviado: true });
+    } catch (err) {
+        console.error('[boleto]', err);
+        res.status(500).json({ ok: false, erro: 'Erro ao gerar boleto.' });
+    }
 });
 
 router.get('/about', (req, res) => res.render('pages/about', { seo: {
@@ -659,7 +766,7 @@ router.post('/login',
       return res.status(400).json({ erros: errors.array() });
     }
 
-    const { username, password } = req.body;
+    const { username, password, next } = req.body;
     const user = usuarios.find(u => (u.nome === username || u.email === username || u.cpf === username) && u.password === password);
 
     if (!user) {
@@ -669,8 +776,11 @@ router.post('/login',
     // salva usuário na sessão
     req.session.user = user;
 
+    // Redireciona para next apenas se for path interno válido (evita open redirect)
+    const safeNext = (next && next.startsWith('/') && !next.startsWith('//')) ? next : '/area-aluno';
+
     console.log("Login bem-sucedido:", username);
-    return res.status(200).json({ mensagem: 'Login realizado com sucesso! Redirecionando...', redirect: '/area-aluno' });
+    return res.status(200).json({ mensagem: 'Login realizado com sucesso! Redirecionando...', redirect: safeNext });
   }
 );
 
