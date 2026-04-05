@@ -690,15 +690,6 @@ router.get('/admin-usuarios', (req, res) => {
     res.render('pages/admin-usuarios', { user: req.session.user });
 });
 
-// Troca de idioma — define o cookie de locale e volta à página anterior
-router.get('/lang/:locale', (req, res) => {
-    const valid  = ['pt', 'en', 'es'];
-    const locale = valid.includes(req.params.locale) ? req.params.locale : 'pt';
-    res.cookie('gymbros_lang', locale, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/' });
-    const back = req.headers.referer || '/';
-    res.redirect(back);
-});
-
 // Logout
 router.get('/logout', (req, res) => {
     const uid = (req.session.user?.cpf || '').replace(/\D/g, '');

@@ -1,24 +1,67 @@
 /**
- * translate.js — tradução dinâmica de conteúdo GymBros
- *
- * Strings estáticas de UI (nav, sidebar, footer, botões, formulários)
- * agora são renderizadas server-side pelo pacote `i18n` via __().
- *
- * Este módulo cuida apenas de:
- *   1. Tradução dinâmica de conteúdo de página via POST /api/translate (Groq)
- *   2. Atualização visual dos botões de idioma ativos
- *   3. Troca de idioma: grava cookie gymbros_lang + recarrega a página
- *      para que o servidor re-renderize com o locale correto.
+ * translate.js — tradução de página completa GymBros
+ * Estratégia:
+ *   1. Dicionário estático para strings de UI conhecidas (data-translate)
+ *   2. TreeWalker coleta TODOS os nós de texto da página
+ *   3. Chama POST /api/translate em lote para traduzir o restante
+ *   4. Restaura textos originais ao voltar para PT
+ *   5. Cache por página+idioma em sessionStorage
  */
 'use strict';
 
-// ── Lê locale atual do cookie (definido server-side pelo i18n) ───────────────
-function getCookieLang() {
-    const match = document.cookie.split('; ').find(r => r.startsWith('gymbros_lang='));
-    return match ? match.split('=')[1] : 'pt';
-}
+// ── Dicionário estático ──────────────────────────────────────────────────────
+const DICT = {
+    'nav.home':        { pt: 'Home',        en: 'Home',         es: 'Inicio' },
+    'nav.academias':   { pt: 'Academias',   en: 'Gyms',         es: 'Gimnasios' },
+    'nav.about':       { pt: 'Sobre nós',   en: 'About us',     es: 'Sobre nosotros' },
+    'nav.planos':      { pt: 'Planos e Preços', en: 'Plans & Pricing', es: 'Planes y Precios' },
+    'nav.login':       { pt: 'Entrar',      en: 'Log in',       es: 'Ingresar' },
 
-let currentLang = getCookieLang();
+    'sidebar.painel':   { pt: 'Painel',      en: 'Dashboard',    es: 'Panel' },
+    'sidebar.treinos':  { pt: 'Meus Treinos', en: 'My Workouts', es: 'Mis Entrenamientos' },
+    'sidebar.evolucao': { pt: 'Evolução',    en: 'Progress',     es: 'Progreso' },
+    'sidebar.plano':    { pt: 'Meu Plano',   en: 'My Plan',      es: 'Mi Plan' },
+    'sidebar.config':   { pt: 'Configurações', en: 'Settings',   es: 'Configuración' },
+    'sidebar.ai':       { pt: 'Personal Trainer IA', en: 'AI Personal Trainer', es: 'Entrenador IA' },
+    'sidebar.avaliacao':{ pt: 'Avaliação Corporal', en: 'Body Assessment', es: 'Evaluación Corporal' },
+    'sidebar.imc':      { pt: 'Meu Perfil IMC', en: 'My BMI Profile', es: 'Mi Perfil IMC' },
+    'sidebar.suporte':  { pt: 'Suporte', en: 'Support', es: 'Soporte' },
+    'sidebar.role':     { pt: 'Aluno GymBros', en: 'GymBros Member', es: 'Miembro GymBros' },
+
+    'btn.login':       { pt: 'Entrar',       en: 'Log in',       es: 'Ingresar' },
+    'btn.register':    { pt: 'Registrar',    en: 'Register',     es: 'Registrarse' },
+    'btn.save':        { pt: 'Salvar',       en: 'Save',         es: 'Guardar' },
+    'btn.cancel':      { pt: 'Cancelar',     en: 'Cancel',       es: 'Cancelar' },
+    'btn.next':        { pt: 'Avançar',      en: 'Next',         es: 'Siguiente' },
+    'btn.back':        { pt: 'Voltar',       en: 'Back',         es: 'Atrás' },
+    'btn.send':        { pt: 'Enviar',       en: 'Send',         es: 'Enviar' },
+    'btn.logout':      { pt: 'Sair',         en: 'Log out',      es: 'Salir' },
+    'btn.edit':        { pt: 'Editar',       en: 'Edit',         es: 'Editar' },
+    'btn.geolocate':   { pt: 'Usar minha localização', en: 'Use my location', es: 'Usar mi ubicación' },
+    'btn.subscribe':   { pt: 'Assinar',      en: 'Subscribe',    es: 'Suscribirse' },
+    'btn.upgrade':     { pt: 'Upar de Plano', en: 'Upgrade Plan', es: 'Mejorar Plan' },
+    'btn.cancel.plan': { pt: 'Cancelar Plano', en: 'Cancel Plan', es: 'Cancelar Plan' },
+
+    'form.name':       { pt: 'Nome completo', en: 'Full name',   es: 'Nombre completo' },
+    'form.email':      { pt: 'E-mail',        en: 'Email',       es: 'Correo electrónico' },
+    'form.password':   { pt: 'Senha',         en: 'Password',    es: 'Contraseña' },
+    'form.confirm.pw': { pt: 'Confirmar senha', en: 'Confirm password', es: 'Confirmar contraseña' },
+    'form.cpf':        { pt: 'CPF (somente números)', en: 'CPF (numbers only)', es: 'CPF (solo números)' },
+    'form.cep':        { pt: 'CEP',           en: 'Zip code',    es: 'Código postal' },
+    'form.terms':      { pt: 'Aceito os termos de uso', en: 'I accept the terms of use', es: 'Acepto los términos de uso' },
+
+    'footer.copy': {
+        pt: '© 2025 GymBros. Todos os direitos reservados.',
+        en: '© 2025 GymBros. All rights reserved.',
+        es: '© 2025 GymBros. Todos los derechos reservados.'
+    },
+    'footer.privacy': { pt: 'Política de Privacidade', en: 'Privacy Policy',  es: 'Política de Privacidad' },
+    'footer.terms':   { pt: 'Termos de Serviço',       en: 'Terms of Service', es: 'Términos de Servicio' },
+    'footer.faq':     { pt: 'FAQ',                     en: 'FAQ',              es: 'Preguntas Frecuentes' },
+};
+
+// ── Estado global ─────────────────────────────────────────────────────────────
+let currentLang = localStorage.getItem('gymbros_lang') || 'pt';
 
 // Nós de texto coletados no carregamento: [{ node, orig }]
 const textNodes = [];
@@ -39,8 +82,12 @@ function collectTextNodes() {
                 const par = node.parentElement;
                 if (!par) return NodeFilter.FILTER_REJECT;
                 if (SKIP_TAGS.has(par.tagName)) return NodeFilter.FILTER_REJECT;
-                if (par.dataset && par.dataset.translateApi) return NodeFilter.FILTER_REJECT;
+                // Pula elementos já tratados pelo dicionário estático
+                if (par.dataset && (par.dataset.translate || par.dataset.translateApi)) {
+                    return NodeFilter.FILTER_REJECT;
+                }
                 const text = node.textContent.trim();
+                // Só textos com letras reais (não números/símbolos sozinhos)
                 if (text.length < 2 || !/[a-zA-ZÀ-ÿ]/.test(text)) {
                     return NodeFilter.FILTER_REJECT;
                 }
@@ -54,13 +101,32 @@ function collectTextNodes() {
     }
 }
 
-// ── Tradução de página inteira via API (Groq) ─────────────────────────────────
+// ── Dicionário estático: aplica em elementos data-translate ───────────────────
+function applyDictionary(lang) {
+    document.querySelectorAll('[data-translate]').forEach(el => {
+        const key = el.dataset.translate;
+        if (!DICT[key]?.[lang]) return;
+        const val = DICT[key][lang];
+        // Preserva ícones <i> filhos — atualiza só os nós de texto
+        if (el.children.length > 0) {
+            const tNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
+            if (tNodes.length) {
+                tNodes[tNodes.length - 1].textContent = ' ' + val;
+            }
+        } else {
+            el.textContent = val;
+        }
+    });
+}
+
+// ── Tradução de página inteira via API ────────────────────────────────────────
 async function translatePage(lang) {
     if (!textNodes.length) return;
 
+    // Restaura originais (sempre, para garantir base limpa)
     textNodes.forEach(({ node, orig }) => { node.textContent = orig; });
 
-    if (lang === 'pt') return;
+    if (lang === 'pt') return; // PT é a base
 
     const pageKey = `gymbros_page_${lang}_${location.pathname}`;
     const cached  = sessionStorage.getItem(pageKey);
@@ -71,10 +137,11 @@ async function translatePage(lang) {
             textNodes.forEach(({ node }, i) => {
                 if (saved[i] != null) node.textContent = saved[i];
             });
-        } catch (e) { /* cache corrompido */ }
+        } catch (e) { /* cache corrompido — ignora */ }
         return;
     }
 
+    // Coleta textos únicos para enviar (filtra whitespace puro)
     const texts = textNodes.map(({ node }) => node.textContent.trim());
     const valid = texts.filter(t => t.length > 1);
     if (!valid.length) return;
@@ -106,7 +173,7 @@ async function translatePage(lang) {
     }
 }
 
-// ── Atualiza botões de idioma ativos ──────────────────────────────────────────
+// ── Atualiza botões de idioma ─────────────────────────────────────────────────
 function updateLangButtons(lang) {
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lang === lang);
@@ -115,22 +182,21 @@ function updateLangButtons(lang) {
 }
 
 // ── Troca de idioma ───────────────────────────────────────────────────────────
-// Grava o cookie (lido pelo middleware i18n no próximo request) e recarrega
-// a página para que o servidor renderize as strings estáticas no novo locale.
 function switchLanguage(lang) {
     if (lang === currentLang) return;
-    document.cookie = `gymbros_lang=${lang}; path=/; max-age=${365 * 24 * 3600}`;
-    location.reload();
+    currentLang = lang;
+    localStorage.setItem('gymbros_lang', lang);
+    updateLangButtons(lang);
+    applyDictionary(lang);
+    translatePage(lang);
 }
-
-// Expõe globalmente para uso em config.js
-window.changeLang = switchLanguage;
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     collectTextNodes();
-    updateLangButtons(currentLang);
 
+    applyDictionary(currentLang);
+    updateLangButtons(currentLang);
     if (currentLang !== 'pt') {
         translatePage(currentLang);
     }
