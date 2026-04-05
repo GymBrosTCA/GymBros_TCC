@@ -200,6 +200,7 @@ router.get('/pagamento', (req, res) => {
     res.render('pages/pagamento', {
         user: req.session.user,
         plano,
+        hideThemeToggle: true,
         seo: {
             title:       'Pagamento — GymBros',
             canonical:   '/pagamento',
