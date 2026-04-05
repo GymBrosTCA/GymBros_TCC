@@ -3,6 +3,7 @@ const express = require("express");
 const session = require('express-session');
 const path    = require('path');
 const fs      = require('fs');
+const i18n    = require('./app/config/i18n');
 const app = express();
 const port = 3000;
 
@@ -27,6 +28,9 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }));
+
+// i18n: detecta locale pelo cookie gymbros_lang, expõe __() em todas as views
+app.use(i18n.init);
 
 // Injeta baseUrl em todas as views (canonical + OG)
 app.use((req, res, next) => {

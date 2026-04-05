@@ -23,18 +23,18 @@
                 <img id="sidebar-avatar" src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
             </section>
             <h2><%= user.nome %></h2>
-            <p data-translate="sidebar.role">Aluno GymBros</p>
+            <p><%= __('sidebar.role') %></p>
         </section>
         <ul class="aluno-menu">
-            <li><a href="/area-aluno" data-translate="sidebar.painel"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
-            <li><a href="/treinos" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
-            <li><a href="/evolucao" class="active" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
-            <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
-            <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
-            <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
-            <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
-            <li><a href="/imc-form" data-translate="sidebar.imc"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
-            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+            <li><a href="/area-aluno"><i class="fas fa-tachometer-alt"></i> <%= __('sidebar.painel') %></a></li>
+            <li><a href="/treinos"><i class="fas fa-dumbbell"></i> <%= __('sidebar.treinos') %></a></li>
+            <li><a href="/evolucao" class="active"><i class="fas fa-chart-line"></i> <%= __('sidebar.evolucao') %></a></li>
+            <li><a href="/meu-plano"><i class="fas fa-file-alt"></i> <%= __('sidebar.plano') %></a></li>
+            <li><a href="/config"><i class="fas fa-cog"></i> <%= __('sidebar.config') %></a></li>
+            <li><a href="/ai/chat"><i class="fas fa-robot"></i> <%= __('sidebar.ai') %></a></li>
+            <li><a href="/ai/avaliacao"><i class="fas fa-camera"></i> <%= __('sidebar.avaliacao') %></a></li>
+            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> <%= __('sidebar.imc') %></a></li>
+            <li><a href="/suporte"><i class="fas fa-headset"></i> <%= __('sidebar.suporte') %></a></li>
         </ul>
     </section>
 
