@@ -22,7 +22,6 @@ function atualizarProgress(stepId) {
     const l1 = document.getElementById('prog-line-1');
     const l2 = document.getElementById('prog-line-2');
 
-    // Reset
     [p1, p2, p3].forEach(p => p.className = 'prog-step');
     [l1, l2].forEach(l => l.className = 'prog-line');
     p1.querySelector('span').textContent = '1';
@@ -31,13 +30,11 @@ function atualizarProgress(stepId) {
 
     if (stepId === 'step-1') {
         p1.classList.add('active');
-
     } else if (stepId.startsWith('step-2')) {
         p1.classList.add('done');
         p2.classList.add('active');
         l1.classList.add('done');
         p1.querySelector('span').textContent = '✓';
-
     } else if (stepId === 'step-3') {
         p1.classList.add('done');
         p2.classList.add('done');
@@ -82,18 +79,51 @@ function copiarCodigo(inputId, btnId) {
     }
 }
 
-// Make global so EJS onclick can call it
 window.copiarCodigo = copiarCodigo;
+
+// ── PIX QR Code ───────────────────────────────────────────────────────────
+
+async function carregarPixQR() {
+    const loading = document.getElementById('pix-qr-loading');
+    const img     = document.getElementById('pix-qr-img');
+    const input   = document.getElementById('pix-codigo');
+    if (!img) return;
+
+    if (loading) loading.classList.remove('hidden');
+    img.classList.add('hidden');
+
+    try {
+        const params = new URLSearchParams({
+            planoId: PLANO.id,
+            valor:   PLANO.preco,
+        });
+        const resp = await fetch(`/api/pix/qr?${params}`);
+        const data = await resp.json();
+        if (data.ok) {
+            img.src = data.dataUrl;
+            img.classList.remove('hidden');
+            if (loading) loading.classList.add('hidden');
+            if (input) input.value = data.pixPayload;
+        }
+    } catch (err) {
+        console.error('[pix/qr]', err);
+        if (loading) loading.classList.add('hidden');
+    }
+}
 
 // ── PIX Countdown Timer ───────────────────────────────────────────────────
 
 function iniciarTimer() {
-    let segundos = 30 * 60;
-    const el = document.getElementById('pix-countdown');
+    let segundos = 5 * 60; // 5 minutos
+    const el     = document.getElementById('pix-countdown');
+    const btnPix = document.getElementById('btn-ja-paguei');
+    const btnReg = document.getElementById('btn-regenerar-pix');
     if (!el) return;
 
     clearInterval(pixTimerInterval);
     el.style.color = '#C98B1D';
+    if (btnPix) { btnPix.disabled = false; btnPix.innerHTML = '<i class="fas fa-check"></i> Já paguei'; }
+    if (btnReg) btnReg.classList.add('hidden');
 
     pixTimerInterval = setInterval(() => {
         segundos--;
@@ -101,18 +131,46 @@ function iniciarTimer() {
         const s = segundos % 60;
         el.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 
-        if (m < 5) el.style.color = '#e74c3c';
+        if (m < 2) el.style.color = '#e74c3c';
 
         if (segundos <= 0) {
             clearInterval(pixTimerInterval);
             el.textContent = 'Expirado';
-            const btnPix = document.getElementById('btn-ja-paguei');
             if (btnPix) {
                 btnPix.disabled = true;
                 btnPix.innerHTML = '<i class="fas fa-times"></i> Código expirado';
             }
+            if (btnReg) btnReg.classList.remove('hidden');
         }
     }, 1000);
+}
+
+// ── Luhn Algorithm ────────────────────────────────────────────────────────
+
+function luhn(num) {
+    const digits = num.replace(/\D/g, '');
+    let sum = 0;
+    let alt = false;
+    for (let i = digits.length - 1; i >= 0; i--) {
+        let n = parseInt(digits[i], 10);
+        if (alt) { n *= 2; if (n > 9) n -= 9; }
+        sum += n;
+        alt = !alt;
+    }
+    return sum % 10 === 0;
+}
+
+// ── Card Brand Detection ──────────────────────────────────────────────────
+
+const BRANDS = [
+    { name: 'Visa',       icon: 'fab fa-cc-visa',       pattern: /^4/ },
+    { name: 'Mastercard', icon: 'fab fa-cc-mastercard', pattern: /^5[1-5]|^2(2[2-9]|[3-6]\d|7[01])/ },
+    { name: 'Amex',       icon: 'fab fa-cc-amex',       pattern: /^3[47]/ },
+    { name: 'Elo',        icon: 'fas fa-credit-card',   pattern: /^(4011|4312|4389|4514|4576|5041|5066|5090|6277|6362|6363|650[0-5]|6516|6550)/ },
+];
+
+function detectBrand(raw) {
+    return BRANDS.find(b => b.pattern.test(raw)) || null;
 }
 
 // ── Card Input Masks ──────────────────────────────────────────────────────
@@ -132,6 +190,22 @@ function mascaraNumero(e) {
     const raw = e.target.value.replace(/\D/g, '').slice(0, 16);
     e.target.value = raw.replace(/(.{4})/g, '$1 ').trim();
     atualizarPreviewNumero(raw);
+
+    // Brand icon
+    const brand   = detectBrand(raw);
+    const iconEl  = document.getElementById('card-brand-icon');
+    if (iconEl) {
+        iconEl.innerHTML = brand ? `<i class="${brand.icon}" title="${brand.name}"></i>` : '';
+    }
+
+    // Real-time Luhn feedback
+    if (raw.length === 16) {
+        setFieldRealtime(e.target, luhn(raw));
+    } else {
+        clearFieldRealtime(e.target);
+    }
+
+    verificarBotaoCartao();
 }
 
 function mascaraValidade(e) {
@@ -140,10 +214,63 @@ function mascaraValidade(e) {
     e.target.value = v;
     const el = document.getElementById('prev-validade');
     if (el) el.textContent = v || 'MM/AA';
+
+    if (v.length === 5) {
+        const partes = v.split('/');
+        const mm = parseInt(partes[0]);
+        const ok = !isNaN(mm) && mm >= 1 && mm <= 12 && partes[1].length === 2;
+        setFieldRealtime(e.target, ok);
+    } else {
+        clearFieldRealtime(e.target);
+    }
+
+    verificarBotaoCartao();
 }
 
 function mascaraCVV(e) {
     e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    const len = e.target.value.length;
+    if (len >= 3) {
+        setFieldRealtime(e.target, true);
+    } else {
+        clearFieldRealtime(e.target);
+    }
+    verificarBotaoCartao();
+}
+
+// ── Real-time Field State ─────────────────────────────────────────────────
+
+function setFieldRealtime(el, valid) {
+    el.classList.remove('campo-valido', 'campo-invalido', 'campo-shake');
+    el.classList.add(valid ? 'campo-valido' : 'campo-invalido');
+}
+
+function clearFieldRealtime(el) {
+    el.classList.remove('campo-valido', 'campo-invalido', 'campo-shake');
+}
+
+// ── Enable/disable Confirmar button ──────────────────────────────────────
+
+function verificarBotaoCartao() {
+    const numero   = document.getElementById('cartao-numero');
+    const nome     = document.getElementById('cartao-nome');
+    const validade = document.getElementById('cartao-validade');
+    const cvv      = document.getElementById('cartao-cvv');
+    const btn      = document.getElementById('btn-confirmar-cartao');
+    if (!btn) return;
+
+    const raw = (numero?.value || '').replace(/\s/g, '');
+    const numOk = raw.length === 16 && luhn(raw);
+
+    const nomeOk = (nome?.value.trim().length >= 3) && !/\d/.test(nome?.value);
+
+    const partes = (validade?.value || '').split('/');
+    const mm = parseInt(partes[0]);
+    const valOk = !isNaN(mm) && mm >= 1 && mm <= 12 && partes[1]?.length === 2;
+
+    const cvvOk = (cvv?.value.length >= 3);
+
+    btn.disabled = !(numOk && nomeOk && valOk && cvvOk);
 }
 
 // ── Parcelas Dropdown ─────────────────────────────────────────────────────
@@ -163,7 +290,7 @@ function preencherParcelas() {
     }
 }
 
-// ── Card Form Validation ──────────────────────────────────────────────────
+// ── Card Form Validation (submit) ─────────────────────────────────────────
 
 function marcarInvalido(el) {
     el.classList.add('campo-invalido', 'campo-shake');
@@ -184,22 +311,13 @@ function validarCartao() {
 
     let valido = true;
 
-    if (numero.value.replace(/\s/g, '').length < 16) {
-        marcarInvalido(numero); valido = false;
-    }
-    if (nome.value.trim().length < 3 || /\d/.test(nome.value)) {
-        marcarInvalido(nome); valido = false;
-    }
+    const raw = numero.value.replace(/\s/g, '');
+    if (raw.length < 16 || !luhn(raw)) { marcarInvalido(numero); valido = false; }
+    if (nome.value.trim().length < 3 || /\d/.test(nome.value)) { marcarInvalido(nome); valido = false; }
     const partes = validade.value.split('/');
     const mm = parseInt(partes[0]);
-    const mesOk = !isNaN(mm) && mm >= 1 && mm <= 12;
-    const anoOk = partes[1] && partes[1].length === 2;
-    if (!mesOk || !anoOk) {
-        marcarInvalido(validade); valido = false;
-    }
-    if (cvv.value.length < 3) {
-        marcarInvalido(cvv); valido = false;
-    }
+    if (isNaN(mm) || mm < 1 || mm > 12 || !partes[1] || partes[1].length !== 2) { marcarInvalido(validade); valido = false; }
+    if (cvv.value.length < 3) { marcarInvalido(cvv); valido = false; }
 
     return valido;
 }
@@ -230,6 +348,27 @@ async function finalizarPagamento(metodo, parcelas) {
     }
 }
 
+// ── POST /api/boleto ──────────────────────────────────────────────────────
+
+async function gerarBoleto() {
+    if (typeof PLANO === 'undefined') return { ok: false };
+    try {
+        const resp = await fetch('/api/boleto', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                planoId:   PLANO.id,
+                planoNome: PLANO.nome,
+                valor:     PLANO.preco,
+            })
+        });
+        if (resp.status === 401) { window.location.href = '/login'; return { ok: false }; }
+        return await resp.json();
+    } catch {
+        return { ok: false };
+    }
+}
+
 // ── Show Step 3 ───────────────────────────────────────────────────────────
 
 const METODO_LABEL = {
@@ -249,7 +388,7 @@ function mostrarConfirmacao(metodo, status) {
     const badge = document.getElementById('conf-status-badge');
     const sub   = document.getElementById('conf-sub');
 
-    if (status === 'ativo') {
+    if (status === 'pago' || status === 'ativo') {
         badge.className = 'confirmacao-status ativo';
         badge.innerHTML = '<i class="fas fa-check-circle"></i> Assinatura ativada';
         sub.textContent = 'Sua assinatura foi ativada com sucesso. Bons treinos!';
@@ -284,9 +423,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (metodoSelecionado === 'pix') {
             setStep('step-2-pix');
             iniciarTimer();
+            carregarPixQR();
         } else if (metodoSelecionado === 'cartao') {
             setStep('step-2-cartao');
             preencherParcelas();
+            verificarBotaoCartao();
         } else if (metodoSelecionado === 'boleto') {
             setStep('step-2-boleto');
         }
@@ -308,6 +449,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCopiarBoleto = document.getElementById('btn-copiar-boleto');
     if (btnCopiarBoleto) btnCopiarBoleto.addEventListener('click', () => copiarCodigo('boleto-codigo', 'btn-copiar-boleto'));
 
+    // PIX: Regenerar QR
+    const btnReg = document.getElementById('btn-regenerar-pix');
+    if (btnReg) {
+        btnReg.addEventListener('click', () => {
+            iniciarTimer();
+            carregarPixQR();
+        });
+    }
+
     // PIX: Já paguei
     const btnJaPaguei = document.getElementById('btn-ja-paguei');
     if (btnJaPaguei) {
@@ -322,13 +472,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Card: Confirmar pagamento
     const btnCartao = document.getElementById('btn-confirmar-cartao');
     if (btnCartao) {
+        btnCartao.disabled = true; // começa desabilitado
         btnCartao.addEventListener('click', async () => {
             if (!validarCartao()) return;
             const parcelas = parseInt(document.getElementById('cartao-parcelas').value) || 1;
             btnCartao.disabled = true;
             btnCartao.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
             const result = await finalizarPagamento('cartao', parcelas);
-            mostrarConfirmacao('cartao', result.status || 'ativo');
+            mostrarConfirmacao('cartao', result.status || 'pago');
         });
     }
 
@@ -338,22 +489,34 @@ document.addEventListener('DOMContentLoaded', () => {
         btnBoleto.addEventListener('click', async () => {
             btnBoleto.disabled = true;
             btnBoleto.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando boleto...';
-            const result = await finalizarPagamento('boleto', 1);
-            mostrarConfirmacao('boleto', result.status || 'pendente');
+            const result = await gerarBoleto();
+            if (result.ok && result.linhaDigitavel) {
+                const boletoInput = document.getElementById('boleto-codigo');
+                if (boletoInput) boletoInput.value = result.linhaDigitavel;
+            }
+            const pagResult = await finalizarPagamento('boleto', 1);
+            mostrarConfirmacao('boleto', pagResult.status || 'pendente');
         });
     }
 
-    // Card number mask + preview
+    // Card number mask + brand + preview
     const numInput = document.getElementById('cartao-numero');
     if (numInput) numInput.addEventListener('input', mascaraNumero);
 
-    // Card name → preview
+    // Card name → preview + validation
     const nomInput = document.getElementById('cartao-nome');
     if (nomInput) {
         nomInput.addEventListener('input', e => {
             e.target.value = e.target.value.toUpperCase();
             const el = document.getElementById('prev-nome');
             if (el) el.textContent = e.target.value || 'SEU NOME';
+            const nomeOk = e.target.value.trim().length >= 3 && !/\d/.test(e.target.value);
+            if (e.target.value.trim().length >= 3) {
+                setFieldRealtime(e.target, nomeOk);
+            } else {
+                clearFieldRealtime(e.target);
+            }
+            verificarBotaoCartao();
         });
     }
 
@@ -364,10 +527,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // CVV mask
     const cvvInput = document.getElementById('cartao-cvv');
     if (cvvInput) cvvInput.addEventListener('input', mascaraCVV);
-
-    // Clear invalid state on user input
-    ['cartao-numero', 'cartao-nome', 'cartao-validade', 'cartao-cvv'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', () => limparInvalido(el));
-    });
 });

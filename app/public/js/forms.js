@@ -130,10 +130,12 @@ if (loginForm) {
         const password = document.getElementById('password').value;
 
         try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const nextPath  = urlParams.get('next') || '';
             const res  = await fetch('/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ username, password })
+                body: new URLSearchParams({ username, password, next: nextPath })
             });
             const data = await res.json();
 
@@ -148,7 +150,7 @@ if (loginForm) {
             }
 
             successEl.textContent = data.mensagem;
-            setTimeout(() => { window.location.href = '/area-aluno'; }, 1000);
+            setTimeout(() => { window.location.href = data.redirect || '/area-aluno'; }, 1000);
         } catch (err) {
             console.error(err);
             successEl.textContent = 'Erro inesperado. Tente novamente.';

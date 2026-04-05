@@ -128,8 +128,9 @@
 
             <section class="pix-wrapper">
                 <section class="pix-qr-section">
-                    <section class="pix-qr">
-                        <i class="fas fa-qrcode"></i>
+                    <section class="pix-qr" id="pix-qr-wrap">
+                        <i class="fas fa-spinner fa-spin pix-qr-loading" id="pix-qr-loading"></i>
+                        <img class="pix-qr-img hidden" id="pix-qr-img" alt="QR Code PIX">
                     </section>
                     <p class="pix-instrucao">Abra o app do seu banco e escaneie o QR Code</p>
                 </section>
@@ -146,12 +147,15 @@
 
                 <section class="pix-timer">
                     <i class="fas fa-clock"></i>
-                    Expira em <span id="pix-countdown" class="pix-timer-count">30:00</span>
+                    Expira em <span id="pix-countdown" class="pix-timer-count">05:00</span>
                 </section>
 
                 <section class="pix-acoes">
                     <button class="btn-ja-paguei" id="btn-ja-paguei">
                         <i class="fas fa-check"></i> Já paguei
+                    </button>
+                    <button class="btn-regenerar hidden" id="btn-regenerar-pix">
+                        <i class="fas fa-redo"></i> Gerar novo código
                     </button>
                 </section>
             </section>
@@ -191,8 +195,11 @@
                 <section class="cartao-form">
                     <section class="form-grupo">
                         <label class="form-label" for="cartao-numero">Número do cartão</label>
-                        <input class="form-input" id="cartao-numero" type="text"
-                            placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" autocomplete="cc-number">
+                        <section class="input-with-brand">
+                            <input class="form-input" id="cartao-numero" type="text"
+                                placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" autocomplete="cc-number">
+                            <span class="card-brand-icon" id="card-brand-icon"></span>
+                        </section>
                     </section>
 
                     <section class="form-grupo">
