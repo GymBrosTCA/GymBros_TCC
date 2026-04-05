@@ -58,6 +58,10 @@ async function enviarBoleto({
   });
 
   try {
+    // testa conexão antes de enviar
+    await tp.verify();
+    console.log('[email] SMTP conectado com sucesso');
+
     await tp.sendMail({
       from:
         process.env.SMTP_FROM ||
