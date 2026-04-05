@@ -34,7 +34,7 @@ const photoUpload = multer({
 });
 
 // Store central compartilhado com admin
-const { usuarios, onlineUsers, transacoes, nextId } = require('../data');
+const { usuarios, onlineUsers, transacoes, planos: planosData, nextId } = require('../data');
 const { broadcast } = require('../events');
 
 // ── Dados dos planos disponíveis ──────────────────────────────────────────
@@ -62,6 +62,31 @@ router.use((req, res, next) => {
     }
     next();
 });
+
+// ── Middlewares de autenticação ───────────────────────────────────────────────
+
+/**
+ * Só exige login. Qualquer usuário autenticado passa.
+ */
+function requireAuth(req, res, next) {
+    if (!req.session.user) return res.redirect('/login');
+    next();
+}
+
+/**
+ * Exige login + plano ativo.
+ * Pending (PIX/boleto aguardando confirmação) → redireciona com aviso.
+ * Sem plano → redireciona para /planos com banner.
+ */
+function requirePlano(req, res, next) {
+    if (!req.session.user) return res.redirect('/login');
+    const user = req.session.user;
+
+    if (!user.plano) {
+        return res.redirect('/planos?semPlano=1');
+    }
+    next();
+}
 
 // Função simples pra validar CPF (só pra demo)
 function validarCPF(cpf) {
@@ -168,7 +193,7 @@ router.get('/compra3', (req, res) => res.render('pages/compra3', { seo: {
 router.get('/pagamento', (req, res) => {
     if (!req.session.user) {
         const plano = req.query.plano ? `?plano=${encodeURIComponent(req.query.plano)}` : '';
-        return res.redirect(`/login?next=/pagamento${plano}`);
+        return res.redirect(`/login?redirect=/pagamento${encodeURIComponent(plano)}`);
     }
     const slug = (req.query.plano || 'gymbro').toLowerCase();
     const plano = PLANOS_PAGAMENTO[slug] || PLANOS_PAGAMENTO.gymbro;
@@ -210,7 +235,6 @@ router.post('/api/pagamento', (req, res) => {
 
     transacoes.push(transacao);
 
-    // Atualiza o plano do usuário na sessão e no store
     const stored = usuarios.find(u => u.id === user.id || u.cpf === user.cpf);
     if (stored) {
         stored.plano   = planoNome;
@@ -332,9 +356,8 @@ router.get('/about', (req, res) => res.render('pages/about', { seo: {
     ogDescription: 'Nossa missão: democratizar o acesso à saúde e ao fitness no Brasil.',
 }}));
 
-// Área do Aluno (protegida)
-router.get('/area-aluno', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+// Área do Aluno (protegida — requer plano ativo)
+router.get('/area-aluno', requirePlano, (req, res) => {
     res.render('pages/area-aluno', { user: req.session.user, seo: {
         title: 'Painel do Aluno — GymBros', canonical: '/area-aluno',
         robots: 'noindex, nofollow', description: 'Painel do aluno GymBros.',
@@ -342,8 +365,7 @@ router.get('/area-aluno', (req, res) => {
 });
 
 //Treinos
-router.get('/treinos', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+router.get('/treinos', requirePlano, (req, res) => {
     res.render('pages/treinos', {
         user: req.session.user,
         seo: { title: 'Meus Treinos — GymBros', canonical: '/treinos', robots: 'noindex, nofollow', description: 'Gerencie seus treinos no GymBros.' },
@@ -361,9 +383,8 @@ router.get('/treinos', (req, res) => {
     });
 });
 
-//Evolução 
-router.get('/evolucao', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+//Evolução
+router.get('/evolucao', requirePlano, (req, res) => {
 
     const evolucao = {
         treinosConcluidos: 7,
@@ -390,61 +411,53 @@ router.get('/evolucao', (req, res) => {
 });
 
 // Meu Plano
-router.get('/meu-plano', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+router.get('/meu-plano', requirePlano, (req, res) => {
+    const user = req.session.user;
+
+    // Busca o plano real do usuário no store de dados
+    const planoBase = planosData.find(p => p.id === user.planoId)
+                   || planosData.find(p => p.nome.toLowerCase() === (user.plano || '').toLowerCase())
+                   || planosData[1]; // fallback: GymBro
+
+    const precoFmt = `R$ ${planoBase.preco.toFixed(2).replace('.', ',')}`;
+
+    // Renovação: 30 dias a partir de hoje (simulado)
+    const renovacao = new Date();
+    renovacao.setDate(renovacao.getDate() + 30);
+    const renovacaoStr = renovacao.toLocaleDateString('pt-BR');
+    const tempoRestanteDias = 30;
+    const progresso = Math.round((30 - tempoRestanteDias) / 30 * 100) || 5;
 
     const planoAtual = {
-        nome: 'GYMBRO',
-        descricao: 'O plano mais popular do GymBros.',
-        beneficios: [
-            '3560+ Academias e estúdios',
-            'Treinos online ao vivo',
-            'Leve 4 amigos por mês',
-            'Personal trainer online',
-        ],
-        preco: 'R$ 85,60',
-        periodo: 'mês',
-        renovacao: '05/05/2025',
-        tempoRestanteDias: 21,
-        progresso: 30,
+        nome:              planoBase.nome.toUpperCase(),
+        descricao:         planoBase.descricao,
+        beneficios:        planoBase.beneficios || [],
+        preco:             precoFmt,
+        periodo:           'mês',
+        renovacao:         renovacaoStr,
+        tempoRestanteDias,
+        progresso,
     };
 
-    const outrosPlanos = [
-        {
-            nome: 'STARTER',
-            descricao: 'Para quem está começando na vida fitness.',
-            beneficios: [
-                '2300+ Academias e estúdios',
-                'Treinos online e presenciais',
-            ],
-            preco: 'R$ 64,90',
-            periodo: 'mês',
-            destaque: false,
-        },
-        {
-            nome: 'BLACK',
-            descricao: 'Acesso total, sem limites.',
-            beneficios: [
-                'Acesso ilimitado em academias parceiras',
-                '+5000 Academias e estúdios',
-                'Treinos online e presenciais',
-                'Aulas exclusivas e personal trainer',
-                'Área VIP e benefícios premium',
-            ],
-            preco: 'R$ 145,90',
-            periodo: 'mês',
-            destaque: true,
-        },
-    ];
+    // Outros planos = todos exceto o atual
+    const outrosPlanos = planosData
+        .filter(p => p.id !== planoBase.id)
+        .map((p, _, arr) => ({
+            nome:      p.nome.toUpperCase(),
+            descricao: p.descricao,
+            beneficios: p.beneficios || [],
+            preco:     `R$ ${p.preco.toFixed(2).replace('.', ',')}`,
+            periodo:   'mês',
+            destaque:  p.preco === Math.max(...arr.map(x => x.preco)), // o mais caro = destaque
+        }));
 
-    res.render('pages/meu-plano', { user: req.session.user, planoAtual, outrosPlanos,
+    res.render('pages/meu-plano', { user, planoAtual, outrosPlanos,
         seo: { title: 'Meu Plano — GymBros', canonical: '/meu-plano', robots: 'noindex, nofollow', description: 'Gerencie seu plano GymBros.' },
     });
 });
 
-//Configurações
-router.get('/config', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+//Configurações (só requer login, não exige plano ativo)
+router.get('/config', requireAuth, (req, res) => {
 
     res.render('pages/config', { user: req.session.user,
         seo: { title: 'Configurações — GymBros', canonical: '/config', robots: 'noindex, nofollow', description: 'Configurações da conta GymBros.' },
@@ -452,24 +465,21 @@ router.get('/config', (req, res) => {
 });
 
 //Perfil IMC
-router.get('/imc-form', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+router.get('/imc-form', requirePlano, (req, res) => {
 
     res.render('pages/imc-form', { user: req.session.user,
         seo: { title: 'Meu Perfil IMC — GymBros', canonical: '/imc-form', robots: 'noindex, nofollow', description: 'Perfil IMC personalizado GymBros.' },
     });
 });
 
-//Avaliação Corporal 
-router.get('/ai/avaliacao', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+//Avaliação Corporal
+router.get('/ai/avaliacao', requirePlano, (req, res) => {
 
     res.render('pages/ai-avaliacao', { user: req.session.user });
 });
 
 // Atualizar dados pessoais (nome e e-mail)
-router.post('/config/atualizar-dados', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+router.post('/config/atualizar-dados', requireAuth, (req, res) => {
 
     const { nome, email } = req.body;
     const user = req.session.user;
@@ -492,8 +502,7 @@ router.post('/config/atualizar-dados', (req, res) => {
 });
 
 // Alterar senha
-router.post('/config/alterar-senha', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+router.post('/config/alterar-senha', requireAuth, (req, res) => {
 
     const { senhaAtual, novaSenha } = req.body;
     const user = req.session.user;
@@ -512,8 +521,7 @@ router.post('/config/alterar-senha', (req, res) => {
 });
 
 // Alterar plano
-router.post('/config/alterar-plano', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+router.post('/config/alterar-plano', requireAuth, (req, res) => {
 
     const { plano } = req.body;
     const user = req.session.user;
@@ -552,8 +560,7 @@ router.post('/api/student/profile-photo', (req, res, next) => {
 
 
 
-router.post('/imc-save', (req, res) => {
-    if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
+router.post('/imc-save', requireAuth, (req, res) => {
 
     const { lesoes, restricoesAlimentares, gruposAlimentares, suplementacao, ...rest } = req.body;
 
@@ -569,8 +576,7 @@ router.post('/imc-save', (req, res) => {
 });
 
 // Suporte (área do aluno)
-router.get('/suporte', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+router.get('/suporte', requirePlano, (req, res) => {
     res.render('pages/suporte', { user: req.session.user, seo: {
         title: 'Suporte — GymBros', canonical: '/suporte',
         robots: 'noindex, nofollow', description: 'Central de suporte GymBros.',
@@ -766,7 +772,7 @@ router.post('/login',
       return res.status(400).json({ erros: errors.array() });
     }
 
-    const { username, password, next } = req.body;
+    const { username, password, redirect: redirectTo } = req.body;
     const user = usuarios.find(u => (u.nome === username || u.email === username || u.cpf === username) && u.password === password);
 
     if (!user) {
@@ -776,11 +782,11 @@ router.post('/login',
     // salva usuário na sessão
     req.session.user = user;
 
-    // Redireciona para next apenas se for path interno válido (evita open redirect)
-    const safeNext = (next && next.startsWith('/') && !next.startsWith('//')) ? next : '/area-aluno';
+    // Redireciona para redirect apenas se for path interno válido (evita open redirect)
+    const safeRedirect = (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) ? redirectTo : '/area-aluno';
 
     console.log("Login bem-sucedido:", username);
-    return res.status(200).json({ mensagem: 'Login realizado com sucesso! Redirecionando...', redirect: safeNext });
+    return res.status(200).json({ mensagem: 'Login realizado com sucesso! Redirecionando...', redirect: safeRedirect });
   }
 );
 

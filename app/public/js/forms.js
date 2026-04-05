@@ -130,12 +130,12 @@ if (loginForm) {
         const password = document.getElementById('password').value;
 
         try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const nextPath  = urlParams.get('next') || '';
+            const urlParams  = new URLSearchParams(window.location.search);
+            const redirectTo = urlParams.get('redirect') || '';
             const res  = await fetch('/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ username, password, next: nextPath })
+                body: new URLSearchParams({ username, password, redirect: redirectTo })
             });
             const data = await res.json();
 
@@ -196,9 +196,11 @@ if (registerForm) {
                 return;
             }
 
-            // Redirect to login regardless — creating a new account never touches the current session
+            // Redirect to login, preserving redirect param so the full flow continues
             successEl.textContent = data.mensagem;
-            setTimeout(() => { window.location.href = '/login'; }, 1500);
+            const regParams = new URLSearchParams(window.location.search);
+            const regRedirect = regParams.get('redirect') ? `?redirect=${encodeURIComponent(regParams.get('redirect'))}` : '';
+            setTimeout(() => { window.location.href = `/login${regRedirect}`; }, 1500);
         } catch (err) {
             console.error(err);
             successEl.textContent = 'Erro inesperado. Tente novamente.';

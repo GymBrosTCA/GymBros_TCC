@@ -38,6 +38,29 @@ a {
     font-size: 1rem;
 }
 
+/* ── Banners de status ── */
+.planos-banner {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    max-width: 860px;
+    margin: 0 auto 2.4rem;
+    padding: 1.4rem 2rem;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: 500;
+}
+
+.planos-banner i { font-size: 1.4rem; flex-shrink: 0; }
+.planos-banner p { margin: 0; }
+
+.planos-banner--aviso {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #856404;
+}
+
+
 .plans-hero {
     background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/banner-forms.png');
     background-size: cover;
