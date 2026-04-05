@@ -37,6 +37,13 @@
             <p>O maior site de saúde e bem-estar do mundo, com melhores preços acessíveis para todos</p>
         </section>
 
+        <!-- Banner: sem plano ativo -->
+        <section class="planos-banner planos-banner--aviso" id="banner-sem-plano" style="display:none">
+            <i class="fas fa-lock"></i>
+            <p>Você ainda não possui um plano ativo. Escolha um plano para acessar a área do aluno.</p>
+        </section>
+
+
         <section class="plans-container">
             <section class="plan-card starter">
                 <h2 class="plan-name">STARTER</h2>
@@ -45,7 +52,7 @@
                     <li>Treinos online e presenciais</li>
                 </ul>
                 <p class="plan-price">R$ 64,90<span>/mês</span></p>
-                <a href="/pagamento?plano=starter" class="plan-button">Assinar agora</a>
+                <button class="plan-button" onclick="assinar('starter')">Assinar agora</button>
             </section>
 
             <section class="plan-card gymbro">
@@ -57,7 +64,7 @@
                     <li>Personal trainer online</li>
                 </ul>
                 <p class="plan-price">R$ 85,60<span>/mês</span></p>
-                <a href="/pagamento?plano=gymbro" class="plan-button">Assinar agora</a>
+                <button class="plan-button" onclick="assinar('gymbro')">Assinar agora</button>
             </section>
 
             <section class="plan-card blaok">
@@ -65,12 +72,12 @@
                 <ul class="plan-features">
                     <li>Acesso ilimitado em academias parceiras</li>
                     <li>+5000 Academias e estúdios</li>
-                    <li>Treinos online e presenciaiss</li>
+                    <li>Treinos online e presenciais</li>
                     <li>Aulas exclusivas e personal trainer</li>
                     <li>Área VIP e benefícios premium</li>
                 </ul>
                 <p class="plan-price">R$ 145,90<span>/mês</span></p>
-                <a href="/pagamento?plano=black" class="plan-button">Assinar agora</a>
+                <button class="plan-button" onclick="assinar('black')">Assinar agora</button>
             </section>
         </section>
     </main>
@@ -79,7 +86,25 @@
     <script src="/js/menu.js"></script>
     <script src="/js/header.js"></script>
     <script src="/js/carrossel.js"></script>
-<script src="/js/translate.js"></script>
+    <script src="/js/translate.js"></script>
+    <script>
+        // Exibir banners conforme query string
+        (function () {
+            const p = new URLSearchParams(window.location.search);
+            if (p.get('semPlano') === '1') {
+                document.getElementById('banner-sem-plano').style.display = 'flex';
+                window.history.replaceState({}, '', '/planos');
+            }
+
+        })();
+
+        function assinar(planoId) {
+            sessionStorage.setItem('planoPendente', planoId);
+            window.location.href = '/pagamento?plano=' + encodeURIComponent(planoId);
+        }
+
+
+    </script>
 </body>
 
 </html>
