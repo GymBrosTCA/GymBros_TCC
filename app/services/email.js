@@ -19,7 +19,6 @@ async function enviarBoleto({
 
   try {
     const attachments = [];
-
     if (pdfBuffer) {
       attachments.push({
         filename: 'boleto-gymbros.pdf',
@@ -28,7 +27,9 @@ async function enviarBoleto({
     }
 
     const response = await resend.emails.send({
+      // remetente autorizado (não quebra SPF/DKIM)
       from: 'GymBros <onboarding@resend.dev>',
+      reply_to: 'contato.gymbross@gmail.com',
       to: [to],
       subject: `GymBros | Detalhes da sua assinatura — ${planoNome}`,
       html: `
@@ -37,18 +38,25 @@ async function enviarBoleto({
         <p><strong>Valor:</strong> ${valorFmt}</p>
         <p><strong>Código para pagamento:</strong><br>${linhaDigitavel}</p>
         <p>O arquivo em PDF está anexado para sua conveniência.</p>
-        <p>Se tiver qualquer dúvida, estamos por aqui 💪</p>
         <br>
+        <p>Se tiver qualquer dúvida, é só responder este email 💪</p>
         <p>Equipe GymBros</p>
       `,
+
       attachments,
     });
 
-    console.log('[email] Email enviado via Resend para:', to, response);
+    // valida resposta
+    if (response.error) {
+      console.error('[email] erro resend:', response.error);
+      throw new Error(response.error.message);
+    }
 
-    return { ok: true, response };
+    console.log('[email] enviado com sucesso:', to);
+    return { ok: true };
+
   } catch (err) {
-    console.error('[email] Erro ao enviar via Resend:', err);
+    console.error('[email] erro geral:', err);
     throw err;
   }
 }
