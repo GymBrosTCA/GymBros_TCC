@@ -731,8 +731,7 @@ router.post('/register',
         return true;
       }),
     body('email')
-      .isEmail().withMessage('E-mail inválido.')
-      .normalizeEmail(),
+      .isEmail().withMessage('E-mail inválido.'),
     body('cep')
       .matches(/^\d{8}$/).withMessage('CEP deve ter 8 números.'),
     body('password')

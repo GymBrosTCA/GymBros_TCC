@@ -1,39 +1,8 @@
 'use strict';
-const nodemailer = require('nodemailer');
 
-let transporter = null;
+const { Resend } = require('resend');
 
-function getTransporter() {
-  if (transporter) return transporter;
-
-  if (!process.env.SMTP_HOST) {
-    console.log('[email] SMTP não configurado (faltando SMTP_HOST)');
-    return null;
-  }
-
-  const port = Number(process.env.SMTP_PORT) || 587;
-
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port,
-    secure: port === 465, // 465 = SSL, 587 = STARTTLS
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-
-    // ajuda a debugar conexão SMTP
-    logger: true,
-    debug: true,
-
-    // fallback pra evitar erro de certificado (TEMPORÁRIO)
-    tls: {
-      rejectUnauthorized: false,
-    },
-  });
-
-  return transporter;
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function enviarBoleto({
   to,
@@ -43,53 +12,43 @@ async function enviarBoleto({
   linhaDigitavel,
   pdfBuffer,
 }) {
-  const tp = getTransporter();
-
-  if (!tp) {
-    console.log(
-      `[email] SMTP não configurado — boleto para ${to} (${planoNome} ${valor})`
-    );
-    return { ok: true, simulado: true };
-  }
-
   const valorFmt = Number(valor).toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
   });
 
   try {
-    await tp.sendMail({
-      from:
-        process.env.SMTP_FROM ||
-        '"GymBros" <noreply@gymbros.com.br>',
-      to,
+    const attachments = [];
+
+    if (pdfBuffer) {
+      attachments.push({
+        filename: 'boleto-gymbros.pdf',
+        content: pdfBuffer.toString('base64'),
+      });
+    }
+
+    const response = await resend.emails.send({
+      from: 'GymBros <onboarding@resend.dev>',
+      to: [to],
       subject: `GymBros | Detalhes da sua assinatura — ${planoNome}`,
       html: `
         <h2>Olá, ${nome} 👋</h2>
-         <p>Seu documento de pagamento do plano <strong>${planoNome}</strong> já está disponível.</p>     
-         <p><strong>Valor:</strong> ${valorFmt}</p>    
-         <p><strong>Código para pagamento:</strong><br>${linhaDigitavel}</p>  
-         <p>O arquivo em PDF está anexado para sua conveniência.</p>     
-         <p>Se tiver qualquer dúvida, estamos por aqui 💪</p>
-         <br>
-         <p>Equipe GymBros</p>
+        <p>Seu documento de pagamento do plano <strong>${planoNome}</strong> já está disponível.</p>
+        <p><strong>Valor:</strong> ${valorFmt}</p>
+        <p><strong>Código para pagamento:</strong><br>${linhaDigitavel}</p>
+        <p>O arquivo em PDF está anexado para sua conveniência.</p>
+        <p>Se tiver qualquer dúvida, estamos por aqui 💪</p>
+        <br>
+        <p>Equipe GymBros</p>
       `,
-      attachments: pdfBuffer
-        ? [
-            {
-              filename: 'boleto-gymbros.pdf',
-              content: pdfBuffer,
-              contentType: 'application/pdf',
-            },
-          ]
-        : [],
+      attachments,
     });
 
-    console.log('[email] Email enviado com sucesso para:', to);
+    console.log('[email] Email enviado via Resend para:', to, response);
 
-    return { ok: true, simulado: false };
+    return { ok: true, response };
   } catch (err) {
-    console.error('[email] Erro ao enviar:', err);
+    console.error('[email] Erro ao enviar via Resend:', err);
     throw err;
   }
 }
