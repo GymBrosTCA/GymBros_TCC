@@ -380,3 +380,13 @@ body.light-mode .rec-titulo             { color: #C98B1D; }
 body.light-mode .rec-texto              { color: #4E4C4A; }
 
 body.light-mode .result-aviso           { background: rgba(201,139,29,0.1); border-color: rgba(201,139,29,0.3); color: #8B5E0A; }
+
+/* Ícones de títulos de seção: dourado */
+body.light-mode .resultado-section h3 i  { color: #C98B1D; }
+body.light-mode .dashboard-top h1 i      { color: #C98B1D; }
+/* Ícones de resultado (chart-pie, thumbs-up, fire-alt, etc.) */
+body.light-mode .rec-titulo i            { color: #C98B1D; }
+/* Ícone de aviso */
+body.light-mode .result-aviso i          { color: #8B5E0A; }
+/* Ícones em botões de upload (fundo escuro/colorido ficam claros) */
+body.light-mode .btn-analisar i          { color: #F2F0EE; }

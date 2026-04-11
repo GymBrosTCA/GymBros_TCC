@@ -129,8 +129,11 @@
 
         wrapper.appendChild(bubble);
         chatHistory.appendChild(wrapper);
-        chatHistory.scrollTop = chatHistory.scrollHeight;
-        wrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (sender === 'bot') {
+            wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
     }
 
     async function sendMessage() {

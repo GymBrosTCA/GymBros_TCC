@@ -533,8 +533,8 @@ body {
     }
 }
 
-/* RESPONSIVO */
-@media(max-width:1024px){
+/* RESPONSIVO — tablets (769px–1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
     .aluno-dashboard { flex-direction: column; padding: 1rem; }
     .aluno-sidebar { width: 100%; margin-bottom: 1.5rem; }
 }
@@ -560,14 +560,9 @@ body {
 }
 
 /* ==============================
-   ÁREA DO ALUNO — MOBILE
+   ÁREA DO ALUNO — MOBILE (legado)
    ============================== */
 @media (max-width: 768px) {
-
-    /* Painel principal */
-    .aluno-main {
-        padding: 0;
-    }
 
     /* Cabeçalho de boas-vindas */
     .dashboard-top {
@@ -770,6 +765,71 @@ body.light-mode .progress-fill { background: rgba(0,0,0,0.35); }
 
 body.light-mode .card-price { color: #1C1A18; }
 body.light-mode .time-left  { color: #4E4C4A; }
+
+/* ==============================
+   LIGHT MODE — Ícones
+   (sobrescreve i { color: #fff } do header.css para toda a área do aluno)
+   ============================== */
+
+/* Base: todos os font icons ficam escuros no tema claro */
+body.light-mode i { color: #1C1A18; }
+
+/* Sidebar: ativo e hover mantêm ícone claro (fundo dourado) */
+body.light-mode .aluno-menu li a:hover i,
+body.light-mode .aluno-menu li a.active i { color: #F2F0EE; }
+
+/* Ícone do perfil no topo da sidebar */
+body.light-mode .aluno-profile p i { color: #7E7C7A; }
+
+/* Header: header sempre dourado — ícones escuros ficam bem */
+/* (nenhuma exceção necessária no header) */
+
+/* ── DASHBOARD (dash-) — backgrounds e ícones ── */
+
+body.light-mode .dash-welcome {
+    background: linear-gradient(135deg, #ede9e3 0%, #e4e0da 100%);
+    border-color: #C9C7C4;
+}
+body.light-mode .dash-welcome-text h1 { color: #C98B1D; }
+body.light-mode .dash-welcome-text p  { color: #7E7C7A; }
+body.light-mode .dash-welcome-badge   { background: rgba(201,139,29,0.12); }
+body.light-mode .dash-welcome-badge i { color: #C98B1D; }
+
+body.light-mode .dash-stat            { background: #E8E6E3; border-color: #C9C7C4; }
+body.light-mode .dash-stat-val        { color: #1C1A18; }
+body.light-mode .dash-stat-label      { color: #7E7C7A; }
+/* chips coloridos: mantêm a cor original do ícone */
+body.light-mode .dash-stat-blue i   { color: #1E90FF; }
+body.light-mode .dash-stat-yellow i  { color: #C98B1D; }
+body.light-mode .dash-stat-green i   { color: #32CD32; }
+
+body.light-mode .dash-action-card    { background: #E8E6E3; border-color: #C9C7C4; color: #1C1A18; }
+body.light-mode .dash-action-card:hover { border-color: #aaa; }
+body.light-mode .dash-action-title   { color: #1C1A18; }
+body.light-mode .dash-action-sub     { color: #7E7C7A; }
+body.light-mode .dash-action-arrow   { color: #aaa; }
+body.light-mode .dash-action-blue .dash-action-icon i   { color: #1E90FF; }
+body.light-mode .dash-action-orange .dash-action-icon i { color: #FF8C00; }
+body.light-mode .dash-action-gold .dash-action-icon i   { color: #C98B1D; }
+
+body.light-mode .dash-activities          { background: #E8E6E3; border-color: #C9C7C4; }
+body.light-mode .dash-activities h2       { color: #C98B1D; }
+body.light-mode .dash-activities h2 i     { color: #C98B1D; }
+body.light-mode .dash-activities-list li  { border-bottom-color: #C9C7C4; }
+body.light-mode .dash-act-name            { color: #1C1A18; }
+body.light-mode .dash-act-time            { color: #7E7C7A; }
+body.light-mode .dash-act-icon i          { color: #1E90FF; }
+body.light-mode .dash-act-leaf i          { color: #32CD32; }
+
+body.light-mode .dash-goal-section        { background: #E8E6E3; border-color: #C9C7C4; }
+body.light-mode .dash-goal-header h2      { color: #C98B1D; }
+body.light-mode .dash-goal-header h2 i    { color: #C98B1D; }
+body.light-mode .dash-goal-count          { color: #7E7C7A; }
+body.light-mode .dash-goal-bar            { background: #C9C7C4; }
+body.light-mode .dash-badge               { background: rgba(201,139,29,0.1); border-color: rgba(201,139,29,0.3); color: #C98B1D; }
+body.light-mode .dash-badge i             { color: #C98B1D; }
+
+/* ── Meu Plano — detalhado na seção "Light mode — meu plano" abaixo ── */
 
 
 /* ==============================
@@ -1057,6 +1117,23 @@ body.light-mode .plano-card-nome  { color: #b07818; }
 body.light-mode .plano-card-preco { color: #1C1A18; }
 body.light-mode .plano-card-desc  { color: #777; }
 body.light-mode .plano-card-lista li { color: #444; }
+
+/* ── Ícones meu-plano ── */
+/* plano-atual-card em light-mode tem fundo claro (#EDE8DF) — ícones devem ser escuros/dourados */
+body.light-mode .plano-atual-card i         { color: #1C1A18; } /* sobrescreve a regra anterior incorreta */
+body.light-mode .plano-atual-nome i         { color: #b07818; }
+body.light-mode .plano-atual-badge i        { color: #000; }     /* badge tem fundo dourado */
+body.light-mode .plano-beneficio-item i     { color: #C98B1D; }  /* check dourado nos benefícios */
+body.light-mode .plano-renew-labels i       { color: #666; }
+body.light-mode .plano-btn-cancelar i       { color: #888; }
+body.light-mode .plano-btn-upgrade i        { color: #000; }     /* botão upgrade tem fundo dourado */
+/* Título e cards de outros planos */
+body.light-mode .outros-planos-titulo i     { color: #C98B1D; }
+body.light-mode .plano-card-lista li i      { color: #C98B1D; }  /* check dourado na lista */
+body.light-mode .plano-card-ribbon i        { color: #000; }     /* ribbon tem fundo dourado */
+body.light-mode .plano-card-btn i           { color: #C98B1D; }
+body.light-mode .plano-card-btn:hover i,
+body.light-mode .plano-card-destaque .plano-card-btn i { color: #000; } /* hover/destaque: fundo dourado */
 
 @media (max-width: 768px) {
     .plano-atual-top { flex-direction: column; }

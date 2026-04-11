@@ -486,7 +486,7 @@ router.post('/config/atualizar-dados', requireAuth, (req, res) => {
     const user = req.session.user;
 
     // Verifica se o email já existe
-    const emailExistente = usuarios.find(u => u.email === email && u !== user);
+    const emailExistente = usuarios.find(u => u.email.toLowerCase() === email.toLowerCase() && u.cpf !== user.cpf);
     if (emailExistente) {
         return res.status(400).json({ erro: 'E-mail já cadastrado.' });
     }
@@ -495,8 +495,8 @@ router.post('/config/atualizar-dados', requireAuth, (req, res) => {
     user.nome = nome;
     user.email = email;
 
-    const index = usuarios.findIndex(u => u === user);
-    usuarios[index] = user;
+    const stored = usuarios.find(u => u.cpf === user.cpf);
+    if (stored) { stored.nome = nome; stored.email = email; }
     req.session.user = user;
 
     return res.json({ mensagem: 'Dados atualizados com sucesso!' });
@@ -514,8 +514,8 @@ router.post('/config/alterar-senha', requireAuth, (req, res) => {
 
     user.password = novaSenha;
 
-    const index = usuarios.findIndex(u => u === user);
-    usuarios[index] = user;
+    const stored = usuarios.find(u => u.cpf === user.cpf);
+    if (stored) stored.password = novaSenha;
     req.session.user = user;
 
     return res.json({ mensagem: 'Senha alterada com sucesso!' });
@@ -531,8 +531,8 @@ router.post('/config/alterar-plano', requireAuth, (req, res) => {
     // opcional: atualizar tempo de renovação ou benefícios
     user.renovacao = '20/11/2025';
 
-    const index = usuarios.findIndex(u => u === user);
-    usuarios[index] = user;
+    const stored = usuarios.find(u => u.cpf === user.cpf);
+    if (stored) { stored.plano = plano; stored.renovacao = user.renovacao; }
     req.session.user = user;
 
     return res.json({ mensagem: 'Plano atualizado com sucesso!' });
@@ -782,7 +782,8 @@ router.post('/login',
     }
 
     const { username, password, redirect: redirectTo } = req.body;
-    const user = usuarios.find(u => (u.nome === username || u.email === username || u.cpf === username) && u.password === password);
+    const usernameLower = username.toLowerCase();
+    const user = usuarios.find(u => (u.nome === username || u.email.toLowerCase() === usernameLower || u.cpf === username) && u.password === password);
 
     if (!user) {
       return res.status(401).json({ erros: [{ param: 'password', msg: 'Usuário ou senha incorretos.' }] });

@@ -25,7 +25,13 @@
                 <!-- Sidebar do perfil -->
                 <section>
                     <section class="admin-profile-card">
-                        <section class="avatar"><i class="fas fa-user"></i></section>
+                        <section class="avatar">
+                            <% if (user.profile_photo) { %>
+                            <img src="<%= user.profile_photo %>" alt="<%= user.nome %>">
+                            <% } else { %>
+                            <i class="fas fa-user"></i>
+                            <% } %>
+                        </section>
                         <h2><%= user.nome %></h2>
                         <section class="text-muted" style="font-size:.8rem"><%= user.email %></section>
                         <span class="badge badge-gold plan-badge"><%= user.plano || '—' %></span>

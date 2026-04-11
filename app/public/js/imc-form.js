@@ -226,6 +226,7 @@ function showStep(next, goingBack) {
 
     currentStep = next;
     updateUI();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     if (currentStep === TOTAL_STEPS) buildSummary();
 }

@@ -294,7 +294,13 @@ body.light-mode .cfg-toggle         { background: #dedad6; border-color: #ccc; }
 body.light-mode .cfg-toggle.on      { background: linear-gradient(135deg,#C98B1D,#E0A835); }
 body.light-mode .cfg-danger-zone    { border-color: #e0ded9; }
 body.light-mode .cfg-danger-zone h3 { color: #aaa; }
-body.light-mode .cfg-eye            { color: #aaa; }
+body.light-mode .cfg-eye            { color: #888; }
+/* Ícones de cabeçalho de card: dourado */
+body.light-mode .cfg-card-header h2 i { color: #C98B1D; }
+/* Ícones em botões com fundo colorido ficam claros */
+body.light-mode .cfg-btn-save i,
+body.light-mode .cfg-btn-primary i    { color: #F2F0EE; }
+body.light-mode .cfg-danger-btn i     { color: #F2F0EE; }
 
 /* ─── Responsive ─────────────────────────────────────── */
 @media (max-width: 900px) {
