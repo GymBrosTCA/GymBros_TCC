@@ -270,3 +270,8 @@ body.light-mode .evo-empty i         { color: #C9C7C4; }
 body.light-mode .evo-table th        { color: #7E7C7A; border-bottom-color: #C9C7C4; }
 body.light-mode .evo-table td        { color: #1C1A18; border-bottom-color: #DEDAD6; }
 body.light-mode .evo-table tr:hover td { background: rgba(0,0,0,0.04); }
+
+/* Ícones de títulos de seção: dourado */
+body.light-mode .evo-section-header h2 i { color: #C98B1D; }
+/* Ícones de entrada no timeline: mantêm cor original */
+body.light-mode .evo-entry-dot i          { color: inherit; }

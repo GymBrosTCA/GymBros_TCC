@@ -277,7 +277,8 @@ button { cursor: pointer; font-family: inherit; }
 .admin-profile-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; align-items: start; }
 @media (max-width: 900px) { .admin-profile-grid { grid-template-columns: 1fr; } }
 .admin-profile-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; text-align: center; }
-.admin-profile-card .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--gold-dim); color: var(--gold); font-size: 2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+.admin-profile-card .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--gold-dim); color: var(--gold); font-size: 2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; overflow: hidden; }
+.admin-profile-card .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .admin-profile-card h2 { font-size: 1.1rem; margin-bottom: 4px; }
 .admin-profile-card .plan-badge { margin: 8px auto; }
 .admin-detail-list { list-style: none; text-align: left; margin-top: 16px; }

@@ -621,3 +621,14 @@ body.light-mode .pv-imc-block        { background: #DEDAD6; }
 body.light-mode .pv-imc-value        { color: #C98B1D; }
 body.light-mode .pv-imc-cat          { color: #4E4C4A; }
 body.light-mode .pv-imc-scale span   { color: #7E7C7A; }
+
+/* Ícones em botões com fundo colorido ficam claros */
+body.light-mode .imc-btn-next i       { color: #F2F0EE; }
+body.light-mode .imc-btn-submit i     { color: #F2F0EE; }
+/* Ícone do step header: dourado (imc-step-icon já coberto, mas imc-step-header h2 i não) */
+body.light-mode .imc-step-header h2 i { color: #C98B1D; }
+/* Ícone no cabeçalho do perfil salvo */
+body.light-mode .profile-view-header h2 i { color: #C98B1D; }
+/* Ícone do botão editar (fundo claro) */
+body.light-mode .btn-edit-profile i   { color: #4E4C4A; }
+body.light-mode .btn-edit-profile:hover i { color: #C98B1D; }

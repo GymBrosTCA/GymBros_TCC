@@ -867,6 +867,51 @@ main {
     color: #C98B1D;
 }
 
+/* ==============================
+   ÍCONES — Fix visibilidade
+   (pagamento.css é página de fundo branco; sobrescreve i { color: #fff } do header.css)
+   ============================== */
+
+/* Base: todos os ícones escuros (fundo branco da página) */
+body.pagamento-page i { color: #3a3a3a; }
+
+/* Progress steps: números já são brancos sobre fundo dourado/cinza — ícone herda */
+
+/* Métodos de pagamento: ícone selecionado fica dourado */
+body.pagamento-page .metodo-card.selected .metodo-icon i { color: #C98B1D; }
+
+/* Check do método: selecionado fica dourado */
+body.pagamento-page .metodo-card.selected .metodo-check { color: #C98B1D; }
+
+/* Botões com fundo escuro/colorido — ícone fica claro */
+body.pagamento-page .btn-continuar i,
+body.pagamento-page .btn-confirmar-cartao i,
+body.pagamento-page .btn-ja-paguei i,
+body.pagamento-page .btn-primario i      { color: #fff; }
+
+/* Copiar (fundo preto) */
+body.pagamento-page .btn-copiar i        { color: #fff; }
+body.pagamento-page .btn-copiar.copiado i { color: #fff; }
+
+/* Voltar step (fundo transparente, borda cinza) */
+body.pagamento-page .btn-voltar-step i   { color: #888; }
+
+/* Ícone de spinning do QR */
+body.pagamento-page .pix-qr-loading      { color: #C98B1D; }
+
+/* Confirmação: status ativo (verde) e pendente (dourado) */
+body.pagamento-page .confirmacao-status.ativo i    { color: #27ae60; }
+body.pagamento-page .confirmacao-status.pendente i { color: #C98B1D; }
+
+/* Ícone do summary (resumo) */
+body.pagamento-page .resumo-header i     { color: #C98B1D; }
+body.pagamento-page .resumo-item i       { color: #C98B1D; }
+body.pagamento-page .resumo-seguro i     { color: #27ae60; }
+
+/* Botão secundário */
+body.pagamento-page .btn-secundario i    { color: #666; }
+body.pagamento-page .btn-secundario:hover i { color: #C98B1D; }
+
 /* ── Regenerar button ── */
 .btn-regenerar {
     display: flex;

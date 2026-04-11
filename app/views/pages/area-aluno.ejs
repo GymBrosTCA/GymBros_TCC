@@ -21,7 +21,7 @@
     <section class="aluno-sidebar">
         <section class="aluno-profile">
             <section class="avatar">
-                <img src="/images/avatar.png" alt="Avatar do Aluno">
+                <img src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
             </section>
             <h2><%= user.nome %></h2>
             <p data-translate="sidebar.role">Aluno GymBros</p>
