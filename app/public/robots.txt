@@ -20,4 +20,4 @@ Allow: /
 User-agent: LinkedInBot
 Allow: /
 
-Sitemap: https://gymbros-2ht3.onrender.com/
+Sitemap: https://gymbros.app.br/sitemap.xml

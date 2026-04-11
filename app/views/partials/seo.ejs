@@ -14,7 +14,7 @@ const _canon  = _base + _path;
 const _type   = _seo.ogType      || 'website';
 const _ogTit  = _seo.ogTitle     || _title;
 const _ogDesc = _seo.ogDescription || _desc;
-const _ogImg  = _seo.ogImage     || 'https://gymbros-2ht3.onrender.com/logo.png';
+const _ogImg  = _seo.ogImage     || (_base + '/logo.png');
 const _ogAlt  = _seo.ogImageAlt  || 'GymBros — Academias ilimitadas em todo o Brasil';
 %>
 <title><%= _title %></title>
