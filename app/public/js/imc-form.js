@@ -502,6 +502,7 @@ async function submitForm() {
             // Após 1.5s mostra a view do perfil em vez de redirecionar
             setTimeout(() => {
                 renderProfileView(payload);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 // Volta ao passo 1 caso o usuário edite novamente
                 currentStep = 1;
                 document.querySelectorAll('.imc-step').forEach(s => s.classList.remove('active'));

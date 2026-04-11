@@ -1,7 +1,11 @@
 // ai.js — rotas do Personal Trainer IA (Groq)
-const express = require('express');
-const router  = express.Router();
-const Groq    = require('groq-sdk');
+const express          = require('express');
+const router           = express.Router();
+const Groq             = require('groq-sdk');
+const requirePlanLevel = require('../middleware/requirePlanLevel');
+
+// GymBro (pl002) e Black (pl003) têm acesso à IA
+const requireIA = requirePlanLevel(['pl002', 'pl003']);
 
 const BASE_PROMPT = `Você é um personal trainer virtual chamado GymBot, assistente oficial do GymBros.
 Você ajuda alunos com dúvidas sobre treinos, exercícios, nutrição básica e motivação.
@@ -59,7 +63,7 @@ Use este perfil para personalizar todas as respostas. Não precisa repetir os da
 }
 
 // GET /ai/chat — renderiza a página do chat
-router.get('/chat', (req, res) => {
+router.get('/chat', requireIA, (req, res) => {
     if (!req.session.user) return res.redirect('/login');
     res.render('pages/ai-chat', { user: req.session.user,
         seo: { title: 'GymBot Personal Trainer IA — GymBros', canonical: '/ai/chat', robots: 'noindex, nofollow', description: 'Converse com o GymBot, seu personal trainer IA.' },
@@ -67,7 +71,7 @@ router.get('/chat', (req, res) => {
 });
 
 // GET /ai/avaliacao — renderiza a página de avaliação corporal
-router.get('/avaliacao', (req, res) => {
+router.get('/avaliacao', requireIA, (req, res) => {
     if (!req.session.user) return res.redirect('/login');
     res.render('pages/ai-avaliacao', { user: req.session.user,
         seo: { title: 'Avaliação Corporal IA — GymBros', canonical: '/ai/avaliacao', robots: 'noindex, nofollow', description: 'Avaliação corporal por inteligência artificial GymBros.' },
@@ -75,7 +79,7 @@ router.get('/avaliacao', (req, res) => {
 });
 
 // POST /ai/avaliacao — avaliação corporal por imagem (visão do LLaMA 4)
-router.post('/avaliacao', async (req, res) => {
+router.post('/avaliacao', requireIA, async (req, res) => {
     if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
 
     const { fotoFrontal, fotoLateral, fotoPosterior } = req.body;
@@ -167,7 +171,7 @@ Analise a composição corporal do aluno pela(s) foto(s) enviadas e retorne SOME
 
 // POST /ai/avaliacao-salvar — salva o resultado da avaliação corporal na sessão
 // (chamado pelo frontend após receber o resultado, para que o GymBot tenha acesso)
-router.post('/avaliacao-salvar', (req, res) => {
+router.post('/avaliacao-salvar', requireIA, (req, res) => {
     if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
 
     const { resultado } = req.body;
@@ -182,7 +186,7 @@ router.post('/avaliacao-salvar', (req, res) => {
 });
 
 // POST /ai/message — envia mensagem ao Groq e retorna resposta em JSON
-router.post('/message', async (req, res) => {
+router.post('/message', requireIA, async (req, res) => {
     if (!req.session.user) return res.status(401).json({ reply: 'Não autorizado.' });
 
     const { message } = req.body;

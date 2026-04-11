@@ -68,6 +68,36 @@
             <section class="acad-results-grid" id="acadResultsGrid"></section>
         </section>
 
+        <!-- PAINEL DETALHES ACADEMIA (aparece ao clicar no marcador do mapa) -->
+        <section id="academia-detalhes" class="academia-detalhes hidden">
+            <section class="detalhes-inner">
+                <button class="detalhes-fechar" id="btnFecharDetalhes" aria-label="Fechar">✕</button>
+                <h3 id="det-nome"></h3>
+                <section class="detalhes-grid">
+                    <section class="det-item" id="det-endereco-wrap">
+                        <span class="det-icon">📍</span>
+                        <span id="det-endereco"></span>
+                    </section>
+                    <section class="det-item" id="det-telefone-wrap">
+                        <span class="det-icon">📞</span>
+                        <a id="det-telefone" href="#"></a>
+                    </section>
+                    <section class="det-item" id="det-horarios-wrap">
+                        <span class="det-icon">🕐</span>
+                        <span id="det-horarios"></span>
+                    </section>
+                    <section class="det-item" id="det-site-wrap">
+                        <span class="det-icon">🌐</span>
+                        <a id="det-site" href="#" target="_blank" rel="noopener"></a>
+                    </section>
+                    <section class="det-item" id="det-insta-wrap">
+                        <span class="det-icon">📸</span>
+                        <a id="det-insta" href="#" target="_blank" rel="noopener"></a>
+                    </section>
+                </section>
+            </section>
+        </section>
+
         <!-- PARCEIROS -->
         <section class="acad-partners-section">
             <h2 class="acad-section-title"><i class="fas fa-star"></i> Parceiros GymBros</h2>
@@ -281,11 +311,26 @@
             resultsSection.style.display = 'block';
 
             gyms.forEach(gym => {
-                const name = gym.tags.name || 'Academia';
-                const marker = L.marker([gym.lat, gym.lon], { icon: gymIcon })
-                    .addTo(map)
-                    .bindPopup(`<strong>${name}</strong>`);
+                const name    = gym.tags.name || 'Academia';
+                const phone   = gym.tags.phone || gym.tags['contact:phone'] || '';
+                const website = gym.tags.website || gym.tags['contact:website'] || '';
+                const hours   = gym.tags.opening_hours || '';
+                const street  = gym.tags['addr:street']
+                    ? `${gym.tags['addr:street']}${gym.tags['addr:housenumber'] ? ', ' + gym.tags['addr:housenumber'] : ''}`
+                    : '';
+
+                const marker = L.marker([gym.lat, gym.lon], { icon: gymIcon }).addTo(map);
                 gymMarkers.push(marker);
+
+                marker.on('click', () => mostrarDetalhes({
+                    nome: name,
+                    endereco: street,
+                    telefone: phone,
+                    horarios: hours,
+                    site: website,
+                    instagram: null
+                }));
+
                 resultsGrid.insertAdjacentHTML('beforeend', buildGymCard(gym));
             });
 
@@ -352,6 +397,42 @@
             setStatus('Erro ao buscar CEP. Tente novamente.', 'error');
         }
     }
+
+    // ── Painel de detalhes de academia ──────────────────────────
+    function mostrarDetalhes(academia) {
+        const painel = document.getElementById('academia-detalhes');
+
+        document.getElementById('det-nome').textContent = academia.nome;
+
+        function setDet(wrapId, elId, valor, href) {
+            const wrap = document.getElementById(wrapId);
+            const el   = document.getElementById(elId);
+            if (valor) {
+                wrap.style.display = 'flex';
+                el.textContent = valor;
+                if (href) el.href = href;
+            } else {
+                wrap.style.display = 'none';
+            }
+        }
+
+        setDet('det-endereco-wrap', 'det-endereco', academia.endereco);
+        setDet('det-telefone-wrap', 'det-telefone', academia.telefone, academia.telefone ? `tel:${academia.telefone}` : null);
+        setDet('det-horarios-wrap', 'det-horarios', academia.horarios);
+        setDet('det-site-wrap',     'det-site',     academia.site, academia.site);
+
+        const instaHandle = academia.instagram
+            ? '@' + academia.instagram.replace(/\/$/, '').split('/').pop()
+            : null;
+        setDet('det-insta-wrap', 'det-insta', instaHandle, academia.instagram);
+
+        painel.classList.remove('hidden');
+        painel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.getElementById('btnFecharDetalhes').addEventListener('click', () => {
+        document.getElementById('academia-detalhes').classList.add('hidden');
+    });
     </script>
 <script src="/js/translate.js"></script>
 </body>

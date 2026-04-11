@@ -15,6 +15,7 @@
 <%- include('../partials/header') %>
 
 <section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
 
     <!-- SIDEBAR -->
     <section class="aluno-sidebar">
@@ -26,70 +27,136 @@
             <p><%= __('sidebar.role') %></p>
         </section>
         <ul class="aluno-menu">
-            <li><a href="/area-aluno" class="active"><i class="fas fa-tachometer-alt"></i> <%= __('sidebar.painel') %></a></li>
-            <li><a href="/treinos"><i class="fas fa-dumbbell"></i> <%= __('sidebar.treinos') %></a></li>
-            <li><a href="/evolucao"><i class="fas fa-chart-line"></i> <%= __('sidebar.evolucao') %></a></li>
-            <li><a href="/meu-plano"><i class="fas fa-file-alt"></i> <%= __('sidebar.plano') %></a></li>
-            <li><a href="/config"><i class="fas fa-cog"></i> <%= __('sidebar.config') %></a></li>
-            <li><a href="/ai/chat"><i class="fas fa-robot"></i> <%= __('sidebar.ai') %></a></li>
-            <li><a href="/ai/avaliacao"><i class="fas fa-camera"></i> <%= __('sidebar.avaliacao') %></a></li>
-            <li><a href="/imc-form"><i class="fas fa-clipboard-list"></i> <%= __('sidebar.imc') %></a></li>
-            <li><a href="/suporte"><i class="fas fa-headset"></i> <%= __('sidebar.suporte') %></a></li>
+            <li><a href="/area-aluno" class="active" data-translate="sidebar.painel"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
+            <li><a href="/treinos" data-translate="sidebar.treinos"><i class="fas fa-dumbbell"></i> Meus Treinos</a></li>
+            <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
+            <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
+            <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <% if (['pl002', 'pl003'].includes(user.planoId)) { %>
+            <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
+            <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA 🔒</a></li>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal 🔒</a></li>
+            <% } %>
+            <li><a href="/imc-form" data-translate="sidebar.imc"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
+            <li><a href="/suporte"><i class="fas fa-headset"></i> Suporte</a></li>
         </ul>
     </section>
 
     <!-- CONTEÚDO PRINCIPAL -->
     <section class="aluno-main">
 
-        <!-- TOPO DASHBOARD -->
-        <section class="dashboard-top">
-            <h1>Bem-vindo, <%= user.nome %>!</h1>
-            <p>Acompanhe seu progresso, treinos e planos</p>
+        <!-- BANNER DE BOAS-VINDAS -->
+        <section class="dash-welcome">
+            <section class="dash-welcome-text">
+                <h1>Bem-vindo, <%= user.nome %>!</h1>
+                <p>Acompanhe seu progresso, treinos e planos</p>
+            </section>
+            <section class="dash-welcome-badge">
+                <i class="fas fa-dumbbell"></i>
+            </section>
         </section>
 
-        <!-- CARDS -->
-        <section class="cards-container">
-            <section class="card card-blue">
-                <h3>Meus Treinos</h3>
-                <span class="card-value">70%</span>
-                <a href="/treinos" class="btn-card">Ver Treinos</a>
+        <!-- STATS -->
+        <section class="dash-stats">
+            <section class="dash-stat">
+                <section class="dash-stat-icon dash-stat-blue">
+                    <i class="fas fa-fire"></i>
+                </section>
+                <section class="dash-stat-info">
+                    <span class="dash-stat-val">3</span>
+                    <span class="dash-stat-label">Treinos esta semana</span>
+                </section>
             </section>
+            <section class="dash-stat">
+                <section class="dash-stat-icon dash-stat-yellow">
+                    <i class="fas fa-trophy"></i>
+                </section>
+                <section class="dash-stat-info">
+                    <span class="dash-stat-val">2</span>
+                    <span class="dash-stat-label">Conquistas</span>
+                </section>
+            </section>
+            <section class="dash-stat">
+                <section class="dash-stat-icon dash-stat-green">
+                    <i class="fas fa-chart-line"></i>
+                </section>
+                <section class="dash-stat-info">
+                    <span class="dash-stat-val">60%</span>
+                    <span class="dash-stat-label">Meta semanal</span>
+                </section>
+            </section>
+        </section>
 
-            <section class="card card-orange">
-                <h3>Evolução</h3>
-                <canvas class="line-graph" width="200" height="120"></canvas>
-                <a href="/evolucao" class="btn-card">Ver Evolução</a>
-            </section>
-
-            <section class="card card-green">
-                <h3>Meu Plano</h3>
-                <span class="card-value"><%= user.plano || 'Sem plano' %></span>
-                <a href="/meu-plano" class="btn-card">Ver Plano</a>
-            </section>
+        <!-- ACESSO RÁPIDO -->
+        <section class="dash-actions">
+            <a href="/treinos" class="dash-action-card dash-action-blue">
+                <section class="dash-action-icon"><i class="fas fa-dumbbell"></i></section>
+                <section class="dash-action-body">
+                    <span class="dash-action-title">Meus Treinos</span>
+                    <span class="dash-action-sub">Ver planilha de treinos</span>
+                </section>
+                <i class="fas fa-chevron-right dash-action-arrow"></i>
+            </a>
+            <a href="/evolucao" class="dash-action-card dash-action-orange">
+                <section class="dash-action-icon"><i class="fas fa-chart-line"></i></section>
+                <section class="dash-action-body">
+                    <span class="dash-action-title">Evolução</span>
+                    <span class="dash-action-sub">Acompanhe seus resultados</span>
+                </section>
+                <i class="fas fa-chevron-right dash-action-arrow"></i>
+            </a>
+            <a href="/meu-plano" class="dash-action-card dash-action-gold">
+                <section class="dash-action-icon"><i class="fas fa-crown"></i></section>
+                <section class="dash-action-body">
+                    <span class="dash-action-title">Meu Plano</span>
+                    <span class="dash-action-sub"><%= user.plano || 'Sem plano ativo' %></span>
+                </section>
+                <i class="fas fa-chevron-right dash-action-arrow"></i>
+            </a>
         </section>
 
         <!-- ATIVIDADES RECENTES -->
-        <section class="recent-activities">
-            <h2>Atividades Recentes</h2>
-            <ul>
-                <li><i class="fas fa-dumbbell"></i> Treino de Peito <span>Ontem</span></li>
-                <li><i class="fas fa-dumbbell"></i> Treino de Inferiores <span>2 dias atrás</span></li>
-                <li><i class="fas fa-leaf"></i> Yoga leve <span>3 dias atrás</span></li>
+        <section class="dash-activities">
+            <h2><i class="fas fa-history"></i> Atividades Recentes</h2>
+            <ul class="dash-activities-list">
+                <li>
+                    <section class="dash-act-icon"><i class="fas fa-dumbbell"></i></section>
+                    <section class="dash-act-info">
+                        <span class="dash-act-name">Treino de Peito</span>
+                        <span class="dash-act-time">Ontem</span>
+                    </section>
+                </li>
+                <li>
+                    <section class="dash-act-icon"><i class="fas fa-dumbbell"></i></section>
+                    <section class="dash-act-info">
+                        <span class="dash-act-name">Treino de Inferiores</span>
+                        <span class="dash-act-time">2 dias atrás</span>
+                    </section>
+                </li>
+                <li>
+                    <section class="dash-act-icon dash-act-leaf"><i class="fas fa-leaf"></i></section>
+                    <section class="dash-act-info">
+                        <span class="dash-act-name">Yoga leve</span>
+                        <span class="dash-act-time">3 dias atrás</span>
+                    </section>
+                </li>
             </ul>
         </section>
 
-        <!-- BADGES & METAS -->
-        <section class="goals-badges">
-            <h2>Metas & Conquistas</h2>
-            <section class="goal">
-                <p>Meta semanal: 5 treinos</p>
-                <section class="progress-bar">
-                    <section class="progress-fill" style="width: 60%;"></section>
-                </section>
+        <!-- META SEMANAL -->
+        <section class="dash-goal-section">
+            <section class="dash-goal-header">
+                <h2><i class="fas fa-bullseye"></i> Meta Semanal</h2>
+                <span class="dash-goal-count">3 / 5 treinos</span>
             </section>
-            <section class="badges">
-                <span class="badge">🏆 1ª Meta Semana</span>
-                <span class="badge">💪 Consistência 3 dias</span>
+            <section class="dash-goal-bar">
+                <section class="dash-goal-fill" id="dashGoalFill"></section>
+            </section>
+            <section class="dash-badges">
+                <span class="dash-badge"><i class="fas fa-trophy"></i> 1ª Meta Semana</span>
+                <span class="dash-badge"><i class="fas fa-fire"></i> Consistência 3 dias</span>
             </section>
         </section>
 
@@ -100,7 +167,27 @@
 <%- include('../partials/footer') %>
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
-<script src="/js/area-aluno.js"></script>
 <script src="/js/translate.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var fill = document.getElementById('dashGoalFill');
+    if (fill) {
+        requestAnimationFrame(function () {
+            fill.style.width = '60%';
+        });
+    }
+});
+(function () {
+    var btn     = document.getElementById('menuToggle');
+    var sidebar = document.querySelector('.aluno-sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
+    if (!btn || !sidebar || !overlay) return;
+    function openMenu()  { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    btn.addEventListener('click', openMenu);
+    overlay.addEventListener('click', closeMenu);
+    sidebar.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeMenu); });
+})();
+</script>
 </body>
 </html>
