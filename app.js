@@ -23,10 +23,20 @@ app.set("views", "./app/views");
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
+// Em produção (HTTPS atrás de proxy), o Express precisa confiar no X-Forwarded-* do proxy
+app.set('trust proxy', 1);
+
+const isProd = process.env.NODE_ENV === 'production';
+
 app.use(session({
-  secret: 'gymbrossecret',
+  secret: process.env.SESSION_SECRET || 'gymbrossecret',
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: true,
+  cookie: {
+    secure: isProd,       // HTTPS-only em produção
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000  // 24 horas
+  }
 }));
 
 // i18n: detecta locale pelo cookie gymbros_lang, expõe __() em todas as views

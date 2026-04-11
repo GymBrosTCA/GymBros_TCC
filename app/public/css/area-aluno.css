@@ -499,7 +499,7 @@ body {
 .sidebar-overlay.open { display: block; }
 
 @media (max-width: 768px) {
-    .menu-icon { display: flex; }
+    .menu-icon { display: flex; visibility: visible; pointer-events: auto; }
     /* Reverte logo para fluxo normal — botão ☰ restaura o balanço do flex */
     .logo {
         position: static;
