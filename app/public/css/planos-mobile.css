@@ -30,7 +30,13 @@ h2 {
     text-align: center;
 }
 
-p, a {
+p {
+    font-size: 1rem;
+    line-height: 1.4;
+    text-align: center;
+}
+
+main a {
     font-size: 1rem;
     line-height: 1.4;
     text-align: center;
