@@ -37,8 +37,10 @@ if (formDados) {
             const data = await res.json();
             if (!res.ok) throw new Error(data.erro || 'Erro inesperado.');
             showMsg(msgEl, data.mensagem, true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
             showMsg(msgEl, err.message, false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } finally {
             setLoading(btn, false, orig);
         }
@@ -78,6 +80,7 @@ if (formSenha) {
             if (!res.ok) throw new Error(data.erro || 'Erro inesperado.');
             showMsg(msgEl, data.mensagem, true);
             formSenha.reset();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
             showMsg(msgEl, err.message, false);
         } finally {

@@ -16,6 +16,7 @@
 <%- include('../partials/header') %>
 
 <section class="aluno-dashboard">
+    <section class="sidebar-overlay" id="sidebarOverlay"></section>
 
     <!-- SIDEBAR -->
     <section class="aluno-sidebar">
@@ -32,8 +33,13 @@
             <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
             <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
             <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
+            <% if (['pl002', 'pl003'].includes(user.planoId)) { %>
             <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
             <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
+            <% } else { %>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA 🔒</a></li>
+            <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal 🔒</a></li>
+            <% } %>
             <li><a href="/imc-form" class="active" data-translate="sidebar.imc"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
             <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
         </ul>
@@ -41,7 +47,6 @@
 
     <!-- CONTEÚDO PRINCIPAL -->
     <section class="aluno-main">
-
         <section class="dashboard-top">
             <h1><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</h1>
             <p>Preencha seu perfil para receber orientações personalizadas do GymBot</p>
@@ -377,5 +382,18 @@
 <script>window.GYMBROS_USER_ID = '<%= user.cpf %>';</script>
 <script src="/js/imc-form.js"></script>
 <script src="/js/translate.js"></script>
+<script>
+(function () {
+    var btn     = document.getElementById('menuToggle');
+    var sidebar = document.querySelector('.aluno-sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
+    if (!btn || !sidebar || !overlay) return;
+    function openMenu()  { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    btn.addEventListener('click', openMenu);
+    overlay.addEventListener('click', closeMenu);
+    sidebar.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeMenu); });
+})();
+</script>
 </body>
 </html>

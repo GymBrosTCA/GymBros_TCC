@@ -381,3 +381,59 @@ main.academias-main {
     .acad-cep-wrap { width: 100%; }
     .acad-cep-input { flex: 1; }
 }
+
+/* ==============================
+   PAINEL DE DETALHES DA ACADEMIA
+   ============================== */
+.academia-detalhes {
+    background: #1a1a1a;
+    border-top: 3px solid #FFD700;
+    border-bottom: 3px solid #FFD700;
+    padding: 24px 32px;
+}
+.academia-detalhes.hidden {
+    display: none;
+}
+.detalhes-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+.detalhes-fechar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: 1px solid #444;
+    color: #aaa;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: 0.2s;
+}
+.detalhes-fechar:hover { border-color: #FFD700; color: #FFD700; }
+#det-nome {
+    color: #FFD700;
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 16px;
+    padding-right: 36px;
+}
+.detalhes-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 32px;
+}
+.det-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+.det-item a { color: #FFD700; text-decoration: none; }
+.det-item a:hover { text-decoration: underline; }
+.det-icon { font-size: 1rem; }

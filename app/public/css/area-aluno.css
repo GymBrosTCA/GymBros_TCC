@@ -98,6 +98,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
+    padding: 2rem 2.5rem;
 }
 
 /* TOPO DASHBOARD */
@@ -448,6 +449,87 @@ body {
     margin-bottom: 1rem;
 }
 
+/* =========================
+   MENU LOCKED (plano Starter)
+   ========================= */
+.menu-locked {
+    opacity: 0.45;
+    cursor: pointer;
+}
+.menu-locked:hover {
+    opacity: 0.65;
+}
+
+/* =========================
+   MOBILE DRAWER
+   ========================= */
+/* Esconde o botão ☰ do header no desktop — sidebar já está visível */
+.menu-icon {
+    display: none;
+}
+
+/* Garante que o header fique sempre acima do sidebar drawer (z-index: 999) */
+.gymbros-header {
+    z-index: 1001;
+}
+
+/* Centraliza a logo via position absolute quando o botão ☰ está oculto */
+.header-container {
+    position: relative;
+}
+.logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 72px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+}
+.sidebar-overlay.open { display: block; }
+
+@media (max-width: 768px) {
+    .menu-icon { display: flex; }
+    /* Reverte logo para fluxo normal — botão ☰ restaura o balanço do flex */
+    .logo {
+        position: static;
+        transform: none;
+    }
+    .aluno-sidebar {
+        position: fixed;
+        top: 72px;
+        left: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: calc(100vh - 72px);
+        max-height: calc(100vh - 72px);
+        z-index: 999;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 0;
+        margin-bottom: 0;
+        padding-bottom: 48px;
+    }
+    .aluno-sidebar.open { left: 0; }
+    .aluno-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 1.25rem 1rem;
+    }
+    .aluno-dashboard {
+        flex-direction: column;
+        padding: 0;
+    }
+}
+
 /* RESPONSIVO */
 @media(max-width:1024px){
     .aluno-dashboard { flex-direction: column; padding: 1rem; }
@@ -474,11 +556,99 @@ body {
     }
 }
 
-@media(max-width:768px){
-    .card-green{
-        width: 50%;
-        height: auto;
-        max-width: 60px;
+/* ==============================
+   ÁREA DO ALUNO — MOBILE
+   ============================== */
+@media (max-width: 768px) {
+
+    /* Painel principal */
+    .aluno-main {
+        padding: 0;
+    }
+
+    /* Cabeçalho de boas-vindas */
+    .dashboard-top {
+        margin-bottom: 1.2rem;
+        padding: 0 0.25rem;
+    }
+    .dashboard-top h1 {
+        font-size: 1.45rem;
+        margin-bottom: 0.25rem;
+    }
+    .dashboard-top p {
+        font-size: 0.9rem;
+    }
+
+    /* Cards — linha horizontal compacta */
+    .cards-container {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1.2rem;
+    }
+    .cards-container .card,
+    .card-blue,
+    .card-orange,
+    .card-green {
+        aspect-ratio: auto;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.9rem 1.1rem;
+        max-width: 100%;
+        width: 100%;
+        min-height: 72px;
+        border-radius: 12px;
+    }
+    .card h3 {
+        font-size: 0.95rem;
+        margin-bottom: 0;
+        text-align: left;
+        flex: 1;
+    }
+    .card-value {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin: 0 0.75rem;
+    }
+    .card canvas {
+        width: 70px !important;
+        height: 44px !important;
+        max-height: 44px;
+        margin: 0 0.5rem;
+        padding: 0.25rem;
+    }
+    .btn-card {
+        padding: 6px 14px;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Atividades recentes */
+    .recent-activities,
+    .goals-badges {
+        padding: 0.9rem 1rem;
+        margin-bottom: 0.9rem;
+        border-radius: 10px;
+    }
+    .recent-activities h2,
+    .goals-badges h2 {
+        font-size: 1.05rem;
+        margin-bottom: 0.6rem;
+    }
+    .recent-activities li {
+        font-size: 0.88rem;
+        padding: 0.45rem 0;
+    }
+
+    /* Badges */
+    .goal p {
+        font-size: 0.88rem;
+    }
+    .badge {
+        font-size: 0.78rem;
+        padding: 0.25rem 0.55rem;
+        margin-top: 0.6rem;
     }
 }
 
@@ -890,4 +1060,274 @@ body.light-mode .plano-card-lista li { color: #444; }
     .plano-beneficios { grid-template-columns: 1fr; }
     .plano-acoes { flex-direction: column; }
     .outros-planos-grid { grid-template-columns: 1fr; }
+}
+
+/* =========================
+   DASHBOARD REDESIGN
+   ========================= */
+
+/* WELCOME BANNER */
+.dash-welcome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    border: 1px solid #333;
+    border-left: 4px solid #FFD700;
+    border-radius: 14px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 2rem;
+}
+.dash-welcome-text h1 {
+    font-size: 1.75rem;
+    color: #FFD700;
+    margin-bottom: 0.3rem;
+}
+.dash-welcome-text p {
+    font-size: 0.95rem;
+    color: #aaa;
+}
+.dash-welcome-badge {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(255,215,0,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #FFD700;
+    flex-shrink: 0;
+}
+
+/* STATS ROW */
+.dash-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+.dash-stat {
+    background: #1f1f1f;
+    border-radius: 12px;
+    padding: 1.4rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid #2a2a2a;
+    transition: transform 0.2s;
+}
+.dash-stat:hover { transform: translateY(-3px); }
+.dash-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+.dash-stat-blue   { background: rgba(30,144,255,0.18); color: #1E90FF; }
+.dash-stat-yellow { background: rgba(255,215,0,0.18);  color: #FFD700; }
+.dash-stat-green  { background: rgba(50,205,50,0.18);  color: #32CD32; }
+.dash-stat-info   { display: flex; flex-direction: column; }
+.dash-stat-val    { font-size: 1.4rem; font-weight: 800; color: #fff; line-height: 1.1; }
+.dash-stat-label  { font-size: 0.75rem; color: #888; margin-top: 0.15rem; }
+
+/* QUICK ACTIONS */
+.dash-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin-bottom: 2rem;
+}
+.dash-action-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: #1f1f1f;
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    text-decoration: none;
+    color: #fff;
+    border: 1px solid #2a2a2a;
+    transition: all 0.2s;
+}
+.dash-action-card:hover {
+    transform: translateX(4px);
+    border-color: #444;
+}
+.dash-action-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.dash-action-blue   { border-left: 3px solid #1E90FF; }
+.dash-action-orange { border-left: 3px solid #FF8C00; }
+.dash-action-gold   { border-left: 3px solid #FFD700; }
+.dash-action-blue   .dash-action-icon { background: rgba(30,144,255,0.15); color: #1E90FF; }
+.dash-action-orange .dash-action-icon { background: rgba(255,140,0,0.15);  color: #FF8C00; }
+.dash-action-gold   .dash-action-icon { background: rgba(255,215,0,0.15);  color: #FFD700; }
+.dash-action-body  { flex: 1; display: flex; flex-direction: column; }
+.dash-action-title { font-size: 0.95rem; font-weight: 700; color: #fff; }
+.dash-action-sub   { font-size: 0.78rem; color: #888; margin-top: 0.1rem; }
+.dash-action-arrow { font-size: 0.8rem; color: #555; }
+
+/* ACTIVITIES */
+.dash-activities {
+    background: #1f1f1f;
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.75rem;
+    border: 1px solid #2a2a2a;
+}
+.dash-activities h2 {
+    font-size: 1rem;
+    color: #FFD700;
+    margin-bottom: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.dash-activities-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+.dash-activities-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid #2a2a2a;
+}
+.dash-activities-list li:last-child { border-bottom: none; }
+.dash-act-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(30,144,255,0.14);
+    color: #1E90FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+.dash-act-leaf { background: rgba(50,205,50,0.14); color: #32CD32; }
+.dash-act-info { display: flex; flex-direction: column; flex: 1; }
+.dash-act-name { font-size: 0.88rem; color: #fff; font-weight: 600; }
+.dash-act-time { font-size: 0.75rem; color: #666; }
+
+/* GOAL SECTION */
+.dash-goal-section {
+    background: #1f1f1f;
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    border: 1px solid #2a2a2a;
+}
+.dash-goal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+.dash-goal-header h2 {
+    font-size: 1rem;
+    color: #FFD700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+.dash-goal-count { font-size: 0.82rem; color: #aaa; }
+.dash-goal-bar {
+    width: 100%;
+    height: 8px;
+    background: #2d2d2d;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+.dash-goal-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    border-radius: 4px;
+    transition: width 1s ease;
+}
+.dash-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.dash-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(255,215,0,0.1);
+    color: #FFD700;
+    border: 1px solid rgba(255,215,0,0.25);
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.dash-badge:hover {
+    background: rgba(255,215,0,0.2);
+    transform: translateY(-1px);
+}
+
+/* DASHBOARD REDESIGN — MOBILE */
+@media (max-width: 768px) {
+    .dash-welcome {
+        padding: 1.1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+    }
+    .dash-welcome-text h1 { font-size: 1.2rem; }
+    .dash-welcome-text p  { font-size: 0.8rem; }
+    .dash-welcome-badge   { width: 40px; height: 40px; font-size: 1.1rem; }
+
+    .dash-stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.6rem;
+        margin-bottom: 1.5rem;
+    }
+    .dash-stat {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.9rem 0.75rem;
+        gap: 0.5rem;
+        border-radius: 10px;
+    }
+    .dash-stat-icon  { width: 34px; height: 34px; font-size: 0.95rem; border-radius: 8px; }
+    .dash-stat-val   { font-size: 1.1rem; }
+    .dash-stat-label { font-size: 0.63rem; }
+
+    .dash-actions { gap: 0.7rem; margin-bottom: 1.5rem; }
+    .dash-action-card  { padding: 0.9rem 1rem; border-radius: 10px; gap: 0.9rem; }
+    .dash-action-icon  { width: 36px; height: 36px; font-size: 0.95rem; border-radius: 8px; }
+    .dash-action-title { font-size: 0.85rem; }
+    .dash-action-sub   { font-size: 0.72rem; }
+
+    .dash-activities,
+    .dash-goal-section { padding: 1.1rem 1.2rem; border-radius: 10px; }
+    .dash-activities   { margin-bottom: 1.25rem; }
+    .dash-activities h2,
+    .dash-goal-header h2 { font-size: 0.88rem; }
+    .dash-act-icon   { width: 32px; height: 32px; font-size: 0.82rem; border-radius: 7px; }
+    .dash-act-name   { font-size: 0.83rem; }
+    .dash-act-time   { font-size: 0.7rem; }
+    .dash-badge      { font-size: 0.72rem; padding: 0.28rem 0.6rem; }
+    .dash-goal-count { font-size: 0.75rem; }
 }
