@@ -4,7 +4,9 @@ const session    = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const path       = require('path');
 const fs         = require('fs');
-const db         = require('./app/config/db');
+const cookieParser = require('cookie-parser');
+const db           = require('./app/config/db');
+const i18n         = require('./app/config/i18n');
 
 const app  = express();
 const port = 3000;
@@ -52,6 +54,11 @@ app.use(session({
         // sem maxAge — sessão dura até fechar o browser
     },
 }));
+
+app.use(cookieParser());
+
+// i18n: detecta locale pelo cookie gymbros_lang, expõe __() em todas as views
+app.use(i18n.init);
 
 // Injeta baseUrl em todas as views (canonical + OG)
 app.use((req, res, next) => {

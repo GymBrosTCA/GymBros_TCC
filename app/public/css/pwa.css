@@ -5,13 +5,13 @@
   right: 0;
   background: #1a1a1a;
   border-top: 3px solid #FFD700;
-  padding: 16px 20px;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   gap: 16px;
   z-index: 9999;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
-  animation: slideUp 0.4s ease;
+  box-shadow: 0 -6px 32px rgba(0,0,0,0.6);
+  animation: slideUp 0.5s ease-out;
 }
 @keyframes slideUp {
   from { transform: translateY(100%); opacity: 0; }
@@ -24,17 +24,18 @@
 .pwa-banner-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   flex: 1;
 }
 .pwa-banner-text strong {
   color: #FFD700;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 700;
 }
 .pwa-banner-text span {
-  color: #aaa;
-  font-size: 0.8rem;
-  line-height: 1.3;
+  color: #bbb;
+  font-size: 0.82rem;
+  line-height: 1.4;
 }
 .pwa-banner-actions {
   display: flex;
@@ -43,29 +44,42 @@
   flex-shrink: 0;
 }
 .pwa-btn-install {
-  background: #FFD700;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
   color: #000;
   border: none;
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.85rem;
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-weight: 800;
+  font-size: 0.88rem;
   cursor: pointer;
   white-space: nowrap;
+  box-shadow: 0 2px 12px rgba(255,215,0,0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.pwa-btn-install:hover { background: #FFC200; }
+.pwa-btn-install:hover {
+  background: linear-gradient(135deg, #FFC200, #FF8C00);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(255,215,0,0.5);
+}
 .pwa-btn-dismiss {
   background: none;
   border: none;
-  color: #666;
+  color: #555;
   font-size: 0.75rem;
   cursor: pointer;
   text-align: center;
+  transition: color 0.15s ease;
 }
-.pwa-btn-dismiss:hover { color: #aaa; }
+.pwa-btn-dismiss:hover { color: #999; }
 
 @media (max-width: 600px) {
-  .pwa-banner { flex-wrap: wrap; }
-  .pwa-banner-actions { flex-direction: row; align-items: center; width: 100%; }
-  .pwa-btn-dismiss { margin-left: 8px; }
+  .pwa-banner { flex-wrap: wrap; padding: 14px 16px; }
+  .pwa-banner-actions {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .pwa-btn-install { flex: 1; text-align: center; }
+  .pwa-btn-dismiss { margin-left: 12px; flex-shrink: 0; }
 }

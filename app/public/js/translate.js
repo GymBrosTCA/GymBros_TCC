@@ -1,21 +1,10 @@
-/**
- * translate.js — tradução de página completa GymBros
- * Estratégia:
- *   1. Dicionário estático para strings de UI conhecidas (data-translate)
- *   2. TreeWalker coleta TODOS os nós de texto da página
- *   3. Chama POST /api/translate em lote para traduzir o restante
- *   4. Restaura textos originais ao voltar para PT
- *   5. Cache por página+idioma em sessionStorage
- */
 'use strict';
 
-// ── Dicionário estático ──────────────────────────────────────────────────────
-const DICT = {
-    'nav.home':        { pt: 'Home',        en: 'Home',         es: 'Inicio' },
-    'nav.academias':   { pt: 'Academias',   en: 'Gyms',         es: 'Gimnasios' },
-    'nav.about':       { pt: 'Sobre nós',   en: 'About us',     es: 'Sobre nosotros' },
-    'nav.planos':      { pt: 'Planos e Preços', en: 'Plans & Pricing', es: 'Planes y Precios' },
-    'nav.login':       { pt: 'Entrar',      en: 'Log in',       es: 'Ingresar' },
+// Lê locale atual do cookie gymbros_lang (definido server-side pelo i18n)
+function getCookieLang() {
+    const match = document.cookie.split('; ').find(r => r.startsWith('gymbros_lang='));
+    return match ? match.split('=')[1] : 'pt';
+}
 
     'sidebar.painel':   { pt: 'Painel',      en: 'Dashboard',    es: 'Panel' },
     'sidebar.treinos':  { pt: 'Meus Treinos', en: 'My Workouts', es: 'Mis Entrenamientos' },
@@ -62,126 +51,14 @@ const DICT = {
 
 // ── Estado global ─────────────────────────────────────────────────────────────
 let currentLang = localStorage.getItem('gymbros_lang') || 'pt';
-
-// Nós de texto coletados no carregamento: [{ node, orig }]
-const textNodes = [];
-
-// Tags cujo conteúdo NÃO deve ser traduzido
-const SKIP_TAGS = new Set([
-    'SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'CODE', 'PRE',
-    'INPUT', 'SELECT', 'OPTION', 'CANVAS', 'SVG'
-]);
-
-// ── Coleta todos os nós de texto relevantes ───────────────────────────────────
-function collectTextNodes() {
-    const walker = document.createTreeWalker(
-        document.body,
-        NodeFilter.SHOW_TEXT,
-        {
-            acceptNode(node) {
-                const par = node.parentElement;
-                if (!par) return NodeFilter.FILTER_REJECT;
-                if (SKIP_TAGS.has(par.tagName)) return NodeFilter.FILTER_REJECT;
-                // Pula elementos já tratados pelo dicionário estático
-                if (par.dataset && (par.dataset.translate || par.dataset.translateApi)) {
-                    return NodeFilter.FILTER_REJECT;
-                }
-                const text = node.textContent.trim();
-                // Só textos com letras reais (não números/símbolos sozinhos)
-                if (text.length < 2 || !/[a-zA-ZÀ-ÿ]/.test(text)) {
-                    return NodeFilter.FILTER_REJECT;
-                }
-                return NodeFilter.FILTER_ACCEPT;
-            }
-        }
-    );
-    let n;
-    while ((n = walker.nextNode())) {
-        textNodes.push({ node: n, orig: n.textContent });
-    }
-}
-
-// ── Dicionário estático: aplica em elementos data-translate ───────────────────
-function applyDictionary(lang) {
-    document.querySelectorAll('[data-translate]').forEach(el => {
-        const key = el.dataset.translate;
-        if (!DICT[key]?.[lang]) return;
-        const val = DICT[key][lang];
-        // Preserva ícones <i> filhos — atualiza só os nós de texto
-        if (el.children.length > 0) {
-            const tNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
-            if (tNodes.length) {
-                tNodes[tNodes.length - 1].textContent = ' ' + val;
-            }
-        } else {
-            el.textContent = val;
-        }
-    });
-}
-
-// ── Tradução de página inteira via API ────────────────────────────────────────
-async function translatePage(lang) {
-    if (!textNodes.length) return;
-
-    // Restaura originais (sempre, para garantir base limpa)
-    textNodes.forEach(({ node, orig }) => { node.textContent = orig; });
-
-    if (lang === 'pt') return; // PT é a base
-
-    const pageKey = `gymbros_page_${lang}_${location.pathname}`;
-    const cached  = sessionStorage.getItem(pageKey);
-
-    if (cached) {
-        try {
-            const saved = JSON.parse(cached);
-            textNodes.forEach(({ node }, i) => {
-                if (saved[i] != null) node.textContent = saved[i];
-            });
-        } catch (e) { /* cache corrompido — ignora */ }
-        return;
-    }
-
-    // Coleta textos únicos para enviar (filtra whitespace puro)
-    const texts = textNodes.map(({ node }) => node.textContent.trim());
-    const valid = texts.filter(t => t.length > 1);
-    if (!valid.length) return;
-
-    try {
-        const res  = await fetch('/api/translate', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ text: valid, targetLanguage: lang })
-        });
-        const data = await res.json();
-
-        if (data.translations) {
-            let tIdx = 0;
-            const result = [];
-            textNodes.forEach(({ node }, i) => {
-                if (texts[i].length > 1 && data.translations[tIdx] != null) {
-                    node.textContent = data.translations[tIdx];
-                    result[i] = data.translations[tIdx];
-                    tIdx++;
-                } else {
-                    result[i] = node.textContent;
-                }
-            });
-            sessionStorage.setItem(pageKey, JSON.stringify(result));
-        }
-    } catch (e) {
-        console.warn('[translate.js] Erro na API:', e.message);
-    }
-}
-
-// ── Atualiza botões de idioma ─────────────────────────────────────────────────
 function updateLangButtons(lang) {
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lang === lang);
     });
     document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
 }
-
-// ── Troca de idioma ───────────────────────────────────────────────────────────
+// Grava o cookie (lido pelo middleware i18n no próximo request) e recarrega
+// a página para que o servidor renderize as strings estáticas no novo locale.
 function switchLanguage(lang) {
     if (lang === currentLang) return;
     currentLang = lang;
@@ -191,16 +68,11 @@ function switchLanguage(lang) {
     translatePage(lang);
 }
 
-// ── Bootstrap ─────────────────────────────────────────────────────────────────
+// Expõe globalmente para uso em config.js
+window.changeLang = switchLanguage;
+
 document.addEventListener('DOMContentLoaded', () => {
-    collectTextNodes();
-
-    applyDictionary(currentLang);
     updateLangButtons(currentLang);
-    if (currentLang !== 'pt') {
-        translatePage(currentLang);
-    }
-
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.addEventListener('click', () => switchLanguage(btn.dataset.lang));
     });
