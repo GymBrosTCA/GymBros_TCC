@@ -10,6 +10,7 @@ const { body, validationResult } = require('express-validator');
 const { enviarBoleto }   = require('../services/email');
 const { gerarBoletoPDF } = require('../services/pdf');
 const db         = require('../config/db');
+const i18n       = require('../config/i18n');
 const { broadcast, onlineUsers } = require('../events');
 
 // ── Multer: upload de foto de perfil ──────────────────────────────────────────
@@ -916,5 +917,18 @@ router.get('/js/carrossel.js', (req, res) => res.sendFile(path.join(__dirname, '
 router.get('/js/header.js', (req, res) => res.sendFile(path.join(__dirname, '../public/js/header.js')));
 router.get('/js/forms.js', (req, res) => res.sendFile(path.join(__dirname, '../public/js/forms.js')));
 router.get('/js/area-aluno.js', (req, res) => res.sendFile(path.join(__dirname, '../public/js/area-aluno.js')));
+
+// ====================
+// TROCA DE IDIOMA
+// ====================
+router.get('/lang/:locale', (req, res) => {
+    const locale = req.params.locale;
+    if (['pt', 'en', 'es'].includes(locale)) {
+        res.cookie('gymbros_lang', locale, { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/', sameSite: 'Lax' });
+        i18n.setLocale(req, locale);
+    }
+    const back = req.headers.referer || '/';
+    res.redirect(back);
+});
 
 module.exports = router;

@@ -33,51 +33,49 @@
 
     <main>
         <section class="plans-hero">
-            <h1>PLANOS E PREÇOS DO GYMBROS</h1>
-            <p>O maior site de saúde e bem-estar do mundo, com melhores preços acessíveis para todos</p>
+            <h1 data-translate="plans.hero.title">PLANOS E PREÇOS DO GYMBROS</h1>
+            <p data-translate="plans.hero.desc">O maior site de saúde e bem-estar do mundo, com melhores preços acessíveis para todos</p>
         </section>
 
-        <!-- Banner: sem plano ativo -->
         <section class="planos-banner planos-banner--aviso" id="banner-sem-plano" style="display:none">
             <i class="fas fa-lock"></i>
-            <p>Você ainda não possui um plano ativo. Escolha um plano para acessar a área do aluno.</p>
+            <p data-translate="plans.no_plan">Você ainda não possui um plano ativo. Escolha um plano para acessar a área do aluno.</p>
         </section>
-
 
         <section class="plans-container">
             <section class="plan-card starter">
                 <h2 class="plan-name">STARTER</h2>
                 <ul class="plan-features">
-                    <li>2300+ Academias e estúdios</li>
-                    <li>Treinos online e presenciais</li>
+                    <li data-translate="plans.starter.f1">2300+ Academias e estúdios</li>
+                    <li data-translate="plans.starter.f2">Treinos online e presenciais</li>
                 </ul>
-                <p class="plan-price">R$ 64,90<span>/mês</span></p>
-                <button class="plan-button" onclick="assinar('starter')">Assinar agora</button>
+                <p class="plan-price">R$ 64,90<span data-translate="plans.price.month">/mês</span></p>
+                <button class="plan-button" data-translate="plans.btn.subscribe" onclick="assinar('starter')">Assinar agora</button>
             </section>
 
             <section class="plan-card gymbro">
                 <h2 class="plan-name">GYMBRO</h2>
                 <ul class="plan-features">
-                    <li>3560+ Academias e estúdios</li>
-                    <li>Treinos online ao vivo</li>
-                    <li>Leve 4 amigos por mês</li>
-                    <li>Personal trainer online</li>
+                    <li data-translate="plans.gymbro.f1">3560+ Academias e estúdios</li>
+                    <li data-translate="plans.gymbro.f2">Treinos online ao vivo</li>
+                    <li data-translate="plans.gymbro.f3">Leve 4 amigos por mês</li>
+                    <li data-translate="plans.gymbro.f4">Personal trainer online</li>
                 </ul>
-                <p class="plan-price">R$ 85,60<span>/mês</span></p>
-                <button class="plan-button" onclick="assinar('gymbro')">Assinar agora</button>
+                <p class="plan-price">R$ 85,60<span data-translate="plans.price.month">/mês</span></p>
+                <button class="plan-button" data-translate="plans.btn.subscribe" onclick="assinar('gymbro')">Assinar agora</button>
             </section>
 
             <section class="plan-card blaok">
                 <h2 class="plan-name">BLACK</h2>
                 <ul class="plan-features">
-                    <li>Acesso ilimitado em academias parceiras</li>
-                    <li>+5000 Academias e estúdios</li>
-                    <li>Treinos online e presenciais</li>
-                    <li>Aulas exclusivas e personal trainer</li>
-                    <li>Área VIP e benefícios premium</li>
+                    <li data-translate="plans.black.f1">Acesso ilimitado em academias parceiras</li>
+                    <li data-translate="plans.black.f2">+5000 Academias e estúdios</li>
+                    <li data-translate="plans.black.f3">Treinos online e presenciais</li>
+                    <li data-translate="plans.black.f4">Aulas exclusivas e personal trainer</li>
+                    <li data-translate="plans.black.f5">Área VIP e benefícios premium</li>
                 </ul>
-                <p class="plan-price">R$ 145,90<span>/mês</span></p>
-                <button class="plan-button" onclick="assinar('black')">Assinar agora</button>
+                <p class="plan-price">R$ 145,90<span data-translate="plans.price.month">/mês</span></p>
+                <button class="plan-button" data-translate="plans.btn.subscribe" onclick="assinar('black')">Assinar agora</button>
             </section>
         </section>
     </main>
@@ -86,24 +84,20 @@
     <script src="/js/menu.js"></script>
     <script src="/js/header.js"></script>
     <script src="/js/carrossel.js"></script>
-    
+
     <script>
-        // Exibir banners conforme query string
         (function () {
             const p = new URLSearchParams(window.location.search);
             if (p.get('semPlano') === '1') {
                 document.getElementById('banner-sem-plano').style.display = 'flex';
                 window.history.replaceState({}, '', '/planos');
             }
-
         })();
 
         function assinar(planoId) {
             sessionStorage.setItem('planoPendente', planoId);
             window.location.href = '/pagamento?plano=' + encodeURIComponent(planoId);
         }
-
-
     </script>
 </body>
 

@@ -1,11 +1,14 @@
-const CACHE_NAME = 'gymbros-v1';
+const CACHE_NAME = 'gymbros-v2';
 const STATIC_ASSETS = [
-  '/',
+  '/offline.html',
   '/css/header.css',
   '/css/footer.css',
   '/css/area-aluno.css',
+  '/css/pwa.css',
   '/js/area-aluno.js',
+  '/js/translate.js',
   '/images/logo.png',
+  '/images/favicon.ico',
   '/manifest.json',
 ];
 
@@ -27,8 +30,19 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('/api/') || event.request.url.includes('/ai/')) return;
 
+  const url = event.request.url;
+  if (url.includes('/api/') || url.includes('/ai/')) return;
+
+  // Requisições de navegação (HTML): network-first, fallback para offline.html
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/offline.html'))
+    );
+    return;
+  }
+
+  // Assets estáticos: network-first, atualiza cache, fallback para cache
   event.respondWith(
     fetch(event.request)
       .then(response => {
