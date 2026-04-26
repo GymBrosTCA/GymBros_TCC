@@ -88,7 +88,7 @@
                             <tr>
                                 <td><a href="/admin/usuarios/<%= u.id %>"><%= u.nome %></a></td>
                                 <td><span class="badge badge-gold"><%= u.plano || '—' %></span></td>
-                                <td class="text-muted"><%= u.createdAt.toLocaleDateString('pt-BR') %></td>
+                                <td class="text-muted"><%= u.created_at.toLocaleDateString('pt-BR') %></td>
                             </tr>
                             <% }) %>
                             </tbody>
@@ -130,7 +130,7 @@
                     <table class="admin-table">
                         <thead><tr><th>Usuário</th><th>Assunto</th><th>Há</th></tr></thead>
                         <tbody>
-                        <% ticketsUrgentes.forEach(t => { const horas = Math.floor((Date.now() - t.createdAt) / 3600000); %>
+                        <% ticketsUrgentes.forEach(t => { const horas = Math.floor((Date.now() - new Date(t.created_at)) / 3600000); %>
                         <tr>
                             <td><%= t.userName %></td>
                             <td><a href="/admin/suporte/<%= t.id %>"><%= t.assunto.substring(0,40) %></a></td>

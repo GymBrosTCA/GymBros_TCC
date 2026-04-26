@@ -51,7 +51,7 @@
             <% } else { %>
             <section class="ticket-cards" id="ticket-cards">
             <% lista.forEach(t => { %>
-            <% const horas = Math.floor((Date.now() - new Date(t.createdAt)) / 3600000); %>
+            <% const horas = Math.floor((Date.now() - new Date(t.created_at)) / 3600000); %>
             <a href="/admin/suporte/<%= t.id %>" class="ticket-card <%= t.prioridade==='alta' ? 'priority-high' : '' %>">
                 <section class="ticket-card-left">
                     <section class="ticket-card-avatar">
@@ -61,7 +61,7 @@
                 <section class="ticket-card-body">
                     <section class="ticket-card-top">
                         <span class="ticket-card-name"><%= t.userName %></span>
-                        <span class="ticket-card-time text-muted"><%= t.createdAt.toLocaleDateString('pt-BR') %></span>
+                        <span class="ticket-card-time text-muted"><%= new Date(t.created_at).toLocaleDateString('pt-BR') %></span>
                     </section>
                     <section class="ticket-card-subject"><%= t.assunto %></section>
                     <section class="ticket-card-meta">

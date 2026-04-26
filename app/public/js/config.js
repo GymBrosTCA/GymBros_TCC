@@ -185,6 +185,32 @@ if (langSelect) {
     });
 }
 
+// ─── Intervalo de lembretes (salvo no servidor) ───────────────────────────────
+const btnSalvarNotif = document.getElementById('btnSalvarNotif');
+if (btnSalvarNotif) {
+    const feedbackEl = document.getElementById('notifFeedback');
+    const orig       = btnSalvarNotif.querySelector('.cfg-btn-text')?.textContent || 'Salvar';
+
+    btnSalvarNotif.addEventListener('click', async () => {
+        const dias = document.getElementById('notifIntervalo').value;
+        setLoading(btnSalvarNotif, true, orig);
+        try {
+            const res  = await fetch('/config/notificacao-intervalo', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ dias }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.erro || 'Erro inesperado.');
+            showMsg(feedbackEl, 'Preferência salva!', true);
+        } catch (err) {
+            showMsg(feedbackEl, err.message || 'Erro ao salvar.', false);
+        } finally {
+            setLoading(btnSalvarNotif, false, orig);
+        }
+    });
+}
+
 // ─── Preferências: Notificações ───────────────────────────────────────────────
 const notifToggle = document.getElementById('pref-notif');
 if (notifToggle) {

@@ -7,7 +7,6 @@
 <%- include('../partials/seo') %>
 <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 <link rel="stylesheet" href="/css/header.css">
-<link rel="stylesheet" href="/css/footer.css">
 <link rel="stylesheet" href="/css/area-aluno.css">
 <link rel="stylesheet" href="/css/ai-chat.css">
 </head>
@@ -33,7 +32,7 @@
             <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
             <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
             <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
-            <% if (['pl002', 'pl003'].includes(user.planoId)) { %>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
             <li><a href="/ai/chat" class="active" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
             <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
             <% } else { %>
@@ -94,7 +93,6 @@
 
 </section>
 
-<%- include('../partials/footer') %>
 <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 <script>
@@ -129,11 +127,7 @@
 
         wrapper.appendChild(bubble);
         chatHistory.appendChild(wrapper);
-        if (sender === 'bot') {
-            wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-        }
+        chatHistory.scrollTop = chatHistory.scrollHeight;
     }
 
     async function sendMessage() {

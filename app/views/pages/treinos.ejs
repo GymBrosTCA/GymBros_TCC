@@ -33,7 +33,7 @@
             <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
             <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
             <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
-            <% if (['pl002', 'pl003'].includes(user.planoId)) { %>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
             <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
             <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
             <% } else { %>

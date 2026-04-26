@@ -40,7 +40,7 @@
                         <ul class="admin-detail-list mt-8">
                             <li><span>CPF</span><span><%= user.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') %></span></li>
                             <li><span>CEP</span><span><%= user.cep || '—' %></span></li>
-                            <li><span>Cadastro</span><span><%= user.createdAt.toLocaleDateString('pt-BR') %></span></li>
+                            <li><span>Cadastro</span><span><%= new Date(user.created_at).toLocaleDateString('pt-BR') %></span></li>
                             <li><span>Academia</span><span><%= (academias.find(a=>a.id===user.academiaId)||{}).nome || '—' %></span></li>
                         </ul>
 
@@ -111,8 +111,8 @@
                                 <% userTransacoes.forEach(t => { %>
                                 <tr>
                                     <td><%= t.planoNome %></td>
-                                    <td class="fw-600">R$ <%= t.valor.toFixed(2) %></td>
-                                    <td class="text-muted"><%= t.data.toLocaleDateString('pt-BR') %></td>
+                                    <td class="fw-600">R$ <%= Number(t.valor).toFixed(2) %></td>
+                                    <td class="text-muted"><%= new Date(t.created_at).toLocaleDateString('pt-BR') %></td>
                                     <td>
                                         <span class="badge <%= t.status==='pago'?'badge-success':t.status==='pendente'?'badge-warning':'badge-error' %>"><%= t.status %></span>
                                     </td>
@@ -140,7 +140,7 @@
                                 <tr>
                                     <td><%= t.assunto %></td>
                                     <td class="text-muted"><%= t.tipo %></td>
-                                    <td class="text-muted"><%= t.createdAt.toLocaleDateString('pt-BR') %></td>
+                                    <td class="text-muted"><%= new Date(t.created_at).toLocaleDateString('pt-BR') %></td>
                                     <td><span class="badge <%= t.status==='resolvido'?'badge-success':t.status==='em_atendimento'?'badge-info':'badge-warning' %>"><%= t.status.replace('_',' ') %></span></td>
                                     <td><a href="/admin/suporte/<%= t.id %>" class="btn btn-outline btn-sm btn-icon"><i class="fas fa-eye"></i></a></td>
                                 </tr>

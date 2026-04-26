@@ -5,21 +5,26 @@
 
 const express   = require('express');
 const router    = express.Router();
+const bcrypt    = require('bcrypt');
 const adminAuth = require('../middleware/adminAuth');
-const { usuarios, academias, planos, checkins, transacoes, tickets, mensagens, notificacoes, adminConfig } = require('../data');
+const db        = require('../config/db');
 
-// ── Helper: count tickets abertos ────────────────────────────────────────────
-function ticketsAbertos() {
-    return tickets.filter(t => t.status !== 'resolvido').length;
+// ── Helper: constrói adminConfig a partir de res.locals.config ───────────────
+function buildAdminConfig(config = {}) {
+    return {
+        siteName:             config.siteName             || 'GymBros',
+        maintenance:          config.maintenance === 'true' || config.maintenance === true,
+        version:              config.version              || '1.0.0',
+        notifThresholdHours:  parseInt(config.notifThresholdHours) || 24,
+    };
 }
 
-// ── Helper: injeta variáveis comuns em todas as views admin ──────────────────
-function adminLocals(extra = {}) {
-    return {
-        ticketCount: ticketsAbertos(),
-        adminConfig,
-        ...extra,
-    };
+// ── Helper: conta tickets abertos no banco ───────────────────────────────────
+async function getTicketCount() {
+    const [[row]] = await db.execute(
+        "SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'"
+    );
+    return row.cnt;
 }
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
@@ -28,17 +33,36 @@ router.get('/login', (req, res) => {
     res.render('pages/admin-login', { erro: null, next: req.query.next || '/admin/dashboard' });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    const adminEmail    = process.env.ADMIN_EMAIL    || 'admin@gymbros.com';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-
-    if (email === adminEmail && password === adminPassword) {
-        req.session.admin = { email, loggedAt: new Date() };
+    try {
+        const [rows] = await db.execute(
+            'SELECT * FROM admin_user WHERE email = ? AND ativo = 1',
+            [email]
+        );
+        const admin = rows[0];
+        if (!admin || !(await bcrypt.compare(password, admin.senha_hash))) {
+            return res.render('pages/admin-login', { erro: 'Credenciais inválidas.', next: req.body.next || '/admin/dashboard' });
+        }
+        req.session.admin = {
+            id:    admin.id,
+            nome:  admin.nome,
+            email: admin.email,
+            role:  admin.role,
+        };
+        await db.execute('UPDATE admin_user SET ultimo_login = NOW() WHERE id = ?', [admin.id]);
         const next = req.body.next || '/admin/dashboard';
-        return res.redirect(next);
+        req.session.save(err => {
+            if (err) {
+                console.error('[admin/login] session save error:', err);
+                return res.redirect('/admin/login?erro=1');
+            }
+            return res.redirect(next);
+        });
+    } catch (err) {
+        console.error('[admin/login]', err);
+        res.render('pages/admin-login', { erro: 'Erro interno. Tente novamente.', next: req.body.next || '/admin/dashboard' });
     }
-    res.render('pages/admin-login', { erro: 'Credenciais inválidas.', next: req.body.next || '/admin/dashboard' });
 });
 
 router.get('/logout', (req, res) => {
@@ -50,285 +74,467 @@ router.get('/logout', (req, res) => {
 router.use(adminAuth);
 
 // ── DASHBOARD ────────────────────────────────────────────────────────────────
-router.get('/dashboard', (req, res) => {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
+router.get('/dashboard', async (req, res) => {
+    try {
+        const [[{ totalUsuarios }]] = await db.execute('SELECT COUNT(*) AS totalUsuarios FROM user');
+        const [[{ ativosHoje }]]    = await db.execute("SELECT COUNT(*) AS ativosHoje FROM checkin WHERE DATE(data) = CURDATE()");
+        const [[{ receitaMes }]]    = await db.execute(
+            "SELECT COALESCE(SUM(valor_final),0) AS receitaMes FROM payment WHERE MONTH(created_at)=MONTH(NOW()) AND YEAR(created_at)=YEAR(NOW()) AND status='pago'"
+        );
+        const [[{ ticketsAbertosN }]] = await db.execute(
+            "SELECT COUNT(*) AS ticketsAbertosN FROM support_ticket WHERE status != 'resolvido'"
+        );
 
-    // KPIs
-    const totalUsuarios    = usuarios.length;
-    const ativosHoje       = checkins.filter(c => c.data >= hoje).length;
-    const receitaMes       = transacoes
-        .filter(t => t.status === 'pago' && t.data.getMonth() === new Date().getMonth())
-        .reduce((s, t) => s + t.valor, 0);
-    const ticketsAbertosN  = ticketsAbertos();
+        // Gráfico: cadastros por dia (30 dias)
+        const [cadastrosRaw] = await db.execute(
+            "SELECT DATE(created_at) AS dia, COUNT(*) AS total FROM user WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 29 DAY) GROUP BY DATE(created_at)"
+        );
+        const cadastrosMap = new Map(cadastrosRaw.map(r => [r.dia.toISOString().slice(0,10), Number(r.total)]));
+        const labelsDias = [], cadastrosPorDia = [];
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            labelsDias.push(`${d.getDate()}/${d.getMonth()+1}`);
+            cadastrosPorDia.push(cadastrosMap.get(d.toISOString().slice(0,10)) || 0);
+        }
 
-    // Gráfico: novos cadastros por dia (últimos 30 dias)
-    const cadastrosPorDia = [];
-    const labelsDias = [];
-    for (let i = 29; i >= 0; i--) {
-        const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
-        const prox = new Date(d); prox.setDate(prox.getDate() + 1);
-        labelsDias.push(`${d.getDate()}/${d.getMonth()+1}`);
-        cadastrosPorDia.push(usuarios.filter(u => u.createdAt >= d && u.createdAt < prox).length);
+        // Gráfico: checkins por dia da semana
+        const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const [checkinsDia] = await db.execute(
+            'SELECT (DAYOFWEEK(data)-1) AS dia, COUNT(*) AS total FROM checkin GROUP BY DAYOFWEEK(data)'
+        );
+        const checkinsPorDiaSemana = diasSemana.map((_, d) => {
+            const r = checkinsDia.find(x => x.dia === d);
+            return r ? Number(r.total) : 0;
+        });
+
+        const [ultimosCadastros] = await db.execute(
+            'SELECT id, nome, email, cpf, status, created_at FROM user ORDER BY created_at DESC LIMIT 5'
+        );
+        const [ticketsUrgentes] = await db.execute(
+            "SELECT * FROM support_ticket WHERE status = 'aberto' AND created_at < NOW() - INTERVAL 24 HOUR LIMIT 5"
+        );
+
+        const ticketCount  = Number(ticketsAbertosN);
+        const adminConfig  = buildAdminConfig(res.locals.config);
+
+        res.render('pages/admin-dashboard', {
+            ticketCount, adminConfig,
+            title: 'Dashboard', page: 'dashboard', admin: req.session.admin,
+            totalUsuarios: Number(totalUsuarios), ativosHoje: Number(ativosHoje),
+            receitaMes: Number(receitaMes).toFixed(2),
+            ticketsAbertosN: ticketCount,
+            labelsDias: JSON.stringify(labelsDias),
+            cadastrosPorDia: JSON.stringify(cadastrosPorDia),
+            diasSemana: JSON.stringify(diasSemana),
+            checkinsPorDiaSemana: JSON.stringify(checkinsPorDiaSemana),
+            ultimosCadastros,
+            ticketsUrgentes,
+        });
+    } catch (err) {
+        console.error('[admin/dashboard]', err);
+        res.status(500).send('Erro ao carregar dashboard.');
     }
-
-    // Gráfico: checkins por dia da semana
-    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    const checkinsPorDiaSemana = diasSemana.map((_, d) => checkins.filter(c => c.diaSemana === d).length);
-
-    // Tabelas
-    const ultimosCadastros = [...usuarios]
-        .sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0) || new Date(b.createdAt||0) - new Date(a.createdAt||0))
-        .slice(0, 5);
-    const ticketsUrgentes  = tickets.filter(t => t.status === 'aberto' && (Date.now() - t.createdAt) > 86_400_000).slice(0, 5);
-
-    res.render('pages/admin-dashboard', adminLocals({
-        title: 'Dashboard',
-        page: 'dashboard',
-        totalUsuarios, ativosHoje,
-        receitaMes: receitaMes.toFixed(2),
-        ticketsAbertosN,
-        labelsDias: JSON.stringify(labelsDias),
-        cadastrosPorDia: JSON.stringify(cadastrosPorDia),
-        diasSemana: JSON.stringify(diasSemana),
-        checkinsPorDiaSemana: JSON.stringify(checkinsPorDiaSemana),
-        ultimosCadastros,
-        ticketsUrgentes,
-        admin: req.session.admin,
-    }));
 });
 
 // ── USUÁRIOS ──────────────────────────────────────────────────────────────────
-router.get('/usuarios', (req, res) => {
-    const { busca = '', plano = '', status = '', page = 1 } = req.query;
+router.get('/usuarios', async (req, res) => {
+    const { busca = '', plano = '', status = '' } = req.query;
     const perPage = 15;
+    const pagina  = Math.floor(Number(req.query.page)) || 1;
+    const offset  = (pagina - 1) * perPage;
+    try {
+        let where = 'WHERE 1=1';
+        const params = [];
+        if (busca)  { where += ' AND (u.nome LIKE ? OR u.cpf LIKE ?)'; params.push(`%${busca}%`, `%${busca}%`); }
+        if (plano)  { where += ' AND p.slug = ?'; params.push(plano); }
+        if (status) { where += ' AND u.status = ?'; params.push(status); }
 
-    let lista = [...usuarios];
-    if (busca)  lista = lista.filter(u => u.nome.toLowerCase().includes(busca.toLowerCase()) || u.cpf.includes(busca));
-    if (plano)  lista = lista.filter(u => u.plano === plano);
-    if (status) lista = lista.filter(u => u.status === status);
-    lista.sort((a, b) => b.createdAt - a.createdAt);
+        const countSql = `SELECT COUNT(*) AS total FROM user u LEFT JOIN user_plan up ON up.user_id=u.id AND up.status='ativo' LEFT JOIN plan p ON p.id=up.plan_id ${where}`;
+        const [[{ total }]] = await db.execute(countSql, params);
 
-    const total  = lista.length;
-    const pages  = Math.ceil(total / perPage);
-    const offset = (parseInt(page) - 1) * perPage;
-    const items  = lista.slice(offset, offset + perPage);
+        const listSql = `SELECT u.id, u.nome, u.email, u.cpf, u.status, u.created_at AS createdAt, p.nome AS plano, p.id AS planoId, p.slug AS planoSlug
+            FROM user u
+            LEFT JOIN user_plan up ON up.user_id=u.id AND up.status='ativo'
+            LEFT JOIN plan p ON p.id=up.plan_id
+            ${where} ORDER BY u.created_at DESC LIMIT ${perPage} OFFSET ${offset}`;
+        const [items] = await db.execute(listSql, params);
 
-    res.render('pages/admin-usuarios', adminLocals({
-        title: 'Usuários', page: 'usuarios', admin: req.session.admin,
-        items, total, pages, currentPage: parseInt(page),
-        busca, plano, status, planos,
-    }));
+        const [planos] = await db.execute('SELECT id, nome, slug FROM plan WHERE status = "ativo"');
+        const pages     = Math.ceil(total / perPage);
+        const [ticketCount] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig   = buildAdminConfig(res.locals.config);
+
+        res.render('pages/admin-usuarios', {
+            ticketCount: ticketCount[0].cnt, adminConfig,
+            title: 'Usuários', page: 'usuarios', admin: req.session.admin,
+            items, total: Number(total), pages, currentPage: pagina,
+            busca, plano, status, planos,
+        });
+    } catch (err) {
+        console.error('[admin/usuarios]', err);
+        res.status(500).send('Erro ao carregar usuários.');
+    }
 });
 
 // ── PERFIL DO USUÁRIO ─────────────────────────────────────────────────────────
-router.get('/usuarios/:id', (req, res) => {
-    const user = usuarios.find(u => u.id === req.params.id);
-    if (!user) return res.redirect('/admin/usuarios');
+router.get('/usuarios/:id', async (req, res) => {
+    try {
+        const [[user]] = await db.execute('SELECT * FROM user WHERE id = ?', [req.params.id]);
+        if (!user) return res.redirect('/admin/usuarios');
 
-    const userCheckins  = checkins.filter(c => c.userId === user.id).slice(0, 20);
-    const userTickets   = tickets.filter(t => t.userId === user.id);
-    const userTransacoes = transacoes.filter(t => t.userId === user.id);
+        const [userCheckins]  = await db.execute(
+            'SELECT c.*, g.nome AS academiaNome FROM checkin c LEFT JOIN gym g ON g.id=c.gym_id WHERE c.user_id=? ORDER BY c.data DESC LIMIT 20',
+            [user.id]
+        );
+        const [userTickets]   = await db.execute('SELECT * FROM support_ticket WHERE user_id=? ORDER BY created_at DESC', [user.id]);
+        const [userTransacoes]= await db.execute(
+            'SELECT py.*, p.nome AS planoNome FROM payment py LEFT JOIN plan p ON p.id=py.plan_id WHERE py.user_id=? ORDER BY py.created_at DESC',
+            [user.id]
+        );
+        const [academias]     = await db.execute('SELECT id, nome FROM gym WHERE status="ativa"');
 
-    res.render('pages/admin-usuario-perfil', adminLocals({
-        title: `Perfil — ${user.nome}`, page: 'usuarios', admin: req.session.admin,
-        user, userCheckins, userTickets, userTransacoes, academias,
-    }));
+        const [tc]  = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig = buildAdminConfig(res.locals.config);
+
+        res.render('pages/admin-usuario-perfil', {
+            ticketCount: tc[0].cnt, adminConfig,
+            title: `Perfil — ${user.nome}`, page: 'usuarios', admin: req.session.admin,
+            user, userCheckins, userTickets, userTransacoes, academias,
+        });
+    } catch (err) {
+        console.error('[admin/usuarios/:id]', err);
+        res.status(500).send('Erro ao carregar perfil.');
+    }
 });
 
 // ── ACADEMIAS ─────────────────────────────────────────────────────────────────
-router.get('/academias', (req, res) => {
-    res.render('pages/admin-academias', adminLocals({
-        title: 'Academias', page: 'academias', admin: req.session.admin,
-        academias,
-    }));
+router.get('/academias', async (req, res) => {
+    try {
+        const [academias] = await db.execute('SELECT * FROM gym ORDER BY nome ASC');
+        const [tc] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig = buildAdminConfig(res.locals.config);
+        res.render('pages/admin-academias', {
+            ticketCount: tc[0].cnt, adminConfig,
+            title: 'Academias', page: 'academias', admin: req.session.admin,
+            academias,
+        });
+    } catch (err) {
+        console.error('[admin/academias]', err);
+        res.status(500).send('Erro ao carregar academias.');
+    }
 });
 
 // ── PLANOS ───────────────────────────────────────────────────────────────────
-router.get('/planos', (req, res) => {
-    const planosComCount = planos.map(p => ({
-        ...p,
-        totalAssinantes: usuarios.filter(u => u.planoId === p.id).length,
-    }));
-    res.render('pages/admin-planos', adminLocals({
-        title: 'Planos', page: 'planos', admin: req.session.admin,
-        planos: planosComCount,
-    }));
+router.get('/planos', async (req, res) => {
+    try {
+        const [rows] = await db.execute(
+            `SELECT p.*, COUNT(up.id) AS totalAssinantes
+             FROM plan p
+             LEFT JOIN user_plan up ON up.plan_id = p.id AND up.status = 'ativo'
+             GROUP BY p.id ORDER BY p.preco ASC`
+        );
+        const [tc] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig = buildAdminConfig(res.locals.config);
+        res.render('pages/admin-planos', {
+            ticketCount: tc[0].cnt, adminConfig,
+            title: 'Planos', page: 'planos', admin: req.session.admin,
+            planos: rows,
+        });
+    } catch (err) {
+        console.error('[admin/planos]', err);
+        res.status(500).send('Erro ao carregar planos.');
+    }
 });
 
 // ── CHECK-INS ────────────────────────────────────────────────────────────────
-router.get('/checkins', (req, res) => {
-    const { academia = '', page = 1 } = req.query;
+router.get('/checkins', async (req, res) => {
+    const { academia = '' } = req.query;
     const perPage = 20;
-    let lista = [...checkins];
-    if (academia) lista = lista.filter(c => c.academiaId === academia);
+    const pagina  = Math.floor(Number(req.query.page)) || 1;
+    const offset  = (pagina - 1) * perPage;
+    try {
+        const params = [];
+        let where = 'WHERE 1=1';
+        if (academia) { where += ' AND c.gym_id = ?'; params.push(academia); }
 
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const checkinsHoje = checkins.filter(c => c.data >= hoje).length;
+        const [[{ total }]]   = await db.execute(`SELECT COUNT(*) AS total FROM checkin c ${where}`, params);
+        const [[{ checkinsHoje }]] = await db.execute("SELECT COUNT(*) AS checkinsHoje FROM checkin WHERE DATE(data) = CURDATE()");
 
-    const total  = lista.length;
-    const pages  = Math.ceil(total / perPage);
-    const offset = (parseInt(page) - 1) * perPage;
-    const items  = lista.slice(offset, offset + perPage);
+        const [items] = await db.execute(
+            `SELECT c.*, u.nome AS userName, g.nome AS academiaNome
+             FROM checkin c
+             LEFT JOIN user u ON u.id=c.user_id
+             LEFT JOIN gym g ON g.id=c.gym_id
+             ${where} ORDER BY c.data DESC LIMIT ${perPage} OFFSET ${offset}`,
+            params
+        );
 
-    // Heatmap: checkins por hora × dia da semana
-    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    const heatmap = diasSemana.map((_, d) => checkins.filter(c => c.diaSemana === d).length);
+        const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const [heatmapRaw] = await db.execute(
+            'SELECT (DAYOFWEEK(data)-1) AS dia, COUNT(*) AS total FROM checkin GROUP BY DAYOFWEEK(data)'
+        );
+        const heatmap = diasSemana.map((_, d) => {
+            const r = heatmapRaw.find(x => x.dia === d);
+            return r ? Number(r.total) : 0;
+        });
 
-    res.render('pages/admin-checkins', adminLocals({
-        title: 'Check-ins', page: 'checkins', admin: req.session.admin,
-        items, total, pages, currentPage: parseInt(page),
-        academia, academias, checkinsHoje,
-        heatmap: JSON.stringify(heatmap),
-        diasSemana: JSON.stringify(diasSemana),
-    }));
+        const [academias] = await db.execute('SELECT id, nome FROM gym WHERE status = "ativa"');
+        const [tc]  = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig = buildAdminConfig(res.locals.config);
+
+        res.render('pages/admin-checkins', {
+            ticketCount: tc[0].cnt, adminConfig,
+            title: 'Check-ins', page: 'checkins', admin: req.session.admin,
+            items, total: Number(total), pages: Math.ceil(total / perPage), currentPage: pagina,
+            academia, academias, checkinsHoje: Number(checkinsHoje),
+            heatmap: JSON.stringify(heatmap),
+            diasSemana: JSON.stringify(diasSemana),
+        });
+    } catch (err) {
+        console.error('[admin/checkins]', err);
+        res.status(500).send('Erro ao carregar check-ins.');
+    }
 });
 
 // ── FINANCEIRO ───────────────────────────────────────────────────────────────
-router.get('/financeiro', (req, res) => {
-    const now = new Date();
-    const mesAtual = now.getMonth();
-    const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
+router.get('/financeiro', async (req, res) => {
+    try {
+        const [[{ receitaMes }]]      = await db.execute("SELECT COALESCE(SUM(valor_final),0) AS receitaMes FROM payment WHERE MONTH(created_at)=MONTH(NOW()) AND YEAR(created_at)=YEAR(NOW()) AND status='pago'");
+        const [[{ receitaAnterior }]] = await db.execute("SELECT COALESCE(SUM(valor_final),0) AS receitaAnterior FROM payment WHERE MONTH(created_at)=MONTH(NOW()-INTERVAL 1 MONTH) AND YEAR(created_at)=YEAR(NOW()-INTERVAL 1 MONTH) AND status='pago'");
+        const [[{ inadimplentes }]]   = await db.execute("SELECT COUNT(*) AS inadimplentes FROM payment WHERE status='pendente'");
 
-    const receitaMes = transacoes.filter(t => t.status === 'pago' && t.data.getMonth() === mesAtual).reduce((s, t) => s + t.valor, 0);
-    const receitaAnterior = transacoes.filter(t => t.status === 'pago' && t.data.getMonth() === mesAnterior).reduce((s, t) => s + t.valor, 0);
+        const [receitaPlanoRaw] = await db.execute(
+            `SELECT p.nome, COALESCE(SUM(py.valor_final),0) AS valor, COUNT(up.id) AS count
+             FROM plan p
+             LEFT JOIN payment py ON py.plan_id=p.id AND py.status='pago'
+             LEFT JOIN user_plan up ON up.plan_id=p.id AND up.status='ativo'
+             GROUP BY p.id ORDER BY p.preco ASC`
+        );
 
-    // Receita por plano
-    const receitaPorPlano = planos.map(p => ({
-        nome: p.nome,
-        valor: transacoes.filter(t => t.planoId === p.id && t.status === 'pago').reduce((s, t) => s + t.valor, 0),
-        count: usuarios.filter(u => u.planoId === p.id).length,
-    }));
+        const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        const [receitaMensalRaw] = await db.execute(
+            "SELECT MONTH(created_at)-1 AS mes, COALESCE(SUM(valor_final),0) AS total FROM payment WHERE status='pago' AND YEAR(created_at)=YEAR(NOW()) GROUP BY MONTH(created_at)"
+        );
+        const receitaMensal = meses.map((_, m) => {
+            const r = receitaMensalRaw.find(x => x.mes === m);
+            return r ? Number(r.total).toFixed(2) : '0.00';
+        });
 
-    // Gráfico: receita mensal 12 meses
-    const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    const receitaMensal = meses.map((_, m) => transacoes.filter(t => t.status === 'pago' && t.data.getMonth() === m).reduce((s, t) => s + t.valor, 0).toFixed(2));
+        const rm = Number(receitaMes), ra = Number(receitaAnterior);
+        const [tc] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig = buildAdminConfig(res.locals.config);
 
-    const inadimplentes = transacoes.filter(t => t.status === 'pendente').length;
-
-    res.render('pages/admin-financeiro', adminLocals({
-        title: 'Financeiro', page: 'financeiro', admin: req.session.admin,
-        receitaMes: receitaMes.toFixed(2),
-        receitaAnterior: receitaAnterior.toFixed(2),
-        variacao: receitaAnterior > 0 ? (((receitaMes - receitaAnterior) / receitaAnterior) * 100).toFixed(1) : 0,
-        receitaPorPlano,
-        inadimplentes,
-        meses: JSON.stringify(meses),
-        receitaMensal: JSON.stringify(receitaMensal),
-    }));
+        res.render('pages/admin-financeiro', {
+            ticketCount: tc[0].cnt, adminConfig,
+            title: 'Financeiro', page: 'financeiro', admin: req.session.admin,
+            receitaMes: rm.toFixed(2),
+            receitaAnterior: ra.toFixed(2),
+            variacao: ra > 0 ? (((rm - ra) / ra) * 100).toFixed(1) : 0,
+            receitaPorPlano: receitaPlanoRaw,
+            inadimplentes: Number(inadimplentes),
+            meses: JSON.stringify(meses),
+            receitaMensal: JSON.stringify(receitaMensal),
+        });
+    } catch (err) {
+        console.error('[admin/financeiro]', err);
+        res.status(500).send('Erro ao carregar financeiro.');
+    }
 });
 
-router.get('/financeiro/receitas', (req, res) => {
+router.get('/financeiro/receitas', async (req, res) => {
     const { status = '', page = 1 } = req.query;
     const perPage = 20;
-    let lista = [...transacoes].sort((a, b) => b.data - a.data);
-    if (status) lista = lista.filter(t => t.status === status);
+    const offset  = (parseInt(page) - 1) * perPage;
+    try {
+        const params = [];
+        let where = 'WHERE 1=1';
+        if (status) { where += ' AND py.status = ?'; params.push(status); }
 
-    const total  = lista.length;
-    const pages  = Math.ceil(total / perPage);
-    const offset = (parseInt(page) - 1) * perPage;
-    const items  = lista.slice(offset, offset + perPage);
+        const [[{ total }]] = await db.execute(`SELECT COUNT(*) AS total FROM payment py ${where}`, params);
+        const [items] = await db.execute(
+            `SELECT py.*, u.nome AS userName, u.email AS userEmail, p.nome AS planoNome
+             FROM payment py
+             LEFT JOIN user u ON u.id=py.user_id
+             LEFT JOIN plan p ON p.id=py.plan_id
+             ${where} ORDER BY py.created_at DESC LIMIT ${perPage} OFFSET ${offset}`,
+            params
+        );
 
-    res.render('pages/admin-financeiro-receitas', adminLocals({
-        title: 'Receitas', page: 'financeiro', admin: req.session.admin,
-        items, total, pages, currentPage: parseInt(page), status,
-    }));
+        const [tc] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig = buildAdminConfig(res.locals.config);
+        res.render('pages/admin-financeiro-receitas', {
+            ticketCount: tc[0].cnt, adminConfig,
+            title: 'Receitas', page: 'financeiro', admin: req.session.admin,
+            items, total: Number(total), pages: Math.ceil(total / perPage), currentPage: parseInt(page), status,
+        });
+    } catch (err) {
+        console.error('[admin/financeiro/receitas]', err);
+        res.status(500).send('Erro ao carregar receitas.');
+    }
 });
 
-router.get('/financeiro/inadimplentes', (req, res) => {
-    const lista = transacoes
-        .filter(t => t.status === 'pendente')
-        .map(t => ({ ...t, user: usuarios.find(u => u.id === t.userId) }))
-        .sort((a, b) => b.diasAtraso - a.diasAtraso);
-
-    res.render('pages/admin-financeiro-inadimplentes', adminLocals({
-        title: 'Inadimplentes', page: 'financeiro', admin: req.session.admin,
-        lista,
-    }));
+router.get('/financeiro/inadimplentes', async (req, res) => {
+    try {
+        const [lista] = await db.execute('SELECT * FROM vw_inadimplentes');
+        const [tc] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig = buildAdminConfig(res.locals.config);
+        res.render('pages/admin-financeiro-inadimplentes', {
+            ticketCount: tc[0].cnt, adminConfig,
+            title: 'Inadimplentes', page: 'financeiro', admin: req.session.admin,
+            lista,
+        });
+    } catch (err) {
+        console.error('[admin/financeiro/inadimplentes]', err);
+        res.status(500).send('Erro ao carregar inadimplentes.');
+    }
 });
 
 // ── SUPORTE ───────────────────────────────────────────────────────────────────
-router.get('/suporte', (req, res) => {
+router.get('/suporte', async (req, res) => {
     const { status = '' } = req.query;
-    const todos = [...tickets].sort((a, b) => b.createdAt - a.createdAt);
-    const lista = status ? todos.filter(t => t.status === status) : todos;
-    const counts = {
-        todos:          todos.length,
-        aberto:         todos.filter(t => t.status === 'aberto').length,
-        em_atendimento: todos.filter(t => t.status === 'em_atendimento').length,
-        resolvido:      todos.filter(t => t.status === 'resolvido').length,
-    };
+    try {
+        const params = [];
+        let where = 'WHERE 1=1';
+        if (status) { where += ' AND st.status = ?'; params.push(status); }
 
-    res.render('pages/admin-suporte', adminLocals({
-        title: 'Suporte', page: 'suporte', admin: req.session.admin,
-        lista, status, counts,
-    }));
+        const [lista] = await db.execute(
+            `SELECT st.*, u.nome AS userName, u.email AS userEmail, u.cpf AS userCpf
+             FROM support_ticket st
+             LEFT JOIN user u ON u.id=st.user_id
+             ${where} ORDER BY st.updated_at DESC`,
+            params
+        );
+
+        const [[{ total }]]         = await db.execute('SELECT COUNT(*) AS total FROM support_ticket');
+        const [[{ aberto }]]        = await db.execute("SELECT COUNT(*) AS aberto FROM support_ticket WHERE status='aberto'");
+        const [[{ em_atendimento }]]= await db.execute("SELECT COUNT(*) AS em_atendimento FROM support_ticket WHERE status='em_atendimento'");
+        const [[{ resolvido }]]     = await db.execute("SELECT COUNT(*) AS resolvido FROM support_ticket WHERE status='resolvido'");
+
+        const counts = { todos: Number(total), aberto: Number(aberto), em_atendimento: Number(em_atendimento), resolvido: Number(resolvido) };
+        const adminConfig = buildAdminConfig(res.locals.config);
+
+        res.render('pages/admin-suporte', {
+            ticketCount: Number(aberto) + Number(em_atendimento), adminConfig,
+            title: 'Suporte', page: 'suporte', admin: req.session.admin,
+            lista, status, counts,
+        });
+    } catch (err) {
+        console.error('[admin/suporte]', err);
+        res.status(500).send('Erro ao carregar suporte.');
+    }
 });
 
-router.get('/suporte/:ticketId', (req, res) => {
-    const ticket = tickets.find(t => t.id === req.params.ticketId);
-    if (!ticket) return res.redirect('/admin/suporte');
+router.get('/suporte/:ticketId', async (req, res) => {
+    try {
+        const [[ticket]] = await db.execute('SELECT * FROM support_ticket WHERE id = ?', [req.params.ticketId]);
+        if (!ticket) return res.redirect('/admin/suporte');
 
-    const msgs  = mensagens.filter(m => m.ticketId === ticket.id).sort((a, b) => a.criadaEm - b.criadaEm);
-    const user  = usuarios.find(u => u.id === ticket.userId);
+        const [msgs] = await db.execute(
+            'SELECT * FROM support_message WHERE ticket_id = ? ORDER BY created_at ASC',
+            [ticket.id]
+        );
+        const [[user]] = await db.execute('SELECT id, nome, email, cpf FROM user WHERE id = ?', [ticket.user_id]);
 
-    res.render('pages/admin-suporte-chat', adminLocals({
-        title: `Ticket #${ticket.id}`, page: 'suporte', admin: req.session.admin,
-        ticket, msgs, user,
-    }));
+        const [tc] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig = buildAdminConfig(res.locals.config);
+        res.render('pages/admin-suporte-chat', {
+            ticketCount: tc[0].cnt, adminConfig,
+            title: `Ticket #${ticket.id}`, page: 'suporte', admin: req.session.admin,
+            ticket, msgs, user,
+        });
+    } catch (err) {
+        console.error('[admin/suporte/:ticketId]', err);
+        res.status(500).send('Erro ao carregar ticket.');
+    }
 });
 
 // ── NOTIFICAÇÕES ─────────────────────────────────────────────────────────────
-router.get('/notificacoes', (req, res) => {
-    const lista = [...notificacoes].sort((a, b) => b.criadaEm - a.criadaEm);
-    res.render('pages/admin-notificacoes', adminLocals({
-        title: 'Notificações', page: 'notificacoes', admin: req.session.admin,
-        lista, planos,
-    }));
+router.get('/notificacoes', async (req, res) => {
+    try {
+        const [lista]  = await db.execute('SELECT * FROM notification ORDER BY created_at DESC');
+        const [planos] = await db.execute('SELECT id, nome, slug FROM plan WHERE status = "ativo"');
+        const [tc]     = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig = buildAdminConfig(res.locals.config);
+        res.render('pages/admin-notificacoes', {
+            ticketCount: tc[0].cnt, adminConfig,
+            title: 'Notificações', page: 'notificacoes', admin: req.session.admin,
+            lista, planos,
+        });
+    } catch (err) {
+        console.error('[admin/notificacoes]', err);
+        res.status(500).send('Erro ao carregar notificações.');
+    }
 });
 
 // ── RELATÓRIOS ────────────────────────────────────────────────────────────────
-router.get('/relatorios', (req, res) => {
-    // Crescimento: usuários novos por mês (últimos 6 meses)
-    const meses = [];
-    const crescimento = [];
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(); d.setMonth(d.getMonth() - i);
-        meses.push(d.toLocaleString('pt-BR', { month: 'short' }));
-        crescimento.push(usuarios.filter(u => {
-            if (!u.createdAt) return false;
-            const ca = new Date(u.createdAt);
-            return ca.getMonth() === d.getMonth() && ca.getFullYear() === d.getFullYear();
-        }).length);
+router.get('/relatorios', async (req, res) => {
+    try {
+        // Crescimento: novos usuários por mês (6 meses)
+        const [crescRaw] = await db.execute(
+            `SELECT DATE_FORMAT(created_at, '%b') AS mes,
+                    MONTH(created_at) AS mesNum,
+                    YEAR(created_at)  AS ano,
+                    COUNT(*) AS total
+             FROM user
+             WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+             GROUP BY YEAR(created_at), MONTH(created_at)
+             ORDER BY ano ASC, mesNum ASC`
+        );
+
+        // Preenche meses sem cadastro com 0
+        const mesesLabels = [], crescimento = [];
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(); d.setMonth(d.getMonth() - i);
+            const label = d.toLocaleString('pt-BR', { month: 'short' });
+            mesesLabels.push(label);
+            const r = crescRaw.find(x => x.mesNum === d.getMonth()+1 && x.ano === d.getFullYear());
+            crescimento.push(r ? Number(r.total) : 0);
+        }
+
+        const [distPlanoRaw] = await db.execute(
+            `SELECT p.nome, COUNT(up.id) AS count
+             FROM plan p
+             LEFT JOIN user_plan up ON up.plan_id=p.id AND up.status='ativo'
+             GROUP BY p.id ORDER BY p.preco ASC`
+        );
+
+        const [acadAtivasRaw] = await db.execute(
+            `SELECT g.nome, COUNT(c.id) AS count
+             FROM gym g
+             LEFT JOIN checkin c ON c.gym_id=g.id
+             GROUP BY g.id ORDER BY count DESC LIMIT 6`
+        );
+
+        const [tc] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig = buildAdminConfig(res.locals.config);
+
+        res.render('pages/admin-relatorios', {
+            ticketCount: tc[0].cnt, adminConfig,
+            title: 'Relatórios', page: 'relatorios', admin: req.session.admin,
+            meses: JSON.stringify(mesesLabels),
+            crescimento: JSON.stringify(crescimento),
+            distPlano: JSON.stringify(distPlanoRaw),
+            acadAtivas: JSON.stringify(acadAtivasRaw),
+        });
+    } catch (err) {
+        console.error('[admin/relatorios]', err);
+        res.status(500).send('Erro ao carregar relatórios.');
     }
-
-    // Distribuição por plano
-    const distPlano = planos.map(p => ({
-        nome: p.nome,
-        count: usuarios.filter(u => u.planoId === p.id).length,
-    }));
-
-    // Academias mais ativas (por checkins)
-    const acadAtivas = academias.map(a => ({
-        nome: a.nome,
-        count: checkins.filter(c => c.academiaId === a.id).length,
-    })).sort((a, b) => b.count - a.count).slice(0, 6);
-
-    res.render('pages/admin-relatorios', adminLocals({
-        title: 'Relatórios', page: 'relatorios', admin: req.session.admin,
-        meses: JSON.stringify(meses),
-        crescimento: JSON.stringify(crescimento),
-        distPlano: JSON.stringify(distPlano),
-        acadAtivas: JSON.stringify(acadAtivas),
-    }));
 });
 
 // ── CONFIGURAÇÕES ─────────────────────────────────────────────────────────────
-router.get('/configuracoes', (req, res) => {
-    res.render('pages/admin-configuracoes', adminLocals({
-        title: 'Configurações', page: 'configuracoes', admin: req.session.admin,
-        adminConfig,
-    }));
+router.get('/configuracoes', async (req, res) => {
+    try {
+        const [tc] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const adminConfig = buildAdminConfig(res.locals.config);
+        res.render('pages/admin-configuracoes', {
+            ticketCount: tc[0].cnt, adminConfig,
+            title: 'Configurações', page: 'configuracoes', admin: req.session.admin,
+        });
+    } catch (err) {
+        console.error('[admin/configuracoes]', err);
+        res.status(500).send('Erro ao carregar configurações.');
+    }
 });
 
 module.exports = router;

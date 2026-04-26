@@ -1,4 +1,12 @@
 // ==============================
+// BANNERS DE NOTIFICAÇÃO
+// ==============================
+function fecharBanner(id) {
+    const el = document.getElementById(id);
+    if (el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }
+}
+
+// ==============================
 // ANIMAÇÃO DE PROGRESSO
 // ==============================
 document.querySelectorAll('.progress-fill').forEach(fill => {
