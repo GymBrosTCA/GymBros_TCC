@@ -39,7 +39,7 @@
                                     <section class="text-muted" style="font-size:.75rem"><%= t.userEmail || '' %></section>
                                 </td>
                                 <td><span class="badge badge-gold"><%= t.planoNome %></span></td>
-                                <td class="fw-600">R$ <%= t.valor.toFixed(2) %></td>
+                                <td class="fw-600">R$ <%= Number(t.valor).toFixed(2) %></td>
                                 <td>
                                     <span class="badge <%= t.diasAtraso > 7 ? 'badge-error' : 'badge-warning' %>">
                                         <%= t.diasAtraso %> dia<%= t.diasAtraso !== 1 ? 's' : '' %>

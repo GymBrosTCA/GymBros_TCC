@@ -44,8 +44,8 @@
                             <tr>
                                 <td class="fw-600"><%= t.userName %></td>
                                 <td><span class="badge badge-gold"><%= t.planoNome %></span></td>
-                                <td class="fw-600">R$ <%= t.valor.toFixed(2) %></td>
-                                <td class="text-muted"><%= t.data.toLocaleDateString('pt-BR') %></td>
+                                <td class="fw-600">R$ <%= Number(t.valor).toFixed(2) %></td>
+                                <td class="text-muted"><%= new Date(t.created_at).toLocaleDateString('pt-BR') %></td>
                                 <td>
                                     <span class="badge <%= t.status==='pago'?'badge-success':t.status==='pendente'?'badge-warning':'badge-error' %>"><%= t.status %></span>
                                 </td>

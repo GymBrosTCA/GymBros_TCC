@@ -28,9 +28,9 @@
                     <section class="admin-chat-box" id="admin-chat-box">
                         <section class="admin-chat-header">
                             <section class="admin-chat-header-user">
-                                <section class="chat-avatar"><%= ticket.userName.charAt(0).toUpperCase() %></section>
+                                <section class="chat-avatar"><%= user.nome.charAt(0).toUpperCase() %></section>
                                 <section>
-                                    <section class="fw-600" style="font-size:.9rem"><%= ticket.userName %></section>
+                                    <section class="fw-600" style="font-size:.9rem"><%= user.nome %></section>
                                     <section class="text-muted" style="font-size:.72rem"><%= ticket.tipo %> · #<%= ticket.id %></section>
                                 </section>
                             </section>
@@ -57,10 +57,10 @@
                                     <% if (m.remetente === 'admin') { %>
                                         <i class="fas fa-user-shield" style="font-size:.6rem"></i> Você (Admin)
                                     <% } else { %>
-                                        <i class="fas fa-user" style="font-size:.6rem"></i> <%= ticket.userName %>
+                                        <i class="fas fa-user" style="font-size:.6rem"></i> <%= user.nome %>
                                     <% } %>
-                                    · <%= m.criadaEm.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %>
-                                    <%= m.criadaEm.toLocaleDateString('pt-BR') %>
+                                    · <%= new Date(m.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %>
+                                    <%= new Date(m.created_at).toLocaleDateString('pt-BR') %>
                                     <% if (m.remetente === 'admin') { %>
                                     <span class="msg-status" data-msgid="<%= m.id %>">
                                         <i class="fas fa-check-double" style="color:var(--gold);font-size:.6rem"></i>
@@ -97,18 +97,18 @@
                     <section class="admin-card">
                         <section class="admin-card-header"><span class="admin-card-title"><i class="fas fa-user text-gold"></i> Usuário</span></section>
                         <section class="admin-card-body" style="text-align:center">
-                            <section class="chat-avatar" style="width:56px;height:56px;font-size:1.5rem;margin:0 auto 10px"><%= ticket.userName.charAt(0).toUpperCase() %></section>
-                            <section class="fw-600"><%= ticket.userName %></section>
-                            <section class="text-muted" style="font-size:.78rem;margin-top:2px"><%= ticket.userEmail %></section>
-                            <span class="badge badge-gold" style="margin-top:8px;display:inline-block"><%= ticket.userPlano %></span>
+                            <section class="chat-avatar" style="width:56px;height:56px;font-size:1.5rem;margin:0 auto 10px"><%= user.nome.charAt(0).toUpperCase() %></section>
+                            <section class="fw-600"><%= user.nome %></section>
+                            <section class="text-muted" style="font-size:.78rem;margin-top:2px"><%= user.email %></section>
+                            <span class="badge badge-gold" style="margin-top:8px;display:inline-block"><%= '—' %></span>
                         </section>
                         <section class="admin-card-body" style="padding-top:0">
                             <ul class="admin-detail-list">
                                 <li><span>Ticket</span><span class="text-muted">#<%= ticket.id %></span></li>
                                 <li><span>Tipo</span><span><%= ticket.tipo %></span></li>
                                 <li><span>Prioridade</span><span class="badge <%= ticket.prioridade==='alta'?'badge-error':'badge-muted' %>"><%= ticket.prioridade %></span></li>
-                                <li><span>Abertura</span><span class="text-muted"><%= ticket.createdAt.toLocaleDateString('pt-BR') %></span></li>
-                                <li><span>Atualiz.</span><span class="text-muted"><%= ticket.updatedAt.toLocaleDateString('pt-BR') %></span></li>
+                                <li><span>Abertura</span><span class="text-muted"><%= new Date(ticket.created_at).toLocaleDateString('pt-BR') %></span></li>
+                                <li><span>Atualiz.</span><span class="text-muted"><%= new Date(ticket.updated_at).toLocaleDateString('pt-BR') %></span></li>
                             </ul>
                             <% if (user) { %>
                             <a href="/admin/usuarios/<%= user.id %>" class="btn btn-outline btn-sm w-100" style="justify-content:center;margin-top:12px">
@@ -192,7 +192,7 @@ if (window._adminSSE) {
             hideTyping();
             appendBubble({ texto: d.texto, remetente: 'usuario', criadaEm: new Date().toISOString() }, 'usuario', true);
             scrollChat();
-            toast('Nova mensagem de <%= ticket.userName %>', 'info', 2500);
+            toast('Nova mensagem de <%= user.nome %>', 'info', 2500);
         }, 500);
     });
 
@@ -224,7 +224,7 @@ function hideTyping() {
 function appendBubble(msg, side, animate) {
     const time = new Date(msg.criadaEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     const date = new Date(msg.criadaEm).toLocaleDateString('pt-BR');
-    const senderLabel = side === 'admin' ? '<i class="fas fa-user-shield" style="font-size:.6rem"></i> Você (Admin)' : `<i class="fas fa-user" style="font-size:.6rem"></i> <%= ticket.userName %>`;
+    const senderLabel = side === 'admin' ? '<i class="fas fa-user-shield" style="font-size:.6rem"></i> Você (Admin)' : `<i class="fas fa-user" style="font-size:.6rem"></i> <%= user.nome %>`;
     const checkmark = side === 'admin' ? '<span class="msg-status"><i class="fas fa-check" style="color:#666;font-size:.6rem"></i></span>' : '';
     // bubble: self-contained chat message block (sender + text + timestamp)
     const bubble = document.createElement('section');

@@ -30,3 +30,69 @@
             <p><%= __('footer.copy') %></p>
         </section>
     </footer>
+<section id="pwa-install-banner" class="pwa-banner" style="display:none">
+  <section class="pwa-banner-icon">
+    <img src="/images/logo.png" alt="GymBros" width="48" height="48">
+  </section>
+  <section class="pwa-banner-text">
+    <strong>Instale o GymBros</strong>
+    <span>Acesse treinos, IA e academias direto da sua tela inicial — sem abrir o navegador.</span>
+  </section>
+  <section class="pwa-banner-actions">
+    <button id="pwa-install-btn" class="pwa-btn-install">Instalar</button>
+    <button id="pwa-dismiss-btn" class="pwa-btn-dismiss">Agora não</button>
+  </section>
+</section>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .catch(err => console.error('[SW] erro:', err));
+  });
+}
+(function () {
+  const dismissed = localStorage.getItem('pwa_dismissed');
+  if (dismissed && Date.now() - parseInt(dismissed) < 7 * 24 * 60 * 60 * 1000) return;
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
+
+  let deferredPrompt = null;
+  const banner     = document.getElementById('pwa-install-banner');
+  const btnInstall = document.getElementById('pwa-install-btn');
+  const btnDismiss = document.getElementById('pwa-dismiss-btn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(() => { if (banner) banner.style.display = 'flex'; }, 3000);
+  });
+
+  btnInstall?.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') banner.style.display = 'none';
+    deferredPrompt = null;
+  });
+
+  btnDismiss?.addEventListener('click', () => {
+    banner.style.display = 'none';
+    localStorage.setItem('pwa_dismissed', Date.now().toString());
+  });
+
+  const isIos        = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  if (isIos && !isStandalone) {
+    setTimeout(() => {
+      if (banner) {
+        banner.style.display = 'flex';
+        if (btnInstall) {
+          btnInstall.textContent = 'Como instalar';
+          btnInstall.addEventListener('click', () => {
+            alert('No Safari: toque em compartilhar (□↑) → "Adicionar à Tela de Início"');
+          }, { once: true });
+        }
+      }
+    }, 3000);
+  }
+})();
+</script>

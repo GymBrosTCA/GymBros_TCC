@@ -32,7 +32,7 @@
             <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
             <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
             <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
-            <% if (['pl002', 'pl003'].includes(user.planoId)) { %>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
             <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
             <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
             <% } else { %>
@@ -46,6 +46,32 @@
 
     <!-- CONTEÚDO PRINCIPAL -->
     <section class="aluno-main">
+
+        <!-- BANNERS DE NOTIFICAÇÃO -->
+        <%
+          const agora = new Date();
+          const diasSemImc = user.last_imc_update
+            ? Math.floor((agora - new Date(user.last_imc_update)) / 86400000)
+            : 999;
+          const diasSemAval = user.last_avaliacao_update
+            ? Math.floor((agora - new Date(user.last_avaliacao_update)) / 86400000)
+            : 999;
+          const intervalo = user.notification_interval_days || 7;
+        %>
+        <% if (diasSemImc >= intervalo) { %>
+        <section class="notif-banner notif-warning" id="bannerImc">
+          <span>📋 Faz <%= diasSemImc === 999 ? 'um tempo' : diasSemImc + ' dias' %> que você não atualiza seu perfil IMC.</span>
+          <a href="/imc-form" class="notif-link">Atualizar agora</a>
+          <button class="notif-fechar" onclick="fecharBanner('bannerImc')">✕</button>
+        </section>
+        <% } %>
+        <% if (['gymbro','black'].includes(user.planoSlug) && diasSemAval >= intervalo) { %>
+        <section class="notif-banner notif-info" id="bannerAval">
+          <span>📸 Que tal fazer uma avaliação corporal? Acompanhe sua evolução.</span>
+          <a href="/ai/avaliacao" class="notif-link">Fazer avaliação</a>
+          <button class="notif-fechar" onclick="fecharBanner('bannerAval')">✕</button>
+        </section>
+        <% } %>
 
         <!-- BANNER DE BOAS-VINDAS -->
         <section class="dash-welcome">

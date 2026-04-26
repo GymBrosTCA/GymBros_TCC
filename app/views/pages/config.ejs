@@ -33,7 +33,7 @@
             <li><a href="/evolucao" data-translate="sidebar.evolucao"><i class="fas fa-chart-line"></i> Evolução</a></li>
             <li><a href="/meu-plano" data-translate="sidebar.plano"><i class="fas fa-file-alt"></i> Meu Plano</a></li>
             <li><a href="/config" data-translate="sidebar.config"><i class="fas fa-cog"></i> Configurações</a></li>
-            <% if (['pl002', 'pl003'].includes(user.planoId)) { %>
+            <% if (user && (user.planoSlug === 'gymbro' || user.planoSlug === 'black')) { %>
             <li><a href="/ai/chat" data-translate="sidebar.ai"><i class="fas fa-robot"></i> Personal Trainer IA</a></li>
             <li><a href="/ai/avaliacao" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal</a></li>
             <% } else { %>
@@ -177,6 +177,37 @@
                         <i class="fas fa-sign-out-alt"></i> Sair da conta
                     </a>
                 </section>
+            </section>
+
+            <!-- ── CARD NOTIFICAÇÕES ────────────────────────── -->
+            <section class="cfg-card" id="cfg-notificacoes">
+                <header class="cfg-card-header">
+                    <span class="cfg-card-icon"><i class="fas fa-bell"></i></span>
+                    <h2>Notificações</h2>
+                </header>
+
+                <p class="cfg-card-desc">Com que frequência você quer ser lembrado de atualizar seu perfil IMC e fazer avaliação corporal?</p>
+
+                <section class="cfg-pref-list">
+                    <section class="cfg-pref-row">
+                        <section class="cfg-pref-info">
+                            <strong>Intervalo de lembretes</strong>
+                            <span>Banners na área do aluno</span>
+                        </section>
+                        <select class="cfg-select" id="notifIntervalo" name="dias">
+                            <option value="3"   <%= (user.notification_interval_days == 3)                                          ? 'selected' : '' %>>A cada 3 dias</option>
+                            <option value="7"   <%= (user.notification_interval_days == 7 || !user.notification_interval_days)      ? 'selected' : '' %>>A cada 7 dias (padrão)</option>
+                            <option value="14"  <%= (user.notification_interval_days == 14)                                         ? 'selected' : '' %>>A cada 2 semanas</option>
+                            <option value="30"  <%= (user.notification_interval_days == 30)                                         ? 'selected' : '' %>>A cada mês</option>
+                            <option value="999" <%= (user.notification_interval_days == 999)                                        ? 'selected' : '' %>>Nunca</option>
+                        </select>
+                    </section>
+                </section>
+
+                <button type="button" class="cfg-btn cfg-btn-gold" id="btnSalvarNotif">
+                    <i class="fas fa-save"></i> <span class="cfg-btn-text">Salvar</span>
+                </button>
+                <p class="cfg-feedback" id="notifFeedback"></p>
             </section>
 
         </section><!-- /cfg-grid -->

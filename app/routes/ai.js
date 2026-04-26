@@ -3,13 +3,40 @@ const express          = require('express');
 const router           = express.Router();
 const Groq             = require('groq-sdk');
 const requirePlanLevel = require('../middleware/requirePlanLevel');
+const db               = require('../config/db');
 
-// GymBro (pl002) e Black (pl003) têm acesso à IA
-const requireIA = requirePlanLevel(['pl002', 'pl003']);
+// Planos gymbro e black têm acesso à IA
+const requireIA = requirePlanLevel(['gymbro', 'black']);
 
 const BASE_PROMPT = `Você é um personal trainer virtual chamado GymBot, assistente oficial do GymBros.
 Você ajuda alunos com dúvidas sobre treinos, exercícios, nutrição básica e motivação.
 Seja direto, motivador e use linguagem acessível. Responda sempre em português.`;
+
+// Carrega perfil IMC do DB se a sessão não tiver (compatibilidade)
+async function loadImcProfile(userId) {
+    const [rows] = await db.execute(
+        `SELECT * FROM imc_profile WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`,
+        [userId]
+    );
+    if (!rows[0]) return null;
+    const r = rows[0];
+    return {
+        peso:                  r.peso,
+        altura:                r.altura,
+        imcValor:              r.imc_valor,
+        idade:                 r.idade,
+        sexo:                  r.sexo,
+        objetivo:              r.objetivo,
+        experiencia:           r.experiencia,
+        diasSemana:            r.dias_semana,
+        tempoPorSessao:        r.tempo_por_sessao,
+        localTreino:           r.local_treino,
+        lesoes:                JSON.parse(r.lesoes || '[]'),
+        restricoesAlimentares: JSON.parse(r.restricoes_alimentares || '[]'),
+        suplementacao:         JSON.parse(r.suplementacao || '[]'),
+        hidratacao:            r.hidratacao,
+    };
+}
 
 function buildSystemPrompt(user) {
     const imc = user.imc;
@@ -169,41 +196,109 @@ Analise a composição corporal do aluno pela(s) foto(s) enviadas e retorne SOME
     }
 });
 
-// POST /ai/avaliacao-salvar — salva o resultado da avaliação corporal na sessão
-// (chamado pelo frontend após receber o resultado, para que o GymBot tenha acesso)
-router.post('/avaliacao-salvar', requireIA, (req, res) => {
+// POST /ai/avaliacao-salvar — persiste avaliação no DB e na sessão
+router.post('/avaliacao-salvar', requireIA, async (req, res) => {
     if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
 
-    const { resultado } = req.body;
+    const { resultado, fotoPath } = req.body;
     if (!resultado) return res.status(400).json({ erro: 'Resultado não informado.' });
+
+    const c = resultado.composicao || {};
+    try {
+        await db.execute(
+            `INSERT INTO body_photo
+             (user_id, foto_path, consent_given, consent_at,
+              gordura_total, gordura_tronco, gordura_braco, gordura_perna,
+              margem_erro, analise_raw, modelo_ia)
+             VALUES (?, ?, 1, NOW(), ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                req.session.user.id,
+                fotoPath || null,
+                c.percentual_gordura_estimado || null,
+                c.regiao_predominante || null,
+                c.massa_muscular_aparente || null,
+                null,
+                c.margem_erro || null,
+                JSON.stringify(resultado),
+                'llama-4-scout',
+            ]
+        );
+    } catch (err) {
+        console.error('[ai/avaliacao-salvar DB]', err.message);
+        // Não bloqueia — salva na sessão mesmo assim
+    }
 
     req.session.user.avaliacaoCorporal = {
         ...resultado,
-        data: new Date().toLocaleDateString('pt-BR')
+        data: new Date().toLocaleDateString('pt-BR'),
     };
 
     return res.json({ ok: true });
 });
 
-// POST /ai/message — envia mensagem ao Groq e retorna resposta em JSON
+// POST /ai/message — envia mensagem ao Groq e persiste sessão + mensagens no DB
 router.post('/message', requireIA, async (req, res) => {
     if (!req.session.user) return res.status(401).json({ reply: 'Não autorizado.' });
 
     const { message } = req.body;
-    if (!message || !message.trim()) {
-        return res.json({ reply: 'Por favor, envie uma mensagem.' });
+    if (!message || !message.trim()) return res.json({ reply: 'Por favor, envie uma mensagem.' });
+
+    const userId = req.session.user.id;
+
+    // Garante IMC na sessão (carrega do DB se não tiver)
+    if (!req.session.user.imc) {
+        req.session.user.imc = await loadImcProfile(userId).catch(() => null);
     }
 
     try {
+        // Busca ou cria sessão ativa de IA
+        const [sessions] = await db.execute(
+            "SELECT * FROM ai_session WHERE user_id=? AND ativa=1 ORDER BY created_at DESC LIMIT 1",
+            [userId]
+        );
+
+        let sessionId;
+        if (sessions.length === 0) {
+            const [[ctxRows]] = await db.execute('CALL sp_contexto_ia(?)', [userId]);
+            const ctx = ctxRows?.[0] || { nome: req.session.user.nome, plano: req.session.user.plano };
+            const [r] = await db.execute(
+                'INSERT INTO ai_session (user_id, modelo, context_snapshot) VALUES (?, ?, ?)',
+                [userId, 'llama-3.3-70b-versatile', JSON.stringify(ctx)]
+            );
+            sessionId = r.insertId;
+        } else {
+            sessionId = sessions[0].id;
+        }
+
+        // Salva mensagem do usuário
+        await db.execute(
+            'INSERT INTO ai_message (session_id, role, content) VALUES (?, "user", ?)',
+            [sessionId, message]
+        );
+
         const groq       = new Groq({ apiKey: process.env.GROQ_API_KEY });
         const completion = await groq.chat.completions.create({
             model:    'llama-3.3-70b-versatile',
             messages: [
                 { role: 'system', content: buildSystemPrompt(req.session.user) },
-                { role: 'user',   content: message }
-            ]
+                { role: 'user',   content: message },
+            ],
         });
-        return res.json({ reply: completion.choices[0].message.content });
+
+        const reply  = completion.choices[0].message.content;
+        const tokens = completion.usage?.total_tokens || 0;
+
+        // Salva resposta da IA
+        await db.execute(
+            'INSERT INTO ai_message (session_id, role, content, tokens) VALUES (?, "assistant", ?, ?)',
+            [sessionId, reply, tokens]
+        );
+        await db.execute(
+            'UPDATE ai_session SET total_mensagens=total_mensagens+2, total_tokens=total_tokens+? WHERE id=?',
+            [tokens, sessionId]
+        );
+
+        return res.json({ reply });
     } catch (err) {
         console.error('Erro ao chamar Groq:', err.message);
         return res.json({ reply: 'Desculpe, não consegui processar sua mensagem. Tente novamente.' });

@@ -1,5 +1,7 @@
 'use strict';
 
+const db = require('./config/db');
+
 // ── SSE clients: admin panel ──────────────────────────────────────────────────
 const adminClients = new Set();
 
@@ -56,4 +58,48 @@ function broadcastToStudents(type, data) {
     }
 }
 
-module.exports = { addAdminClient, broadcast, addTicketClient, broadcastTicket, addStudentClient, broadcastToStudents };
+// ── SSE clients: per-user (notificações diretas) ──────────────────────────────
+const userConnections = new Map(); // userId (string) → res
+
+function registerUserSSE(userId, res) {
+    userConnections.set(String(userId), res);
+}
+
+function unregisterUserSSE(userId) {
+    userConnections.delete(String(userId));
+}
+
+function emitToUser(userId, event, data) {
+    const res = userConnections.get(String(userId));
+    if (res) res.write(`data: ${JSON.stringify({ event, ...data })}\n\n`);
+}
+
+function emitToUsers(userIds, event, data) {
+    userIds.forEach(id => emitToUser(id, event, data));
+}
+
+async function emitToPlan(planId, event, data) {
+    try {
+        const [rows] = await db.execute(
+            `SELECT u.id FROM user u
+             JOIN user_plan up ON up.user_id = u.id AND up.status = 'ativo'
+             WHERE up.plan_id = ?`,
+            [planId]
+        );
+        rows.forEach(r => emitToUser(r.id, event, data));
+    } catch (err) {
+        console.error('[events] emitToPlan error:', err.message);
+    }
+}
+
+// ── Online users tracking (userId → { nome, email, page, lastSeen }) ─────────
+const onlineUsers = new Map();
+
+module.exports = {
+    addAdminClient, broadcast,
+    addTicketClient, broadcastTicket,
+    addStudentClient, broadcastToStudents,
+    registerUserSSE, unregisterUserSSE,
+    emitToUser, emitToUsers, emitToPlan,
+    onlineUsers,
+};

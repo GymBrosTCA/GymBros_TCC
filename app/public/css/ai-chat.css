@@ -12,7 +12,7 @@
       → chat-input-area (height natural)
 */
 
-/* Trava a rolagem da página — só o chat-history rola */
+/* Página sem scroll — só o chat-history rola */
 html, body {
     height: 100%;
     overflow: hidden;
@@ -23,17 +23,13 @@ body {
     flex-direction: column;
 }
 
-/* Header e footer não crescem */
+/* Header não cresce */
 .gymbros-header {
     flex-shrink: 0;
-    position: relative; /* sticky não faz sentido sem scroll de página */
+    position: relative;
 }
 
-footer {
-    flex-shrink: 0;
-}
-
-/* Dashboard ocupa todo o espaço entre header e footer */
+/* Dashboard ocupa todo o espaço abaixo do header */
 .aluno-dashboard {
     flex: 1;
     min-height: 0;
@@ -43,6 +39,7 @@ footer {
 }
 
 .aluno-main {
+    flex: 1;
     min-height: 0;
     display: flex;
     flex-direction: column;

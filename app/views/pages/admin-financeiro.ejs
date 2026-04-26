@@ -76,7 +76,7 @@
                         <tr>
                             <td class="fw-600"><%= p.nome %></td>
                             <td><span class="badge badge-muted"><%= p.count %></span></td>
-                            <td class="fw-600 text-gold">R$ <%= p.valor.toFixed(2) %></td>
+                            <td class="fw-600 text-gold">R$ <%= Number(p.valor).toFixed(2) %></td>
                         </tr>
                         <% }) %>
                         </tbody>

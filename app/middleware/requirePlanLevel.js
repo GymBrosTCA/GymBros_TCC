@@ -1,9 +1,10 @@
-// requirePlanLevel.js — restringe rotas por plano do usuário
-// planoId: 'pl001' = Starter | 'pl002' = GymBro | 'pl003' = Black
-function requirePlanLevel(allowedIds) {
+'use strict';
+
+// planoSlug: 'starter' | 'gymbro' | 'black'
+function requirePlanLevel(slugs) {
     return (req, res, next) => {
-        const userPlanoId = req.session.user?.planoId;
-        if (!allowedIds.includes(userPlanoId)) {
+        const userSlug = req.session.user?.planoSlug;
+        if (!slugs.includes(userSlug)) {
             return res.redirect('/meu-plano?upgrade=1');
         }
         next();

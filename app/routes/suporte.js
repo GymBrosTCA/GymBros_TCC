@@ -5,8 +5,8 @@
 
 const express  = require('express');
 const router   = express.Router();
-const { tickets, mensagens, notificacoes, nextId } = require('../data');
-const { broadcast, broadcastTicket, addTicketClient, addStudentClient } = require('../events');
+const db       = require('../config/db');
+const { broadcast, broadcastTicket, addTicketClient, addStudentClient, registerUserSSE, unregisterUserSSE } = require('../events');
 
 // Middleware: exige sessão de aluno
 router.use((req, res, next) => {
@@ -15,107 +15,174 @@ router.use((req, res, next) => {
 });
 
 // ── Abrir chamado ─────────────────────────────────────────────────────────────
-router.post('/tickets', (req, res) => {
+router.post('/tickets', async (req, res) => {
     const { assunto, tipo, descricao } = req.body;
     const user = req.session.user;
     if (!assunto || !descricao?.trim()) return res.status(400).json({ erro: 'Assunto e descrição são obrigatórios.' });
 
-    const tid = nextId('tk');
-    const ticket = {
-        id: tid,
-        userId: user.id || user.cpf,
-        userName: user.nome,
-        userEmail: user.email,
-        userPlano: user.plano || 'Starter',
-        assunto,
-        tipo: tipo || 'Outro',
-        status: 'aberto',
-        prioridade: 'normal',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    };
-    tickets.push(ticket);
-    mensagens.push({ id: nextId('ms'), ticketId: tid, remetente: 'usuario', texto: descricao.trim(), criadaEm: new Date() });
+    try {
+        const [result] = await db.execute(
+            'INSERT INTO support_ticket (user_id, assunto, tipo, prioridade) VALUES (?, ?, ?, "normal")',
+            [user.id, assunto, tipo || 'Outro']
+        );
+        const ticketId = result.insertId;
 
-    // Notifica o admin em tempo real
-    broadcast('new_ticket', { ticketId: tid, userName: user.nome, assunto, tipo: ticket.tipo, status: 'aberto', createdAt: ticket.createdAt.toISOString() });
+        await db.execute(
+            'INSERT INTO support_message (ticket_id, remetente, texto) VALUES (?, "usuario", ?)',
+            [ticketId, descricao.trim()]
+        );
 
-    res.status(201).json({ mensagem: 'Chamado aberto com sucesso!', ticket });
+        broadcast('new_ticket', {
+            ticketId,
+            userName: user.nome,
+            assunto,
+            tipo: tipo || 'Outro',
+            status: 'aberto',
+            createdAt: new Date().toISOString(),
+        });
+
+        res.status(201).json({ mensagem: 'Chamado aberto com sucesso!', ticketId });
+    } catch (err) {
+        console.error('[suporte/tickets POST]', err);
+        res.status(500).json({ erro: 'Erro ao abrir chamado.' });
+    }
 });
 
 // ── Listar tickets do usuário ─────────────────────────────────────────────────
-router.get('/tickets', (req, res) => {
-    const userId = req.session.user.id || req.session.user.cpf;
-    const lista  = tickets.filter(t => t.userId === userId).sort((a, b) => b.createdAt - a.createdAt);
-    res.json(lista);
+router.get('/tickets', async (req, res) => {
+    const userId = req.session.user.id;
+    try {
+        const [lista] = await db.execute(
+            `SELECT st.*,
+               (SELECT COUNT(*) FROM support_message sm
+                WHERE sm.ticket_id=st.id AND sm.lida=0 AND sm.remetente='admin') AS nao_lidas
+             FROM support_ticket st
+             WHERE st.user_id = ?
+             ORDER BY st.updated_at DESC`,
+            [userId]
+        );
+        res.json(lista);
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar tickets.' });
+    }
 });
 
 // ── Mensagens de um ticket ────────────────────────────────────────────────────
-router.get('/tickets/:id', (req, res) => {
-    const userId = req.session.user.id || req.session.user.cpf;
-    const ticket = tickets.find(t => t.id === req.params.id && t.userId === userId);
-    if (!ticket) return res.status(404).json({ erro: 'Ticket não encontrado.' });
-    const msgs = mensagens.filter(m => m.ticketId === ticket.id).sort((a, b) => a.criadaEm - b.criadaEm);
-    res.json({ ticket, mensagens: msgs });
+router.get('/tickets/:id', async (req, res) => {
+    const userId = req.session.user.id;
+    try {
+        const [[ticket]] = await db.execute(
+            'SELECT * FROM support_ticket WHERE id = ? AND user_id = ?',
+            [req.params.id, userId]
+        );
+        if (!ticket) return res.status(404).json({ erro: 'Ticket não encontrado.' });
+
+        const [msgs] = await db.execute(
+            'SELECT * FROM support_message WHERE ticket_id = ? ORDER BY created_at ASC',
+            [ticket.id]
+        );
+        res.json({ ticket, mensagens: msgs });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar ticket.' });
+    }
 });
 
 // ── Usuário responde ──────────────────────────────────────────────────────────
-router.post('/tickets/:id/mensagem', (req, res) => {
-    const userId = req.session.user.id || req.session.user.cpf;
-    const ticket = tickets.find(t => t.id === req.params.id && t.userId === userId);
-    if (!ticket) return res.status(404).json({ erro: 'Ticket não encontrado.' });
-    if (ticket.status === 'resolvido') return res.status(400).json({ erro: 'Ticket já resolvido.' });
+router.post('/tickets/:id/mensagem', async (req, res) => {
+    const userId = req.session.user.id;
     const { texto } = req.body;
     if (!texto?.trim()) return res.status(400).json({ erro: 'Mensagem vazia.' });
-    const msg = { id: nextId('ms'), ticketId: ticket.id, remetente: 'usuario', texto: texto.trim(), criadaEm: new Date(), lida: false };
-    mensagens.push(msg);
-    ticket.updatedAt = new Date();
-    const msgPayload = { ...msg, criadaEm: msg.criadaEm.toISOString() };
-    // Notifica admin e outros clientes do ticket em tempo real
-    broadcastTicket(ticket.id, 'new_message', msgPayload);
-    broadcast('ticket_message', { ticketId: ticket.id, userName: ticket.userName, assunto: ticket.assunto, texto: texto.trim() });
-    res.status(201).json(msgPayload);
+
+    try {
+        const [[ticket]] = await db.execute(
+            'SELECT * FROM support_ticket WHERE id = ? AND user_id = ?',
+            [req.params.id, userId]
+        );
+        if (!ticket) return res.status(404).json({ erro: 'Ticket não encontrado.' });
+        if (ticket.status === 'resolvido') return res.status(400).json({ erro: 'Ticket já resolvido.' });
+
+        const [result] = await db.execute(
+            'INSERT INTO support_message (ticket_id, remetente, texto) VALUES (?, "usuario", ?)',
+            [ticket.id, texto.trim()]
+        );
+        await db.execute('UPDATE support_ticket SET updated_at=NOW() WHERE id=?', [ticket.id]);
+
+        const [[msg]] = await db.execute('SELECT * FROM support_message WHERE id=?', [result.insertId]);
+        broadcastTicket(ticket.id, 'new_message', msg);
+        broadcast('ticket_message', { ticketId: ticket.id, userName: req.session.user.nome, assunto: ticket.assunto, texto: texto.trim() });
+
+        res.status(201).json(msg);
+    } catch (err) {
+        console.error('[suporte/tickets/:id/mensagem]', err);
+        res.status(500).json({ erro: 'Erro ao enviar mensagem.' });
+    }
 });
 
 // ── SSE: atualizações em tempo real de um ticket ──────────────────────────────
-router.get('/tickets/:id/stream', (req, res) => {
-    const userId = req.session.user.id || req.session.user.cpf;
-    const ticket = tickets.find(t => t.id === req.params.id && t.userId === userId);
-    if (!ticket) return res.status(404).end();
-    res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive', 'X-Accel-Buffering': 'no' });
-    res.flushHeaders();
-    res.write(':ok\n\n');
-    addTicketClient(ticket.id, res);
-    const ping = setInterval(() => { try { res.write(':ping\n\n'); } catch (_) { clearInterval(ping); } }, 20000);
-    res.on('close', () => clearInterval(ping));
+router.get('/tickets/:id/stream', async (req, res) => {
+    const userId = req.session.user.id;
+    try {
+        const [[ticket]] = await db.execute(
+            'SELECT id FROM support_ticket WHERE id = ? AND user_id = ?',
+            [req.params.id, userId]
+        );
+        if (!ticket) return res.status(404).end();
+
+        res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive', 'X-Accel-Buffering': 'no' });
+        res.flushHeaders();
+        res.write(':ok\n\n');
+        addTicketClient(ticket.id, res);
+        const ping = setInterval(() => { try { res.write(':ping\n\n'); } catch (_) { clearInterval(ping); } }, 20000);
+        res.on('close', () => clearInterval(ping));
+    } catch {
+        res.status(500).end();
+    }
 });
 
 // ── SSE: notificações push do admin ──────────────────────────────────────────
 router.get('/notificacoes/stream', (req, res) => {
+    const userId = req.session.user.id;
     res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive', 'X-Accel-Buffering': 'no' });
     res.flushHeaders();
     res.write(':ok\n\n');
     addStudentClient(res);
+    registerUserSSE(userId, res);
     const ping = setInterval(() => { try { res.write(':ping\n\n'); } catch (_) { clearInterval(ping); } }, 20000);
-    res.on('close', () => clearInterval(ping));
+    res.on('close', () => { clearInterval(ping); unregisterUserSSE(userId); });
 });
 
 // ── Notificações do usuário ───────────────────────────────────────────────────
-router.get('/notificacoes', (req, res) => {
-    const userId = req.session.user.id || req.session.user.cpf;
+router.get('/notificacoes', async (req, res) => {
+    const userId  = req.session.user.id;
     const planoId = req.session.user.planoId;
-    const lista = notificacoes.filter(n =>
-        n.destinatarios === 'todos' || n.destinatarios === planoId
-    ).sort((a, b) => b.criadaEm - a.criadaEm).slice(0, 20);
-    res.json(lista.map(n => ({ ...n, lida: (n.lidas || []).includes(userId) })));
+    try {
+        const [lista] = await db.execute(
+            `SELECT n.*,
+               EXISTS(SELECT 1 FROM notification_read nr WHERE nr.notification_id=n.id AND nr.user_id=?) AS lida
+             FROM notification n
+             WHERE n.destinatarios = 'todos'
+                OR n.destinatarios = ?
+             ORDER BY n.created_at DESC
+             LIMIT 20`,
+            [userId, String(planoId)]
+        );
+        res.json(lista);
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao buscar notificações.' });
+    }
 });
 
-router.put('/notificacoes/:id/lida', (req, res) => {
-    const userId = req.session.user.id || req.session.user.cpf;
-    const notif  = notificacoes.find(n => n.id === req.params.id);
-    if (!notif) return res.status(404).json({ erro: 'Notificação não encontrada.' });
-    if (!notif.lidas.includes(userId)) notif.lidas.push(userId);
-    res.json({ mensagem: 'Marcada como lida.' });
+router.put('/notificacoes/:id/lida', async (req, res) => {
+    const userId = req.session.user.id;
+    try {
+        await db.execute(
+            'INSERT IGNORE INTO notification_read (notification_id, user_id) VALUES (?, ?)',
+            [req.params.id, userId]
+        );
+        res.json({ mensagem: 'Marcada como lida.' });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao marcar notificação.' });
+    }
 });
 
 module.exports = router;

@@ -5,9 +5,12 @@ const path       = require('path');
 const fs         = require('fs');
 const multer     = require('multer');
 const QRCode     = require('qrcode');
+const bcrypt     = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const { enviarBoleto }   = require('../services/email');
 const { gerarBoletoPDF } = require('../services/pdf');
+const db         = require('../config/db');
+const { broadcast, onlineUsers } = require('../events');
 
 // ── Multer: upload de foto de perfil ──────────────────────────────────────────
 const photoStorage = multer.diskStorage({
@@ -33,27 +36,13 @@ const photoUpload = multer({
     },
 });
 
-// Store central compartilhado com admin
-const { usuarios, onlineUsers, transacoes, planos: planosData, nextId } = require('../data');
-const { broadcast } = require('../events');
-
-// ── Dados dos planos disponíveis ──────────────────────────────────────────
-const PLANOS_PAGAMENTO = {
-    starter: { id: 'pl001', nome: 'Starter', preco: 64.90, precoFmt: 'R$ 64,90', beneficios: ['2300+ academias e estúdios', 'Treinos online e presenciais', 'App GymBros', 'Suporte 24h'] },
-    gymbro:  { id: 'pl002', nome: 'GymBro',  preco: 85.60, precoFmt: 'R$ 85,60', beneficios: ['3560+ academias e estúdios', 'Treinos online ao vivo', 'Leve 4 amigos por mês', 'Personal trainer online'] },
-    black:   { id: 'pl003', nome: 'Black',   preco: 145.90, precoFmt: 'R$ 145,90', beneficios: ['5000+ academias e estúdios', 'Treinos online ao vivo', 'Leve amigos ilimitado', 'Personal trainer exclusivo', 'Área VIP e benefícios premium'] },
-};
-
 // ── Middleware: rastreia usuários online ──────────────────────────────────────
 router.use((req, res, next) => {
     if (req.session && req.session.user) {
         const user = req.session.user;
-        const uid  = user.id || user.cpf;
+        const uid  = String(user.id);
         const isNew = !onlineUsers.has(uid);
         onlineUsers.set(uid, { nome: user.nome, email: user.email, page: req.path, lastSeen: Date.now() });
-        // Atualiza lastSeen no objeto do usuário para aparecer primeiro no admin
-        const userObj = usuarios.find(u => u.id === uid || u.cpf === uid);
-        if (userObj) userObj.lastSeen = Date.now();
         if (isNew) {
             broadcast('user_online', { id: uid, nome: user.nome, email: user.email, page: req.path, lastSeen: Date.now() });
         } else {
@@ -190,84 +179,90 @@ router.get('/compra3', (req, res) => res.render('pages/compra3', { seo: {
 
 
 // Pagamento
-router.get('/pagamento', (req, res) => {
+router.get('/pagamento', async (req, res) => {
     if (!req.session.user) {
         const plano = req.query.plano ? `?plano=${encodeURIComponent(req.query.plano)}` : '';
         return res.redirect(`/login?redirect=/pagamento${encodeURIComponent(plano)}`);
     }
     const slug = (req.query.plano || 'gymbro').toLowerCase();
-    const plano = PLANOS_PAGAMENTO[slug] || PLANOS_PAGAMENTO.gymbro;
-    res.render('pages/pagamento', {
-        user: req.session.user,
-        plano,
-        hideThemeToggle: true,
-        seo: {
-            title:       'Pagamento — GymBros',
-            canonical:   '/pagamento',
-            robots:      'noindex, nofollow',
-            description: 'Finalize sua assinatura GymBros com segurança.',
-        }
-    });
+    try {
+        const [rows] = await db.execute(
+            'SELECT * FROM plan WHERE slug = ? AND status = "ativo" LIMIT 1', [slug]
+        );
+        const plano = rows[0];
+        if (!plano) return res.redirect('/planos');
+        res.render('pages/pagamento', {
+            user: req.session.user,
+            plano,
+            seo: {
+                title:       'Pagamento — GymBros',
+                canonical:   '/pagamento',
+                robots:      'noindex, nofollow',
+                description: 'Finalize sua assinatura GymBros com segurança.',
+            }
+        });
+    } catch (err) {
+        console.error('[pagamento]', err);
+        res.redirect('/planos');
+    }
 });
 
-router.post('/api/pagamento', (req, res) => {
+router.post('/api/pagamento', async (req, res) => {
     if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
 
-    const { planoId, planoNome, valor, metodo, parcelas } = req.body;
-    const user = req.session.user;
+    const { planoId, planoNome, valor, metodo, parcelas, cartaoFinal, bandeira } = req.body;
+    const user   = req.session.user;
+    const status = 'pago';
+    const valorN = Number(valor);
 
-    // Cartão = ativo imediatamente; PIX e boleto = pendente até confirmação
-    const status = metodo === 'cartao' ? 'pago' : 'pendente';
+    try {
+        // 1. Buscar id numérico do plano no banco
+        const [planRows] = await db.execute('SELECT id, nome, slug FROM plan WHERE slug = ? OR nome = ? LIMIT 1', [planoId, planoNome]);
+        const plan = planRows[0];
+        if (!plan) return res.status(400).json({ erro: 'Plano não encontrado.' });
 
-    const transacao = {
-        id:         nextId('tr'),
-        userId:     user.id || user.cpf,
-        userName:   user.nome,
-        userEmail:  user.email,
-        planoId:    planoId,
-        planoNome:  planoNome,
-        valor:      Number(valor),
-        metodo,
-        parcelas:   Number(parcelas) || 1,
-        data:       new Date(),
-        status,
-        diasAtraso: 0,
-    };
+        // 2. Inserir pagamento
+        const [payResult] = await db.execute(
+            `INSERT INTO payment
+             (user_id, plan_id, valor_bruto, valor_final, metodo, parcelas,
+              cartao_final, cartao_bandeira, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [user.id, plan.id, valorN, valorN, metodo, Number(parcelas) || 1,
+             cartaoFinal || null, bandeira || null, status]
+        );
+        const paymentId = payResult.insertId;
 
-    transacoes.push(transacao);
+        // 3. Ativar plano via procedure
+        if (status === 'pago') {
+            try {
+                await db.execute('CALL sp_ativar_plano(?, ?, ?)', [user.id, plan.id, paymentId]);
+            } catch (spErr) {
+                console.error('[pagamento] sp_ativar_plano ERRO:', spErr.message);
+            }
+        }
 
-    const stored = usuarios.find(u => u.id === user.id || u.cpf === user.cpf);
-    if (stored) {
-        stored.plano   = planoNome;
-        stored.planoId = planoId;
-        stored.status  = 'ativo';
+        // 4. Atualizar sessão
+        req.session.user = { ...user, plano: plan.nome, planoId: plan.id, planoSlug: plan.slug, status: 'ativo' };
+
+        // 5. Notificar admin via SSE
+        broadcast('nova_compra', {
+            paymentId,
+            userName:  user.nome,
+            userEmail: user.email,
+            planoNome: plan.nome,
+            valor:     valorN,
+            metodo,
+            status,
+        });
+
+        req.session.save(err => {
+            if (err) console.error('[pagamento] session save error:', err);
+            return res.json({ ok: true, status, transacaoId: paymentId });
+        });
+    } catch (err) {
+        console.error('[api/pagamento]', err);
+        return res.status(500).json({ ok: false, erro: 'Erro ao processar pagamento.' });
     }
-    req.session.user = { ...user, plano: planoNome, planoId, status: 'ativo' };
-
-    // Notifica admin via SSE
-    const { notificacoes } = require('../data');
-    const notif = {
-        id:           nextId('no'),
-        titulo:       `Nova compra — ${planoNome}`,
-        mensagem:     `${user.nome} assinou o plano ${planoNome} via ${metodo} — R$ ${Number(valor).toFixed(2).replace('.', ',')}`,
-        tipo:         'compra',
-        destinatarios:'admin',
-        criadaEm:    new Date(),
-        lidas:        [],
-    };
-    notificacoes.push(notif);
-    broadcast('nova_compra', {
-        transacaoId: transacao.id,
-        userName:    user.nome,
-        userEmail:   user.email,
-        planoNome,
-        valor:       Number(valor),
-        metodo,
-        status,
-        data:        transacao.data,
-    });
-
-    return res.json({ ok: true, status, transacaoId: transacao.id });
 });
 
 // ── GET /api/pix/qr — gera QR Code PIX ───────────────────────────────────────
@@ -358,11 +353,40 @@ router.get('/about', (req, res) => res.render('pages/about', { seo: {
 }}));
 
 // Área do Aluno (protegida — requer plano ativo)
-router.get('/area-aluno', requirePlano, (req, res) => {
-    res.render('pages/area-aluno', { user: req.session.user, seo: {
-        title: 'Painel do Aluno — GymBros', canonical: '/area-aluno',
-        robots: 'noindex, nofollow', description: 'Painel do aluno GymBros.',
-    }});
+router.get('/area-aluno', requirePlano, async (req, res) => {
+    try {
+        const [rows] = await db.execute(
+            'SELECT last_imc_update, last_avaliacao_update, notification_interval_days FROM user WHERE id = ?',
+            [req.session.user.id]
+        );
+        const extra = rows[0] || {};
+        res.render('pages/area-aluno', {
+            user: { ...req.session.user, ...extra },
+            seo: {
+                title: 'Painel do Aluno — GymBros', canonical: '/area-aluno',
+                robots: 'noindex, nofollow', description: 'Painel do aluno GymBros.',
+            }
+        });
+    } catch (err) {
+        console.error('[area-aluno]', err);
+        res.render('pages/area-aluno', { user: req.session.user, seo: {
+            title: 'Painel do Aluno — GymBros', canonical: '/area-aluno',
+            robots: 'noindex, nofollow', description: 'Painel do aluno GymBros.',
+        }});
+    }
+});
+
+router.post('/config/notificacao-intervalo', requireAuth, async (req, res) => {
+    const dias = Math.max(1, parseInt(req.body.dias) || 7);
+    try {
+        await db.execute('UPDATE user SET notification_interval_days = ? WHERE id = ?',
+            [dias, req.session.user.id]);
+        req.session.user.notification_interval_days = dias;
+        res.json({ ok: true });
+    } catch (err) {
+        console.error('[notificacao-intervalo]', err);
+        res.status(500).json({ ok: false });
+    }
 });
 
 //Treinos
@@ -412,53 +436,72 @@ router.get('/evolucao', requirePlano, (req, res) => {
 });
 
 // Meu Plano
-router.get('/meu-plano', requirePlano, (req, res) => {
+router.get('/meu-plano', requirePlano, async (req, res) => {
     const user = req.session.user;
+    try {
+        const [planoRows] = await db.execute(
+            `SELECT p.* FROM plan p
+             JOIN user_plan up ON up.plan_id = p.id
+             WHERE up.user_id = ? AND up.status = 'ativo'
+             LIMIT 1`,
+            [user.id]
+        );
+        const [todosPlanos] = await db.execute(
+            `SELECT * FROM plan WHERE status = 'ativo' ORDER BY preco ASC`
+        );
 
-    // Busca o plano real do usuário no store de dados
-    const planoBase = planosData.find(p => p.id === user.planoId)
-                   || planosData.find(p => p.nome.toLowerCase() === (user.plano || '').toLowerCase())
-                   || planosData[1]; // fallback: GymBro
+        const planoBase = planoRows[0] || todosPlanos[1] || todosPlanos[0];
+        const beneficios = (() => { try { return JSON.parse(planoBase.beneficios || '[]'); } catch { return []; } })();
 
-    const precoFmt = `R$ ${planoBase.preco.toFixed(2).replace('.', ',')}`;
+        const renovacao = new Date();
+        renovacao.setDate(renovacao.getDate() + 30);
+        const renovacaoStr = renovacao.toLocaleDateString('pt-BR');
+        const tempoRestanteDias = 30;
+        const progresso = 5;
 
-    // Renovação: 30 dias a partir de hoje (simulado)
-    const renovacao = new Date();
-    renovacao.setDate(renovacao.getDate() + 30);
-    const renovacaoStr = renovacao.toLocaleDateString('pt-BR');
-    const tempoRestanteDias = 30;
-    const progresso = Math.round((30 - tempoRestanteDias) / 30 * 100) || 5;
+        const planoAtual = {
+            nome:              planoBase.nome.toUpperCase(),
+            descricao:         planoBase.descricao,
+            beneficios,
+            preco:             `R$ ${Number(planoBase.preco).toFixed(2).replace('.', ',')}`,
+            periodo:           'mês',
+            renovacao:         renovacaoStr,
+            tempoRestanteDias,
+            progresso,
+        };
 
-    const planoAtual = {
-        nome:              planoBase.nome.toUpperCase(),
-        descricao:         planoBase.descricao,
-        beneficios:        planoBase.beneficios || [],
-        preco:             precoFmt,
-        periodo:           'mês',
-        renovacao:         renovacaoStr,
-        tempoRestanteDias,
-        progresso,
-    };
+        const outrosPlanos = todosPlanos
+            .filter(p => p.id !== planoBase.id)
+            .map((p, _, arr) => {
+                const ben = (() => { try { return JSON.parse(p.beneficios || '[]'); } catch { return []; } })();
+                return {
+                    nome:       p.nome.toUpperCase(),
+                    descricao:  p.descricao,
+                    beneficios: ben,
+                    preco:      `R$ ${Number(p.preco).toFixed(2).replace('.', ',')}`,
+                    periodo:    'mês',
+                    destaque:   Number(p.preco) === Math.max(...arr.map(x => Number(x.preco))),
+                };
+            });
 
-    // Outros planos = todos exceto o atual
-    const outrosPlanos = planosData
-        .filter(p => p.id !== planoBase.id)
-        .map((p, _, arr) => ({
-            nome:      p.nome.toUpperCase(),
-            descricao: p.descricao,
-            beneficios: p.beneficios || [],
-            preco:     `R$ ${p.preco.toFixed(2).replace('.', ',')}`,
-            periodo:   'mês',
-            destaque:  p.preco === Math.max(...arr.map(x => x.preco)), // o mais caro = destaque
-        }));
-
-    res.render('pages/meu-plano', { user, planoAtual, outrosPlanos,
-        seo: { title: 'Meu Plano — GymBros', canonical: '/meu-plano', robots: 'noindex, nofollow', description: 'Gerencie seu plano GymBros.' },
-    });
+        res.render('pages/meu-plano', { user, planoAtual, outrosPlanos,
+            seo: { title: 'Meu Plano — GymBros', canonical: '/meu-plano', robots: 'noindex, nofollow', description: 'Gerencie seu plano GymBros.' },
+        });
+    } catch (err) {
+        console.error('[meu-plano]', err);
+        res.status(500).send('Erro ao carregar plano.');
+    }
 });
 
 //Configurações (só requer login, não exige plano ativo)
-router.get('/config', requireAuth, (req, res) => {
+router.get('/config', requireAuth, async (req, res) => {
+    try {
+        const [rows] = await db.execute(
+            'SELECT notification_interval_days FROM user WHERE id = ?',
+            [req.session.user.id]
+        );
+        req.session.user.notification_interval_days = rows[0]?.notification_interval_days ?? 7;
+    } catch (_) { /* mantém valor da sessão se houver */ }
 
     res.render('pages/config', { user: req.session.user,
         seo: { title: 'Configurações — GymBros', canonical: '/config', robots: 'noindex, nofollow', description: 'Configurações da conta GymBros.' },
@@ -480,100 +523,127 @@ router.get('/ai/avaliacao', requirePlano, (req, res) => {
 });
 
 // Atualizar dados pessoais (nome e e-mail)
-router.post('/config/atualizar-dados', requireAuth, (req, res) => {
-
-    const { nome, email } = req.body;
+router.post('/config/atualizar-dados', requireAuth, async (req, res) => {
+    const { nome, email, cep } = req.body;
     const user = req.session.user;
+    try {
+        const [dup] = await db.execute(
+            'SELECT id FROM user WHERE email = ? AND id != ?',
+            [email, user.id]
+        );
+        if (dup.length > 0) return res.status(400).json({ erro: 'E-mail já cadastrado.' });
 
-    // Verifica se o email já existe
-    const emailExistente = usuarios.find(u => u.email.toLowerCase() === email.toLowerCase() && u.cpf !== user.cpf);
-    if (emailExistente) {
-        return res.status(400).json({ erro: 'E-mail já cadastrado.' });
+        await db.execute(
+            'UPDATE user SET nome = ?, email = ?, cep = ? WHERE id = ?',
+            [nome, email, cep || user.cep, user.id]
+        );
+        req.session.user = { ...user, nome, email };
+        return res.json({ mensagem: 'Dados atualizados com sucesso!' });
+    } catch (err) {
+        console.error('[config/atualizar-dados]', err);
+        return res.status(500).json({ erro: 'Erro ao atualizar dados.' });
     }
-
-    // Atualiza no "banco" e na sessão
-    user.nome = nome;
-    user.email = email;
-
-    const stored = usuarios.find(u => u.cpf === user.cpf);
-    if (stored) { stored.nome = nome; stored.email = email; }
-    req.session.user = user;
-
-    return res.json({ mensagem: 'Dados atualizados com sucesso!' });
 });
 
 // Alterar senha
-router.post('/config/alterar-senha', requireAuth, (req, res) => {
-
+router.post('/config/alterar-senha', requireAuth, async (req, res) => {
     const { senhaAtual, novaSenha } = req.body;
     const user = req.session.user;
-
-    if (user.password !== senhaAtual) {
-        return res.status(400).json({ erro: 'Senha atual incorreta.' });
+    try {
+        const [rows] = await db.execute('SELECT senha_hash FROM user WHERE id = ?', [user.id]);
+        if (!rows[0]) return res.status(404).json({ erro: 'Usuário não encontrado.' });
+        const ok = await bcrypt.compare(senhaAtual, rows[0].senha_hash);
+        if (!ok) return res.status(400).json({ erro: 'Senha atual incorreta.' });
+        const novaHash = await bcrypt.hash(novaSenha, 10);
+        await db.execute('UPDATE user SET senha_hash = ? WHERE id = ?', [novaHash, user.id]);
+        return res.json({ mensagem: 'Senha alterada com sucesso!' });
+    } catch (err) {
+        console.error('[config/alterar-senha]', err);
+        return res.status(500).json({ erro: 'Erro ao alterar senha.' });
     }
-
-    user.password = novaSenha;
-
-    const stored = usuarios.find(u => u.cpf === user.cpf);
-    if (stored) stored.password = novaSenha;
-    req.session.user = user;
-
-    return res.json({ mensagem: 'Senha alterada com sucesso!' });
 });
 
-// Alterar plano
+// Alterar plano (redirecionamento para pagamento — não muda diretamente)
 router.post('/config/alterar-plano', requireAuth, (req, res) => {
-
-    const { plano } = req.body;
-    const user = req.session.user;
-
-    user.plano = plano;
-    // opcional: atualizar tempo de renovação ou benefícios
-    user.renovacao = '20/11/2025';
-
-    const stored = usuarios.find(u => u.cpf === user.cpf);
-    if (stored) { stored.plano = plano; stored.renovacao = user.renovacao; }
-    req.session.user = user;
-
-    return res.json({ mensagem: 'Plano atualizado com sucesso!' });
+    return res.json({ mensagem: 'Redirecionando para pagamento...' });
 });
 
 // Upload de foto de perfil
 router.post('/api/student/profile-photo', (req, res, next) => {
     if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
     next();
-}, photoUpload.single('photo'), (req, res) => {
+}, photoUpload.single('photo'), async (req, res) => {
     if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado.' });
 
     const photoUrl = `/uploads/profile_photos/${req.file.filename}`;
     const user = req.session.user;
-    user.profile_photo = photoUrl;
-
-    const stored = usuarios.find(u => u.cpf === user.cpf || u.id === user.id);
-    if (stored) stored.profile_photo = photoUrl;
-    req.session.user = user;
-
-    return res.json({ mensagem: 'Foto atualizada com sucesso!', photoUrl });
+    try {
+        await db.execute('UPDATE user SET profile_photo = ? WHERE id = ?', [photoUrl, user.id]);
+        req.session.user = { ...user, profile_photo: photoUrl };
+        return res.json({ mensagem: 'Foto atualizada com sucesso!', photoUrl });
+    } catch (err) {
+        console.error('[profile-photo]', err);
+        return res.status(500).json({ erro: 'Erro ao salvar foto.' });
+    }
 }, (err, _req, res, _next) => {
-    // multer error handler
     return res.status(400).json({ erro: err.message });
 });
 
 
 
-router.post('/imc-save', requireAuth, (req, res) => {
+router.post('/imc-save', requireAuth, async (req, res) => {
+    const {
+        lesoes, restricoesAlimentares, gruposAlimentares, suplementacao,
+        peso, altura, idade, sexo, objetivo, experiencia,
+        diasSemana, tempoPorSessao, localTreino, hidratacao,
+        seletividade, alimentosSeletividade,
+    } = req.body;
 
-    const { lesoes, restricoesAlimentares, gruposAlimentares, suplementacao, ...rest } = req.body;
+    const toArr = v => Array.isArray(v) ? v : (v ? [v] : []);
 
-    req.session.user.imc = {
-        ...rest,
-        lesoes:                Array.isArray(lesoes)                ? lesoes                : (lesoes                ? [lesoes]                : []),
-        restricoesAlimentares: Array.isArray(restricoesAlimentares) ? restricoesAlimentares : (restricoesAlimentares ? [restricoesAlimentares] : []),
-        gruposAlimentares:     Array.isArray(gruposAlimentares)     ? gruposAlimentares     : (gruposAlimentares     ? [gruposAlimentares]     : []),
-        suplementacao:         Array.isArray(suplementacao)         ? suplementacao         : (suplementacao         ? [suplementacao]         : []),
-    };
+    const lesoesArr   = toArr(lesoes);
+    const restricArr  = toArr(restricoesAlimentares);
+    const gruposArr   = toArr(gruposAlimentares);
+    const suplArr     = toArr(suplementacao);
 
-    return res.json({ mensagem: 'Perfil salvo com sucesso! Redirecionando...' });
+    const alturaM   = Number(altura) > 3 ? Number(altura) / 100 : Number(altura);
+    const pesoN     = Number(peso);
+    const imc       = alturaM > 0 ? (pesoN / (alturaM * alturaM)).toFixed(1) : null;
+
+    try {
+        await db.execute(
+            `INSERT INTO imc_profile
+             (user_id, peso, altura, imc_valor, idade, sexo, objetivo,
+              experiencia, dias_semana, tempo_por_sessao, local_treino,
+              lesoes, restricoes_alimentares, suplementacao, hidratacao)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                req.session.user.id,
+                pesoN, alturaM, imc, Number(idade), sexo, objetivo,
+                experiencia, Number(diasSemana), tempoPorSessao, localTreino,
+                JSON.stringify(lesoesArr), JSON.stringify(restricArr),
+                JSON.stringify(suplArr), hidratacao,
+            ]
+        );
+
+        await db.execute(
+            'UPDATE user SET peso = ?, altura = ?, imc = ?, objetivo = ?, last_imc_update = NOW() WHERE id = ?',
+            [pesoN, alturaM, imc, objetivo, req.session.user.id]
+        );
+
+        req.session.user.imc = {
+            peso: pesoN, altura, imcValor: imc, idade, sexo, objetivo,
+            experiencia, diasSemana, tempoPorSessao, localTreino,
+            lesoes: lesoesArr, restricoesAlimentares: restricArr,
+            gruposAlimentares: gruposArr, suplementacao: suplArr,
+            hidratacao, seletividade, alimentosSeletividade,
+        };
+
+        return res.json({ mensagem: 'Perfil salvo com sucesso! Redirecionando...' });
+    } catch (err) {
+        console.error('[imc-save]', err);
+        return res.status(500).json({ erro: 'Erro ao salvar perfil.' });
+    }
 });
 
 // Suporte (área do aluno)
@@ -721,51 +791,41 @@ location.href='/login';
 // Registro
 router.post('/register',
   [
-    body('nome')
-      .trim()
-      .notEmpty().withMessage('Nome obrigatório.')
-      .isLength({ min: 3 }).withMessage('Nome muito curto.'),
-    body('cpf')
-      .custom(value => {
-        if (!validarCPF(value)) throw new Error('CPF inválido.');
-        return true;
-      }),
-    body('email')
-      .isEmail().withMessage('E-mail inválido.'),
-    body('cep')
-      .matches(/^\d{8}$/).withMessage('CEP deve ter 8 números.'),
-    body('password')
-      .isLength({ min: 6 }).withMessage('A senha deve ter pelo menos 6 caracteres.'),
-    body('confirmPassword')
-      .custom((value, { req }) => {
+    body('nome').trim().notEmpty().withMessage('Nome obrigatório.').isLength({ min: 3 }).withMessage('Nome muito curto.'),
+    body('cpf').custom(value => { if (!validarCPF(value)) throw new Error('CPF inválido.'); return true; }),
+    body('email').isEmail().withMessage('E-mail inválido.'),
+    body('cep').matches(/^\d{8}$/).withMessage('CEP deve ter 8 números.'),
+    body('password').isLength({ min: 6 }).withMessage('A senha deve ter pelo menos 6 caracteres.'),
+    body('confirmPassword').custom((value, { req }) => {
         if (value !== req.body.password) throw new Error('As senhas não coincidem!');
         return true;
-      }),
-    body('terms')
-      .equals('on').withMessage('Você precisa aceitar os termos de uso.')
+    }),
+    body('terms').equals('on').withMessage('Você precisa aceitar os termos de uso.'),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ erros: errors.array() });
+    if (!errors.isEmpty()) return res.status(400).json({ erros: errors.array() });
+
+    const { nome, email, cep, password, logradouro, numero, complemento, bairro, cidade, estado } = req.body;
+    const cpf = req.body.cpf.replace(/\D/g, '');
+
+    try {
+        const [cpfRows]   = await db.execute('SELECT id FROM user WHERE cpf = ?', [cpf]);
+        const [emailRows] = await db.execute('SELECT id FROM user WHERE email = ?', [email]);
+
+        if (cpfRows.length > 0)   return res.status(400).json({ erros: [{ param: 'cpf',   msg: 'CPF já cadastrado.' }] });
+        if (emailRows.length > 0) return res.status(400).json({ erros: [{ param: 'email', msg: 'E-mail já cadastrado.' }] });
+
+        const senha_hash = await bcrypt.hash(password, 10);
+        await db.execute(
+            'INSERT INTO user (nome, cpf, email, senha_hash, cep, logradouro, numero, complemento, bairro, cidade, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [nome, cpf, email, senha_hash, cep, logradouro || null, numero || null, complemento || null, bairro || null, cidade || null, estado || null]
+        );
+        return res.status(200).json({ mensagem: 'Cadastro realizado com sucesso! Redirecionando para o login...' });
+    } catch (err) {
+        console.error('[register]', err);
+        return res.status(500).json({ erros: [{ msg: 'Erro interno ao cadastrar.' }] });
     }
-
-    const { nome, email, cep, password } = req.body;
-    const cpf = req.body.cpf.replace(/\D/g, ''); // normaliza antes de comparar/guardar
-
-    const cpfExiste   = usuarios.find(u => u.cpf === cpf);
-    const emailExiste = usuarios.find(u => u.email === email);
-    if (cpfExiste) {
-      return res.status(400).json({ erros: [{ param: 'cpf', msg: 'CPF já cadastrado.' }] });
-    }
-    if (emailExiste) {
-      return res.status(400).json({ erros: [{ param: 'email', msg: 'E-mail já cadastrado.' }] });
-    }
-
-    usuarios.push({ nome, cpf, email, cep, password, createdAt: new Date(), status: 'ativo', plano: null, planoId: null });
-    console.log("Usuário registrado:", nome);
-
-    return res.status(200).json({ mensagem: 'Cadastro realizado com sucesso! Redirecionando para o login...' });
   }
 );
 
@@ -773,30 +833,88 @@ router.post('/register',
 router.post('/login',
   [
     body('username').trim().notEmpty().withMessage('Usuário obrigatório.'),
-    body('password').notEmpty().withMessage('Senha obrigatória.')
+    body('password').notEmpty().withMessage('Senha obrigatória.'),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ erros: errors.array() });
-    }
+    if (!errors.isEmpty()) return res.status(400).json({ erros: errors.array() });
 
     const { username, password, redirect: redirectTo } = req.body;
-    const usernameLower = username.toLowerCase();
-    const user = usuarios.find(u => (u.nome === username || u.email.toLowerCase() === usernameLower || u.cpf === username) && u.password === password);
+    const identifier = username.trim();
+    const cpfNorm    = identifier.replace(/\D/g, '');
 
-    if (!user) {
-      return res.status(401).json({ erros: [{ param: 'password', msg: 'Usuário ou senha incorretos.' }] });
+    try {
+        // Busca por CPF (digits only) ou por e-mail
+        let userRows;
+        if (/^\d{11}$/.test(cpfNorm)) {
+            [userRows] = await db.execute(
+                "SELECT * FROM user WHERE cpf = ? AND status = 'ativo'",
+                [cpfNorm]
+            );
+        }
+        if (!userRows || userRows.length === 0) {
+            [userRows] = await db.execute(
+                "SELECT * FROM user WHERE email = ? AND status = 'ativo'",
+                [identifier.toLowerCase()]
+            );
+        }
+        if (!userRows || userRows.length === 0) {
+            [userRows] = await db.execute(
+                "SELECT * FROM user WHERE nome = ? AND status = 'ativo'",
+                [identifier]
+            );
+        }
+
+        const user = userRows[0];
+        if (!user || !(await bcrypt.compare(password, user.senha_hash))) {
+            await db.execute(
+                'INSERT INTO login_attempt (identificador, ip, sucesso) VALUES (?, ?, 0)',
+                [identifier, req.ip]
+            ).catch(() => {});
+            return res.status(401).json({ erros: [{ param: 'password', msg: 'Usuário ou senha incorretos.' }] });
+        }
+
+        // Busca plano ativo
+        const [planoRows] = await db.execute(
+            `SELECT p.* FROM plan p
+             JOIN user_plan up ON up.plan_id = p.id
+             WHERE up.user_id = ? AND up.status = 'ativo'
+             LIMIT 1`,
+            [user.id]
+        );
+        const plano = planoRows[0] || null;
+
+        req.session.user = {
+            id:            user.id,
+            nome:          user.nome,
+            email:         user.email,
+            cpf:           user.cpf,
+            plano:         plano?.nome  || null,
+            planoId:       plano?.id    || null,
+            planoSlug:     plano?.slug  || null,
+            profile_photo: user.profile_photo || null,
+            status:        user.status,
+        };
+
+        await db.execute(
+            'INSERT INTO login_attempt (identificador, ip, sucesso) VALUES (?, ?, 1)',
+            [identifier, req.ip]
+        ).catch(() => {});
+
+        broadcast('user_online', { id: user.id, nome: user.nome, email: user.email });
+
+        const safeRedirect = (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) ? redirectTo : '/area-aluno';
+        req.session.save(err => {
+            if (err) {
+                console.error('[login] session save error:', err);
+                return res.status(500).json({ erros: [{ msg: 'Erro ao salvar sessão.' }] });
+            }
+            return res.status(200).json({ mensagem: 'Login realizado com sucesso! Redirecionando...', redirect: safeRedirect });
+        });
+    } catch (err) {
+        console.error('[login]', err);
+        return res.status(500).json({ erros: [{ msg: 'Erro interno ao autenticar.' }] });
     }
-
-    // salva usuário na sessão
-    req.session.user = user;
-
-    // Redireciona para redirect apenas se for path interno válido (evita open redirect)
-    const safeRedirect = (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) ? redirectTo : '/area-aluno';
-
-    console.log("Login bem-sucedido:", username);
-    return res.status(200).json({ mensagem: 'Login realizado com sucesso! Redirecionando...', redirect: safeRedirect });
   }
 );
 

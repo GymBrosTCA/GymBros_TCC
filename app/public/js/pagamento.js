@@ -392,6 +392,7 @@ function mostrarConfirmacao(metodo, status) {
         badge.className = 'confirmacao-status ativo';
         badge.innerHTML = '<i class="fas fa-check-circle"></i> Assinatura ativada';
         sub.textContent = 'Sua assinatura foi ativada com sucesso. Bons treinos!';
+        setTimeout(() => { window.location.replace('/area-aluno'); }, 2000);
     } else {
         badge.className = 'confirmacao-status pendente';
         badge.innerHTML = '<i class="fas fa-clock"></i> Aguardando pagamento';

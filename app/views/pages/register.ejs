@@ -49,6 +49,36 @@
       </section>
 
       <section class="input-box">
+        <input type="text" id="logradouro" name="logradouro" placeholder="Rua / Av." readonly style="opacity:.6">
+        <i class='bx bxs-home'></i>
+      </section>
+
+      <section class="input-box">
+        <input type="text" id="numero" name="numero" placeholder="Número">
+        <i class='bx bx-hash'></i>
+      </section>
+
+      <section class="input-box">
+        <input type="text" id="complemento" name="complemento" placeholder="Apto, bloco... (opcional)">
+        <i class='bx bx-building'></i>
+      </section>
+
+      <section class="input-box">
+        <input type="text" id="bairro" name="bairro" placeholder="Bairro" readonly style="opacity:.6">
+        <i class='bx bxs-map-pin'></i>
+      </section>
+
+      <section class="input-box">
+        <input type="text" id="cidade" name="cidade" placeholder="Cidade" readonly style="opacity:.6">
+        <i class='bx bx-city'></i>
+      </section>
+
+      <section class="input-box">
+        <input type="text" id="estado" name="estado" placeholder="UF" readonly maxlength="2" style="opacity:.6">
+        <i class='bx bx-flag'></i>
+      </section>
+
+      <section class="input-box">
         <input type="password" id="password" name="password" placeholder="Senha">
         <button type="button" class="toggle-password" data-target="password" title="Mostrar/ocultar senha">
           <i class='bx bx-hide'></i>
@@ -80,6 +110,28 @@
   </section>
 
   <script>window.GYMBROS_ALREADY_LOGGED_IN = <%= (typeof user !== 'undefined' && user) ? 'true' : 'false' %>;</script>
+  <script>
+    document.getElementById('cep').addEventListener('blur', async function () {
+      const cep = this.value.replace(/\D/g, '');
+      if (cep.length !== 8) return;
+      try {
+        const data = await fetch(`https://viacep.com.br/ws/${cep}/json/`).then(r => r.json());
+        if (data.erro) return;
+        const logradouro = document.getElementById('logradouro');
+        const bairro     = document.getElementById('bairro');
+        const cidade     = document.getElementById('cidade');
+        const estado     = document.getElementById('estado');
+        logradouro.value = data.logradouro || '';
+        bairro.value     = data.bairro     || '';
+        cidade.value     = data.localidade || '';
+        estado.value     = data.uf         || '';
+        [logradouro, bairro, cidade, estado].forEach(el => el.style.opacity = '1');
+        document.getElementById('numero').focus();
+      } catch (e) {
+        console.error('ViaCEP erro:', e);
+      }
+    });
+  </script>
   <script src="/js/forms.js" type="module"></script>
 </body>
 </html>
