@@ -41,9 +41,11 @@ p, a {
     display: block;
 }
 
-.banner-home img {
-  content: url("/images/banner-mobile.png");
-
+/* Troca de banner em celular */
+@media (max-width: 768px) {
+    .banner-home img {
+        content: url("/images/banner-mobile.png") !important;
+    }
 }
 
 /* Banner 2 */

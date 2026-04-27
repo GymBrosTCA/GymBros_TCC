@@ -1,11 +1,21 @@
-const CACHE_NAME = 'gymbros-v1';
+const CACHE_NAME = 'gymbros-v3';
 const STATIC_ASSETS = [
+  '/offline.html',
   '/',
+  '/login',
+  '/planos',
+  '/about',
   '/css/header.css',
   '/css/footer.css',
   '/css/area-aluno.css',
+  '/css/style.css',
+  '/css/planos.css',
+  '/css/pwa.css',
   '/js/area-aluno.js',
+  '/js/header.js',
+  '/js/translate.js',
   '/images/logo.png',
+  '/images/favicon.ico',
   '/manifest.json',
 ];
 
@@ -36,6 +46,13 @@ self.addEventListener('fetch', event => {
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() =>
+        caches.match(event.request).then(cached => {
+          if (cached) return cached;
+          if (event.request.mode === 'navigate') {
+            return caches.match('/offline.html');
+          }
+        })
+      )
   );
 });

@@ -26,7 +26,7 @@
                 <img src="<%= user.profile_photo || '/images/avatar.png' %>" alt="Avatar do Aluno">
             </section>
             <h2><%= user.nome %></h2>
-            <p><%= __('sidebar.role') %></p>
+            <p data-translate="sidebar.role">Aluno GymBros</p>
         </section>
         <ul class="aluno-menu">
             <li><a href="/area-aluno" data-translate="sidebar.painel"><i class="fas fa-tachometer-alt"></i> Painel</a></li>
@@ -42,7 +42,7 @@
             <li><a href="/meu-plano?upgrade=1" class="menu-locked" data-translate="sidebar.avaliacao"><i class="fas fa-camera"></i> Avaliação Corporal 🔒</a></li>
             <% } %>
             <li><a href="/imc-form" data-translate="sidebar.imc"><i class="fas fa-clipboard-list"></i> Meu Perfil IMC</a></li>
-            <li><a href="/suporte"><i class="fas fa-headset"></i> Suporte</a></li>
+            <li><a href="/suporte" data-translate="sidebar.suporte"><i class="fas fa-headset"></i> Suporte</a></li>
         </ul>
     </section>
 

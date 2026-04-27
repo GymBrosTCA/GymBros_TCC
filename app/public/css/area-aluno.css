@@ -2,9 +2,6 @@
    AREA DO ALUNO - GYMBROS
    ============================== */
 
-/* Esconde o hambúrguer do header nas páginas da área do aluno */
-.menu-icon { visibility: hidden; pointer-events: none; }
-
 /* RESET BÁSICO */
 * {
     margin: 0;

@@ -5,9 +5,9 @@
             </section>
             <section class="footermidia">
                 <ul>
-                    <li><a href="ajuda.html"><%= __('footer.privacy') %></a></li>
-                    <li><a href="ajuda.html"><%= __('footer.terms') %></a></li>
-                    <li><a href="ajuda.html"><%= __('footer.faq') %></a></li>
+                    <li><a href="ajuda.html" data-translate="footer.privacy">Política de Privacidade</a></li>
+                    <li><a href="ajuda.html" data-translate="footer.terms">Termos de Serviço</a></li>
+                    <li><a href="ajuda.html" data-translate="footer.faq">FAQ</a></li>
                 </ul>
             </section>
             <section class="footermidia">
@@ -27,21 +27,20 @@
             </a>
         </section>
         <section class="footercopy">
-            <p><%= __('footer.copy') %></p>
+            <p data-translate="footer.copy">&copy; 2025 GymBros. Todos os direitos reservados.</p>
         </section>
     </footer>
+<script src="/js/translate.js"></script>
 <section id="pwa-install-banner" class="pwa-banner" style="display:none">
+  <button id="pwa-dismiss-btn" class="pwa-btn-close" aria-label="Fechar">✕</button>
   <section class="pwa-banner-icon">
-    <img src="/images/logo.png" alt="GymBros" width="48" height="48">
+    <img src="/images/logo.png" alt="GymBros" width="52" height="52">
   </section>
   <section class="pwa-banner-text">
-    <strong>📲 GymBros no seu celular</strong>
-    <span>Acesse treinos, IA e academias em 1 toque — sem abrir o navegador. Grátis, leve e rápido.</span>
+    <strong>GymBros no seu celular 📲</strong>
+    <span>Instale o app e acesse treinos, IA e academias com 1 toque — sem abrir o navegador.</span>
   </section>
-  <section class="pwa-banner-actions">
-    <button id="pwa-install-btn" class="pwa-btn-install">⭐ Instalar agora</button>
-    <button id="pwa-dismiss-btn" class="pwa-btn-dismiss">Talvez depois</button>
-  </section>
+  <button id="pwa-install-btn" class="pwa-btn-install">Instalar</button>
 </section>
 <script>
 if ('serviceWorker' in navigator) {
