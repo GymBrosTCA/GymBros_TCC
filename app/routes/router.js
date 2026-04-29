@@ -2,7 +2,6 @@
 const express    = require('express');
 const router     = express.Router();
 const path       = require('path');
-const fs         = require('fs');
 const multer     = require('multer');
 const QRCode     = require('qrcode');
 const bcrypt     = require('bcrypt');
@@ -12,18 +11,22 @@ const { gerarBoletoPDF } = require('../services/pdf');
 const db         = require('../config/db');
 const i18n       = require('../config/i18n');
 const { broadcast, onlineUsers } = require('../events');
+const cloudinary = require('../config/cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+function safeJson(str, fallback) {
+    try { return JSON.parse(str || 'null') ?? fallback; }
+    catch { return fallback; }
+}
 
 // ── Multer: upload de foto de perfil ──────────────────────────────────────────
-const photoStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = path.join(__dirname, '../../uploads/profile_photos');
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const uid = (req.session.user?.cpf || 'unknown').replace(/\D/g, '');
-        const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
-        cb(null, `avatar_${uid}${ext}`);
+const photoStorage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder:            'gymbros/profile_photos',
+        allowed_formats:   ['jpg', 'jpeg', 'png', 'webp'],
+        transformation:    [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
+        public_id:         (req) => `avatar_${req.session.user?.cpf?.replace(/\D/g, '') || Date.now()}`,
     },
 });
 const photoUpload = multer({
@@ -576,7 +579,7 @@ router.post('/api/student/profile-photo', (req, res, next) => {
 }, photoUpload.single('photo'), async (req, res) => {
     if (!req.file) return res.status(400).json({ erro: 'Nenhum arquivo enviado.' });
 
-    const photoUrl = `/uploads/profile_photos/${req.file.filename}`;
+    const photoUrl = req.file.path; // URL do Cloudinary
     const user = req.session.user;
     try {
         await db.execute('UPDATE user SET profile_photo = ? WHERE id = ?', [photoUrl, user.id]);
@@ -876,16 +879,65 @@ router.post('/login',
         );
         const plano = planoRows[0] || null;
 
+        // Busca último perfil IMC
+        const [imcRows] = await db.execute(
+            `SELECT * FROM imc_profile WHERE user_id = ? ORDER BY id DESC LIMIT 1`,
+            [user.id]
+        );
+
+        // Busca última avaliação corporal
+        const [avalRows] = await db.execute(
+            `SELECT * FROM body_photo WHERE user_id = ? ORDER BY id DESC LIMIT 1`,
+            [user.id]
+        );
+
+        // Busca dados extras do user
+        const [userExtra] = await db.execute(
+            `SELECT last_imc_update, last_avaliacao_update, notification_interval_days FROM user WHERE id = ?`,
+            [user.id]
+        );
+        const extra = userExtra[0] || {};
+
+        const imcData = imcRows[0] ? {
+            peso:                  imcRows[0].peso,
+            altura:                imcRows[0].altura,
+            imcValor:              imcRows[0].imc_valor,
+            idade:                 imcRows[0].idade,
+            sexo:                  imcRows[0].sexo,
+            objetivo:              imcRows[0].objetivo,
+            experiencia:           imcRows[0].experiencia,
+            diasSemana:            imcRows[0].dias_semana,
+            tempoPorSessao:        imcRows[0].tempo_por_sessao,
+            localTreino:           imcRows[0].local_treino,
+            lesoes:                safeJson(imcRows[0].lesoes, []),
+            restricoesAlimentares: safeJson(imcRows[0].restricoes_alimentares, []),
+            suplementacao:         safeJson(imcRows[0].suplementacao, []),
+            hidratacao:            imcRows[0].hidratacao,
+            seletividade:          imcRows[0].seletividade,
+            alimentosSeletividade: imcRows[0].alimentos_seletividade,
+        } : null;
+
+        const avalRaw = avalRows[0] ? safeJson(avalRows[0].analise_raw, null) : null;
+        const avalData = avalRaw ? {
+            ...avalRaw,
+            data: new Date(avalRows[0].created_at).toLocaleDateString('pt-BR'),
+        } : null;
+
         req.session.user = {
-            id:            user.id,
-            nome:          user.nome,
-            email:         user.email,
-            cpf:           user.cpf,
-            plano:         plano?.nome  || null,
-            planoId:       plano?.id    || null,
-            planoSlug:     plano?.slug  || null,
-            profile_photo: user.profile_photo || null,
-            status:        user.status,
+            id:                         user.id,
+            nome:                       user.nome,
+            email:                      user.email,
+            cpf:                        user.cpf,
+            plano:                      plano?.nome  || null,
+            planoId:                    plano?.id    || null,
+            planoSlug:                  plano?.slug  || null,
+            profile_photo:              user.profile_photo || null,
+            status:                     user.status,
+            last_imc_update:            extra.last_imc_update || null,
+            last_avaliacao_update:      extra.last_avaliacao_update || null,
+            notification_interval_days: extra.notification_interval_days || 7,
+            imc:                        imcData,
+            avaliacaoCorporal:          avalData,
         };
 
         await db.execute(
