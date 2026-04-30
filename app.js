@@ -31,15 +31,11 @@ app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.set('trust proxy', 1);
 
 const sessionStore = new MySQLStore({
-    createDatabaseTable: false,
-    schema: {
-        tableName: 'sessions',
-        columnNames: {
-            session_id: 'session_id',
-            expires:    'expires',
-            data:       'data',
-        },
-    },
+    createDatabaseTable:     false,
+    clearExpired:            true,
+    checkExpirationInterval: 900000,
+    expiration:              86400000,
+    connectionLimit:         1,
 }, db);
 
 app.use(session({
