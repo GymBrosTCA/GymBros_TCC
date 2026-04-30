@@ -99,6 +99,10 @@
   from { opacity: 0; transform: translateX(40px); }
   to   { opacity: 1; transform: translateX(0); }
 }
+@keyframes slideUpMobileCookie {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 .cookie-content {
   display: flex;
   flex-direction: column;
@@ -149,10 +153,32 @@
 
 @media (max-width: 480px) {
   .cookie-banner {
-    bottom: 12px;
-    right: 12px;
-    left: 12px;
-    width: auto;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    border-top: 4px solid #FFD700;
+    border-left: none;
+    border-right: none;
+    padding: 20px 16px;
+    z-index: 10000;
+    animation: slideUpMobileCookie 0.4s ease;
+  }
+
+  .cookie-actions {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .cookie-btn-accept {
+    flex: 2;
+  }
+
+  .cookie-btn-decline {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 12px;
   }
 }
 
@@ -178,6 +204,6 @@
     width: 100%;
     text-align: center;
     padding: 12px;
-    font-size: 0.9rem;
+    font-size: 14px;
   }
 }
