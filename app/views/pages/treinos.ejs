@@ -89,12 +89,47 @@
             </button>
         </section>
 
+        <!-- MEUS TREINOS (banco de dados) -->
+        <% if (workouts && workouts.length > 0) { %>
+        <p class="treinos-section-title">Meus Treinos</p>
+        <section class="treinos-grid">
+            <% workouts.forEach(w => { %>
+            <%
+                const tc = w.tipo === 'Cardio' ? 'tipo-cardio' : w.tipo === 'Alongamento' ? 'tipo-along' : 'tipo-forca';
+                const ic = w.tipo === 'Cardio' ? 'fa-running' : w.tipo === 'Alongamento' ? 'fa-leaf' : 'fa-dumbbell';
+                const exs = w.exercicios_nomes ? w.exercicios_nomes.split(', ') : [];
+            %>
+            <section class="treino-card-v2 <%= tc %>">
+                <section class="card-header-v2">
+                    <section class="card-icon-v2"><i class="fas <%= ic %>"></i></section>
+                    <section class="card-badges">
+                        <% if (w.tipo) { %><span class="badge-tipo"><%= w.tipo %></span><% } %>
+                    </section>
+                </section>
+                <h3 class="card-title-v2"><%= w.nome %></h3>
+                <% if (w.duracao) { %>
+                <p class="card-duracao"><i class="fas fa-clock"></i> <%= w.duracao %> minutos</p>
+                <% } %>
+                <% if (exs.length > 0) { %>
+                <ul class="card-exercicios">
+                    <% exs.slice(0, 4).forEach(ex => { %><li><%= ex %></li><% }) %>
+                </ul>
+                <% } %>
+                <button class="btn-registrar" style="margin-top:0.5rem; width:100%; justify-content:center"
+                        onclick="preencherModal('<%= w.nome %>', '<%= w.tipo || 'Força' %>', <%= w.duracao || 45 %>)">
+                    <i class="fas fa-plus"></i> Registrar sessão
+                </button>
+            </section>
+            <% }) %>
+        </section>
+        <% } %>
+
         <!-- TREINOS REGISTRADOS (localStorage) -->
         <p class="treinos-section-title">Seus Treinos Registrados</p>
         <section class="treinos-grid" id="gridRegistrados"></section>
 
-        <!-- SUGESTÕES DO PROGRAMA -->
-        <p class="treinos-section-title" style="margin-top:0.5rem">Sugestões do Programa</p>
+        <!-- SUGESTÕES DE TREINO -->
+        <p class="treinos-section-title" style="margin-top:0.5rem">Sugestões de Treino</p>
         <section class="treinos-grid" id="gridSugestoes">
             <% sugestoes.forEach(t => { %>
             <%

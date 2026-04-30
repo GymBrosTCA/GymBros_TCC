@@ -5,8 +5,12 @@
 
 const express = require('express');
 const router  = express.Router();
-const bcrypt  = require('bcrypt');
-const db      = require('../config/db');
+const bcrypt        = require('bcrypt');
+const db            = require('../config/db');
+const User          = require('../models/User');
+const Plan          = require('../models/Plan');
+const Gym           = require('../models/Gym');
+const SupportTicket = require('../models/SupportTicket');
 const { addAdminClient, broadcast, broadcastTicket, broadcastToStudents, emitToUser, emitToUsers, emitToPlan, onlineUsers } = require('../events');
 
 // ── Auditoria: registra ações sensíveis ───────────────────────────────────────
@@ -84,26 +88,14 @@ router.get('/online', (req, res) => {
 // ── USUÁRIOS ──────────────────────────────────────────────────────────────────
 router.get('/usuarios', async (req, res) => {
     const { busca = '', plano = '', status = '', page = 1, per = 15 } = req.query;
-    const perN = parseInt(per), offset = (parseInt(page) - 1) * perN;
-    const params = [];
-    let where = 'WHERE 1=1';
-    if (busca)  { where += ' AND (u.nome LIKE ? OR u.cpf LIKE ?)'; params.push(`%${busca}%`, `%${busca}%`); }
-    if (plano)  { where += ' AND p.slug = ?'; params.push(plano); }
-    if (status) { where += ' AND u.status = ?'; params.push(status); }
+    const perN    = parseInt(per);
+    const filters = { status: status || null, busca: busca || null, plano: plano || null };
     try {
-        const [[{ total }]] = await db.execute(
-            `SELECT COUNT(*) AS total FROM user u LEFT JOIN user_plan up ON up.user_id=u.id AND up.status='ativo' LEFT JOIN plan p ON p.id=up.plan_id ${where}`,
-            params
-        );
-        const [items] = await db.execute(
-            `SELECT u.id, u.nome, u.email, u.cpf, u.status, u.created_at AS createdAt, p.nome AS plano, p.slug AS planoSlug
-             FROM user u
-             LEFT JOIN user_plan up ON up.user_id=u.id AND up.status='ativo'
-             LEFT JOIN plan p ON p.id=up.plan_id
-             ${where} ORDER BY u.created_at DESC LIMIT ? OFFSET ?`,
-            [...params, perN, offset]
-        );
-        res.json({ total: Number(total), items });
+        const [items, total] = await Promise.all([
+            User.findAll({ page: parseInt(page), limit: perN, ...filters }),
+            User.count(filters),
+        ]);
+        res.json({ total, items });
     } catch (err) {
         console.error('[admin-api/usuarios]', err);
         res.status(500).json({ erro: 'Erro ao buscar usuários.' });
@@ -112,11 +104,13 @@ router.get('/usuarios', async (req, res) => {
 
 router.get('/usuarios/:id', async (req, res) => {
     try {
-        const [[user]] = await db.execute('SELECT * FROM user WHERE id = ?', [req.params.id]);
+        const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ erro: 'Usuário não encontrado.' });
-        const [userCheckins]   = await db.execute('SELECT c.*, g.nome AS academiaNome FROM checkin c LEFT JOIN gym g ON g.id=c.gym_id WHERE c.user_id=? ORDER BY c.data DESC LIMIT 30', [user.id]);
-        const [userTickets]    = await db.execute('SELECT * FROM support_ticket WHERE user_id=?', [user.id]);
-        const [userTransacoes] = await db.execute('SELECT py.*, p.nome AS planoNome FROM payment py LEFT JOIN plan p ON p.id=py.plan_id WHERE py.user_id=? ORDER BY py.created_at DESC', [user.id]);
+        const [userCheckins, userTickets, userTransacoes] = await Promise.all([
+            db.execute('SELECT c.*, g.nome AS academiaNome FROM checkin c LEFT JOIN gym g ON g.id=c.gym_id WHERE c.user_id=? ORDER BY c.data DESC LIMIT 30', [user.id]).then(([r]) => r),
+            db.execute('SELECT * FROM support_ticket WHERE user_id=?', [user.id]).then(([r]) => r),
+            db.execute('SELECT py.*, p.nome AS planoNome FROM payment py LEFT JOIN plan p ON p.id=py.plan_id WHERE py.user_id=? ORDER BY py.created_at DESC', [user.id]).then(([r]) => r),
+        ]);
         res.json({ user, checkins: userCheckins, tickets: userTickets, transacoes: userTransacoes });
     } catch (err) {
         console.error('[admin-api/usuarios/:id]', err);
@@ -127,14 +121,10 @@ router.get('/usuarios/:id', async (req, res) => {
 router.put('/usuarios/:id', async (req, res) => {
     const { nome, email, status } = req.body;
     try {
-        const [[user]] = await db.execute('SELECT id FROM user WHERE id = ?', [req.params.id]);
+        const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ erro: 'Usuário não encontrado.' });
-        const sets = [], vals = [];
-        if (nome)   { sets.push('nome=?');   vals.push(nome); }
-        if (email)  { sets.push('email=?');  vals.push(email); }
-        if (status) { sets.push('status=?'); vals.push(status); }
-        if (sets.length > 0) await db.execute(`UPDATE user SET ${sets.join(',')} WHERE id=?`, [...vals, req.params.id]);
-        const [[updated]] = await db.execute('SELECT * FROM user WHERE id=?', [req.params.id]);
+        await User.update(req.params.id, { nome, email, status });
+        const updated = await User.findById(req.params.id);
         await logAdmin(req.session.admin.id, 'editar_usuario', 'user', req.params.id, req.body, req.ip);
         res.json({ mensagem: 'Usuário atualizado.', user: updated });
     } catch (err) {
@@ -160,8 +150,7 @@ router.post('/usuarios/:id/desativar', async (req, res) => {
 // ── ACADEMIAS ─────────────────────────────────────────────────────────────────
 router.get('/academias', async (req, res) => {
     try {
-        const [rows] = await db.execute('SELECT * FROM gym ORDER BY nome ASC');
-        res.json(rows);
+        res.json(await Gym.findAll());
     } catch (err) {
         res.status(500).json({ erro: 'Erro ao buscar academias.' });
     }
@@ -171,13 +160,9 @@ router.post('/academias', async (req, res) => {
     const { nome, endereco, numero, bairro, cidade, estado, cep, telefone, email, whatsapp, latitude, longitude } = req.body;
     if (!nome) return res.status(400).json({ erro: 'Nome é obrigatório.' });
     try {
-        const [result] = await db.execute(
-            `INSERT INTO gym (nome, endereco, numero, bairro, cidade, estado, cep, telefone, email, whatsapp, latitude, longitude)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [nome, endereco||null, numero||null, bairro||null, cidade||null, estado||null, cep||null, telefone||null, email||null, whatsapp||null, latitude||null, longitude||null]
-        );
-        const [[nova]] = await db.execute('SELECT * FROM gym WHERE id=?', [result.insertId]);
-        await logAdmin(req.session.admin.id, 'criar_academia', 'gym', result.insertId, { nome }, req.ip);
+        const id  = await Gym.create({ nome, endereco, numero, bairro, cidade, estado, cep, telefone, email, whatsapp, latitude, longitude });
+        const nova = await Gym.findById(id);
+        await logAdmin(req.session.admin.id, 'criar_academia', 'gym', id, { nome }, req.ip);
         res.status(201).json({ mensagem: 'Academia criada.', academia: nova });
     } catch (err) {
         console.error('[admin-api/academias POST]', err);
@@ -187,15 +172,10 @@ router.post('/academias', async (req, res) => {
 
 router.put('/academias/:id', async (req, res) => {
     try {
-        const [[ac]] = await db.execute('SELECT id FROM gym WHERE id=?', [req.params.id]);
+        const ac = await Gym.findById(req.params.id);
         if (!ac) return res.status(404).json({ erro: 'Academia não encontrada.' });
-        const allowed = ['nome','endereco','numero','bairro','cidade','estado','cep','telefone','email','whatsapp','latitude','longitude','status'];
-        const sets = [], vals = [];
-        for (const key of allowed) {
-            if (req.body[key] !== undefined) { sets.push(`${key}=?`); vals.push(req.body[key]); }
-        }
-        if (sets.length > 0) await db.execute(`UPDATE gym SET ${sets.join(',')} WHERE id=?`, [...vals, req.params.id]);
-        const [[updated]] = await db.execute('SELECT * FROM gym WHERE id=?', [req.params.id]);
+        await Gym.update(req.params.id, req.body);
+        const updated = await Gym.findById(req.params.id);
         res.json({ mensagem: 'Academia atualizada.', academia: updated });
     } catch (err) {
         console.error('[admin-api/academias/:id PUT]', err);
@@ -218,13 +198,7 @@ router.post('/academias/:id/toggle', async (req, res) => {
 // ── PLANOS ────────────────────────────────────────────────────────────────────
 router.get('/planos', async (req, res) => {
     try {
-        const [rows] = await db.execute(
-            `SELECT p.*, COUNT(up.id) AS totalAssinantes
-             FROM plan p
-             LEFT JOIN user_plan up ON up.plan_id=p.id AND up.status='ativo'
-             GROUP BY p.id ORDER BY p.preco ASC`
-        );
-        res.json(rows);
+        res.json(await Plan.findAllWithSubscriberCount());
     } catch (err) {
         res.status(500).json({ erro: 'Erro ao buscar planos.' });
     }
@@ -234,15 +208,9 @@ router.post('/planos', async (req, res) => {
     const { slug, nome, descricao, preco, duracao_dias, beneficios, permite_ia, permite_avaliacao_corporal, ordem } = req.body;
     if (!nome || !preco) return res.status(400).json({ erro: 'Nome e preço são obrigatórios.' });
     try {
-        const [result] = await db.execute(
-            `INSERT INTO plan (slug, nome, descricao, preco, duracao_dias, beneficios, permite_ia, permite_avaliacao_corporal, ordem)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [slug || nome.toLowerCase().replace(/\s+/g,'-'), nome, descricao||null, parseFloat(preco),
-             duracao_dias||30, JSON.stringify(Array.isArray(beneficios) ? beneficios : []),
-             permite_ia ? 1 : 0, permite_avaliacao_corporal ? 1 : 0, ordem||0]
-        );
-        const [[novo]] = await db.execute('SELECT * FROM plan WHERE id=?', [result.insertId]);
-        await logAdmin(req.session.admin.id, 'criar_plano', 'plan', result.insertId, { nome }, req.ip);
+        const id   = await Plan.create({ slug, nome, descricao, preco, duracao_dias, beneficios, permite_ia, permite_avaliacao_corporal, ordem });
+        const novo = await Plan.findById(id);
+        await logAdmin(req.session.admin.id, 'criar_plano', 'plan', id, { nome }, req.ip);
         res.status(201).json({ mensagem: 'Plano criado.', plano: novo });
     } catch (err) {
         console.error('[admin-api/planos POST]', err);
@@ -252,17 +220,11 @@ router.post('/planos', async (req, res) => {
 
 router.put('/planos/:id', async (req, res) => {
     try {
-        const [[plan]] = await db.execute('SELECT id FROM plan WHERE id=?', [req.params.id]);
+        const plan = await Plan.findById(req.params.id);
         if (!plan) return res.status(404).json({ erro: 'Plano não encontrado.' });
         const { nome, descricao, preco, beneficios, status } = req.body;
-        const sets = [], vals = [];
-        if (nome)      { sets.push('nome=?');      vals.push(nome); }
-        if (descricao !== undefined) { sets.push('descricao=?'); vals.push(descricao); }
-        if (preco)     { sets.push('preco=?');     vals.push(parseFloat(preco)); }
-        if (beneficios){ sets.push('beneficios=?');vals.push(JSON.stringify(Array.isArray(beneficios) ? beneficios : [])); }
-        if (status)    { sets.push('status=?');    vals.push(status); }
-        if (sets.length > 0) await db.execute(`UPDATE plan SET ${sets.join(',')} WHERE id=?`, [...vals, req.params.id]);
-        const [[updated]] = await db.execute('SELECT * FROM plan WHERE id=?', [req.params.id]);
+        await Plan.update(req.params.id, { nome, descricao, preco: preco ? parseFloat(preco) : undefined, beneficios: beneficios ? (Array.isArray(beneficios) ? beneficios : []) : undefined, status });
+        const updated = await Plan.findById(req.params.id);
         await logAdmin(req.session.admin.id, 'editar_plano', 'plan', req.params.id, req.body, req.ip);
         res.json({ mensagem: 'Plano atualizado.', plano: updated });
     } catch (err) {
@@ -335,18 +297,8 @@ router.get('/financeiro/transacoes', async (req, res) => {
 // ── SUPORTE (admin) ───────────────────────────────────────────────────────────
 router.get('/suporte/tickets', async (req, res) => {
     const { status = '' } = req.query;
-    const params = [];
-    let where = 'WHERE 1=1';
-    if (status) { where += ' AND st.status = ?'; params.push(status); }
     try {
-        const [lista] = await db.execute(
-            `SELECT st.*, u.nome AS userName, u.email AS userEmail
-             FROM support_ticket st
-             LEFT JOIN user u ON u.id=st.user_id
-             ${where} ORDER BY st.updated_at DESC`,
-            params
-        );
-        res.json(lista);
+        res.json(await SupportTicket.findAll({ status: status || null }));
     } catch (err) {
         res.status(500).json({ erro: 'Erro ao buscar tickets.' });
     }

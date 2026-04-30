@@ -6,6 +6,9 @@
 const express  = require('express');
 const router   = express.Router();
 const db       = require('../config/db');
+const { body, validationResult } = require('express-validator');
+const SupportTicket = require('../models/SupportTicket');
+const Notification  = require('../models/Notification');
 const { broadcast, broadcastTicket, addTicketClient, addStudentClient, registerUserSSE, unregisterUserSSE } = require('../events');
 
 // Middleware: exige sessão de aluno
@@ -15,28 +18,27 @@ router.use((req, res, next) => {
 });
 
 // ── Abrir chamado ─────────────────────────────────────────────────────────────
-router.post('/tickets', async (req, res) => {
+router.post('/tickets',
+  [
+    body('assunto').trim().notEmpty().withMessage('Assunto obrigatório.').isLength({ max: 200 }).withMessage('Assunto muito longo.'),
+    body('tipo').notEmpty().withMessage('Tipo obrigatório.'),
+    body('descricao').trim().notEmpty().withMessage('Descrição obrigatória.').isLength({ min: 10 }).withMessage('Descrição muito curta (mín. 10 caracteres).'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ erros: errors.array() });
+
     const { assunto, tipo, descricao } = req.body;
     const user = req.session.user;
-    if (!assunto || !descricao?.trim()) return res.status(400).json({ erro: 'Assunto e descrição são obrigatórios.' });
 
     try {
-        const [result] = await db.execute(
-            'INSERT INTO support_ticket (user_id, assunto, tipo, prioridade) VALUES (?, ?, ?, "normal")',
-            [user.id, assunto, tipo || 'Outro']
-        );
-        const ticketId = result.insertId;
-
-        await db.execute(
-            'INSERT INTO support_message (ticket_id, remetente, texto) VALUES (?, "usuario", ?)',
-            [ticketId, descricao.trim()]
-        );
+        const ticketId = await SupportTicket.create({ userId: user.id, assunto, tipo, descricao });
 
         broadcast('new_ticket', {
             ticketId,
             userName: user.nome,
             assunto,
-            tipo: tipo || 'Outro',
+            tipo,
             status: 'aberto',
             createdAt: new Date().toISOString(),
         });
@@ -50,18 +52,8 @@ router.post('/tickets', async (req, res) => {
 
 // ── Listar tickets do usuário ─────────────────────────────────────────────────
 router.get('/tickets', async (req, res) => {
-    const userId = req.session.user.id;
     try {
-        const [lista] = await db.execute(
-            `SELECT st.*,
-               (SELECT COUNT(*) FROM support_message sm
-                WHERE sm.ticket_id=st.id AND sm.lida=0 AND sm.remetente='admin') AS nao_lidas
-             FROM support_ticket st
-             WHERE st.user_id = ?
-             ORDER BY st.updated_at DESC`,
-            [userId]
-        );
-        res.json(lista);
+        res.json(await SupportTicket.findByUser(req.session.user.id));
     } catch (err) {
         res.status(500).json({ erro: 'Erro ao buscar tickets.' });
     }
@@ -153,20 +145,9 @@ router.get('/notificacoes/stream', (req, res) => {
 
 // ── Notificações do usuário ───────────────────────────────────────────────────
 router.get('/notificacoes', async (req, res) => {
-    const userId  = req.session.user.id;
-    const planoId = req.session.user.planoId;
+    const { id: userId, planoId } = req.session.user;
     try {
-        const [lista] = await db.execute(
-            `SELECT n.*,
-               EXISTS(SELECT 1 FROM notification_read nr WHERE nr.notification_id=n.id AND nr.user_id=?) AS lida
-             FROM notification n
-             WHERE n.destinatarios = 'todos'
-                OR n.destinatarios = ?
-             ORDER BY n.created_at DESC
-             LIMIT 20`,
-            [userId, String(planoId)]
-        );
-        res.json(lista);
+        res.json(await Notification.findForUser(userId, planoId));
     } catch (err) {
         res.status(500).json({ erro: 'Erro ao buscar notificações.' });
     }
