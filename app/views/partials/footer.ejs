@@ -30,6 +30,21 @@
             <p data-translate="footer.copy">&copy; 2026 GymBros. Todos os direitos reservados.</p>
         </section>
     </footer>
+
+    <section id="cookie-banner" class="cookie-banner" style="display:none">
+      <section class="cookie-content">
+        <p>
+          🍪 Usamos cookies para melhorar sua experiência, manter sua sessão ativa
+          e lembrar suas preferências de idioma. Ao continuar navegando, você
+          concorda com nossa
+          <a href="/privacidade" class="cookie-link">Política de Privacidade</a>.
+        </p>
+        <section class="cookie-actions">
+          <button id="cookie-accept" class="cookie-btn-accept">Aceitar</button>
+          <button id="cookie-decline" class="cookie-btn-decline">Só essenciais</button>
+        </section>
+      </section>
+    </section>
 <script src="/js/translate.js"></script>
 <section id="pwa-install-banner" class="pwa-banner" style="display:none">
   <button id="pwa-dismiss-btn" class="pwa-btn-close" aria-label="Fechar">✕</button>
@@ -93,5 +108,27 @@ if ('serviceWorker' in navigator) {
       }
     }, 3000);
   }
+})();
+</script>
+<script>
+(function () {
+  const consent = localStorage.getItem('cookie_consent');
+  if (consent) return;
+
+  const banner     = document.getElementById('cookie-banner');
+  const btnAccept  = document.getElementById('cookie-accept');
+  const btnDecline = document.getElementById('cookie-decline');
+
+  if (banner) setTimeout(() => { banner.style.display = 'block'; }, 1500);
+
+  btnAccept?.addEventListener('click', () => {
+    localStorage.setItem('cookie_consent', 'accepted');
+    banner.style.display = 'none';
+  });
+
+  btnDecline?.addEventListener('click', () => {
+    localStorage.setItem('cookie_consent', 'essential');
+    banner.style.display = 'none';
+  });
 })();
 </script>

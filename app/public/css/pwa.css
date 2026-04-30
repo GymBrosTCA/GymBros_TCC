@@ -81,6 +81,77 @@
 }
 .pwa-btn-close:hover { color: #ccc; }
 
+/* ── Cookie consent banner ── */
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1a1a1a;
+  border-top: 3px solid #FFD700;
+  padding: 16px 24px;
+  z-index: 9998;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
+  animation: slideUpCookie 0.4s ease;
+}
+@keyframes slideUpCookie {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.cookie-content {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.cookie-content p {
+  flex: 1;
+  color: #ccc;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
+}
+.cookie-link {
+  color: #FFD700;
+  text-decoration: underline;
+}
+.cookie-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.cookie-btn-accept {
+  background: #FFD700;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cookie-btn-accept:hover { background: #FFC200; }
+.cookie-btn-decline {
+  background: none;
+  border: 1px solid #444;
+  color: #aaa;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cookie-btn-decline:hover { border-color: #666; color: #ccc; }
+
+@media (max-width: 600px) {
+  .cookie-content { flex-direction: column; }
+  .cookie-actions { width: 100%; }
+  .cookie-btn-accept, .cookie-btn-decline { flex: 1; text-align: center; }
+}
+
 @media (max-width: 540px) {
   .pwa-banner {
     bottom: 0;
