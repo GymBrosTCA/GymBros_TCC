@@ -86,11 +86,21 @@ window.copiarCodigo = copiarCodigo;
 async function carregarPixQR() {
     const loading = document.getElementById('pix-qr-loading');
     const img     = document.getElementById('pix-qr-img');
+    const wrap    = document.getElementById('pix-qr-wrap');
     const input   = document.getElementById('pix-codigo');
     if (!img) return;
 
-    if (loading) loading.classList.remove('hidden');
-    img.classList.add('hidden');
+    // Garante centralização no container pai
+    if (wrap) {
+        wrap.style.display        = 'flex';
+        wrap.style.justifyContent = 'center';
+        wrap.style.alignItems     = 'center';
+        wrap.style.textAlign      = 'center';
+    }
+
+    // Mostra spinner, esconde img
+    if (loading) loading.style.display = '';
+    img.style.display = 'none';
 
     try {
         const params = new URLSearchParams({
@@ -101,13 +111,16 @@ async function carregarPixQR() {
         const data = await resp.json();
         if (data.ok) {
             img.src = data.dataUrl;
+            // Força centralização no elemento gerado dinamicamente
+            img.style.display = 'block';
+            img.style.margin  = '0 auto';
             img.classList.remove('hidden');
-            if (loading) loading.classList.add('hidden');
+            if (loading) loading.style.display = 'none';
             if (input) input.value = data.pixPayload;
         }
     } catch (err) {
         console.error('[pix/qr]', err);
-        if (loading) loading.classList.add('hidden');
+        if (loading) loading.style.display = 'none';
     }
 }
 

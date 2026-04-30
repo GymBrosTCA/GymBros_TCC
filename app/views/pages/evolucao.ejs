@@ -123,11 +123,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>window.GYMBROS_USER_ID = '<%= user.cpf %>';</script>
 <script>
+window._SRV = {
+    graficoLabels: <%- graficoLabels %>,
+    graficoData:   <%- graficoData %>,
+    workoutLogs:   <%- JSON.stringify(workoutLogs) %>,
+    measurements:  <%- JSON.stringify(measurements) %>
+};
+</script>
+<script>
 const _uid        = (window.GYMBROS_USER_ID || 'guest').replace(/\D/g, '');
 const EVO_KEY     = `gymbros_evolucao_${_uid}`;
 const TREINOS_KEY = `gymbros_treinos_${_uid}`;
 
-// Carrega dados dos dois storages
 function getHistorico() {
     try { return JSON.parse(localStorage.getItem(EVO_KEY) || '[]'); }
     catch { return []; }
@@ -145,32 +152,43 @@ const snapIMC    = historico.filter(e => e.tipo === 'imc');
 const snapAval   = historico.filter(e => e.tipo === 'avaliacao');
 const snapTreino = historico.filter(e => e.tipo === 'treino');
 
+const srvLogs    = window._SRV.workoutLogs   || [];
+const srvMeds    = window._SRV.measurements  || [];
+
 // ─── STATS ────────────────────────────────────────────
-document.getElementById('stTreinos').textContent = treinos.length;
-document.getElementById('stTempo').textContent   = treinos.reduce((a, t) => a + (parseInt(t.duracao) || 0), 0);
+document.getElementById('stTreinos').textContent = srvLogs.length || treinos.length;
+document.getElementById('stTempo').textContent   = srvLogs.length
+    ? srvLogs.reduce((a, l) => a + (parseInt(l.duracao) || 0), 0)
+    : treinos.reduce((a, t) => a + (parseInt(t.duracao) || 0), 0);
 document.getElementById('stAval').textContent    = snapAval.length;
 
-// IMC atual (último snapshot)
+// IMC atual: sessão do servidor tem precedência sobre localStorage
+<% if (user.imc && user.imc.imcValor) { %>
+document.getElementById('stIMC').textContent = parseFloat('<%- user.imc.imcValor %>').toFixed(1);
+<% } else { %>
 const ultimoIMC = snapIMC.length ? snapIMC[snapIMC.length - 1] : null;
-if (ultimoIMC) {
-    document.getElementById('stIMC').textContent = parseFloat(ultimoIMC.dados.imcValor).toFixed(1);
-}
+if (ultimoIMC) document.getElementById('stIMC').textContent = parseFloat(ultimoIMC.dados.imcValor).toFixed(1);
+<% } %>
 
 // ─── GRÁFICO PESO ─────────────────────────────────────
 const ctxPeso = document.getElementById('graficoPeso').getContext('2d');
-if (snapIMC.length >= 1) {
-    const labels = snapIMC.map(e => e.data);
-    const pesos  = snapIMC.map(e => parseFloat(e.dados.peso));
-    document.getElementById('labelPeso').textContent = `${snapIMC.length} registro(s)`;
+const pesoLabels = srvMeds.length
+    ? srvMeds.map(m => new Date(m.data).toLocaleDateString('pt-BR')).reverse()
+    : snapIMC.map(e => e.data);
+const pesoData = srvMeds.length
+    ? srvMeds.map(m => parseFloat(m.peso || m.valor || 0)).reverse()
+    : snapIMC.map(e => parseFloat(e.dados.peso));
 
+if (pesoLabels.length >= 1) {
+    document.getElementById('labelPeso').textContent = `${pesoLabels.length} registro(s)`;
     Chart.getChart(document.getElementById('graficoPeso'))?.destroy();
     new Chart(ctxPeso, {
         type: 'line',
         data: {
-            labels,
+            labels: pesoLabels,
             datasets: [{
                 label: 'Peso (kg)',
-                data: pesos,
+                data: pesoData,
                 borderColor: '#FFD700',
                 backgroundColor: 'rgba(255,215,0,0.12)',
                 tension: 0.35,
@@ -184,11 +202,7 @@ if (snapIMC.length >= 1) {
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => ` ${ctx.parsed.y} kg`
-                    }
-                }
+                tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} kg` } }
             },
             scales: {
                 x: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' } },
@@ -204,38 +218,21 @@ if (snapIMC.length >= 1) {
     ctxPeso.canvas.style.display = 'none';
 }
 
-// ─── GRÁFICO TREINOS POR SEMANA ────────────────────────
+// ─── GRÁFICO CHECK-INS POR DIA DA SEMANA ──────────────
 const ctxTreinos = document.getElementById('graficoTreinos').getContext('2d');
-if (treinos.length > 0) {
-    // Agrupa por semana (últimas 8 semanas)
-    const semanas = {};
-    const agora = Date.now();
-    for (let i = 7; i >= 0; i--) {
-        const d = new Date(agora - i * 7 * 24 * 3600 * 1000);
-        const label = `Sem ${8 - i}`;
-        semanas[label] = 0;
-    }
+const labSem = window._SRV.graficoLabels;
+const datSem = window._SRV.graficoData;
+const temCheckins = datSem.some(v => v > 0);
 
-    treinos.forEach(t => {
-        const diff = agora - t.timestamp;
-        const semIdx = Math.floor(diff / (7 * 24 * 3600 * 1000));
-        if (semIdx < 8) {
-            const label = `Sem ${8 - semIdx}`;
-            if (semanas[label] !== undefined) semanas[label]++;
-        }
-    });
-
-    const labSem = Object.keys(semanas);
-    const datSem = Object.values(semanas);
-    document.getElementById('labelTreinos').textContent = `últimas 8 semanas`;
-
+if (temCheckins) {
+    document.getElementById('labelTreinos').textContent = 'últimos 30 dias';
     Chart.getChart(document.getElementById('graficoTreinos'))?.destroy();
     new Chart(ctxTreinos, {
         type: 'bar',
         data: {
             labels: labSem,
             datasets: [{
-                label: 'Treinos',
+                label: 'Check-ins',
                 data: datSem,
                 backgroundColor: 'rgba(255,215,0,0.7)',
                 borderColor: '#FFD700',
@@ -249,44 +246,57 @@ if (treinos.length > 0) {
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' } },
-                y: {
-                    ticks: { color: '#888', stepSize: 1 },
-                    grid: { color: '#1e1e1e' },
-                    beginAtZero: true
-                }
+                y: { ticks: { color: '#888', stepSize: 1 }, grid: { color: '#1e1e1e' }, beginAtZero: true }
             }
         }
     });
 } else {
-    document.getElementById('secGraficoTreinos').innerHTML += `<section class="evo-empty">
-        <i class="fas fa-calendar-times"></i>
-        Registre treinos na página <a href="/treinos" style="color:#FFD700">Meus Treinos</a> para ver o gráfico semanal.
-    </section>`;
-    ctxTreinos.canvas.style.display = 'none';
+    // Gráfico vazio com labels dos 7 dias
+    Chart.getChart(document.getElementById('graficoTreinos'))?.destroy();
+    new Chart(ctxTreinos, {
+        type: 'bar',
+        data: {
+            labels: labSem,
+            datasets: [{ label: 'Check-ins', data: [0,0,0,0,0,0,0], backgroundColor: 'rgba(255,215,0,0.2)', borderColor: '#FFD700', borderWidth: 1, borderRadius: 6 }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: '#888' }, grid: { color: '#1e1e1e' } },
+                y: { ticks: { color: '#888', stepSize: 1 }, grid: { color: '#1e1e1e' }, beginAtZero: true, max: 5 }
+            }
+        }
+    });
+    document.getElementById('labelTreinos').textContent = 'sem check-ins nos últimos 30 dias';
 }
 
 // ─── TABELA DE TREINOS ─────────────────────────────────
 const tabelaEl = document.getElementById('tabelaTreinos');
-if (treinos.length === 0) {
-    tabelaEl.innerHTML = `<section class="evo-empty">
-        <i class="fas fa-table"></i>
-        Nenhum treino registrado ainda.
-    </section>`;
-} else {
-    const badgeClass = tipo => {
-        if (tipo === 'Força') return 'forca';
-        if (tipo === 'Cardio') return 'cardio';
-        return 'alongamento';
-    };
 
+if (srvLogs.length > 0) {
+    const linhas = srvLogs.slice(0, 20).map(l => {
+        const nome = l.workout_nome || l.nome || '—';
+        const data = l.data ? new Date(l.data).toLocaleDateString('pt-BR') : '—';
+        const dur  = l.duracao ? `${l.duracao} min` : '—';
+        return `<tr>
+            <td>${data}</td>
+            <td><strong style="color:#fff">${nome}</strong></td>
+            <td>${dur}</td>
+        </tr>`;
+    }).join('');
+    tabelaEl.innerHTML = `<table class="evo-table">
+        <thead><tr><th>Data</th><th>Treino</th><th>Duração</th></tr></thead>
+        <tbody>${linhas}</tbody>
+    </table>`;
+} else if (treinos.length > 0) {
+    const badgeClass = tipo => tipo === 'Força' ? 'forca' : tipo === 'Cardio' ? 'cardio' : 'alongamento';
     const linhas = treinos.slice(0, 20).map(t => {
         const cargaCell = t.tipo === 'Força' && t.peso
-            ? `${t.peso}kg${t.series ? ' · ' + t.series + 'x' : ''}${t.reps ? t.reps + 'rep' : ''}`
-            : '—';
+            ? `${t.peso}kg${t.series ? ' · ' + t.series + 'x' : ''}${t.reps ? t.reps + 'rep' : ''}` : '—';
         const cardioCell = t.tipo === 'Cardio' && t.cardioMin
-            ? `${t.cardioMin}min ${t.intensidade ? '· ' + t.intensidade : ''}`
-            : '—';
-
+            ? `${t.cardioMin}min ${t.intensidade ? '· ' + t.intensidade : ''}` : '—';
         return `<tr>
             <td>${t.data}</td>
             <td><strong style="color:#fff">${t.nome}</strong></td>
@@ -296,20 +306,15 @@ if (treinos.length === 0) {
             <td style="color:#FF6B35">${cardioCell}</td>
         </tr>`;
     }).join('');
-
     tabelaEl.innerHTML = `<table class="evo-table">
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th>Treino</th>
-                <th>Tipo</th>
-                <th>Duração</th>
-                <th>Carga / Séries</th>
-                <th>Cardio</th>
-            </tr>
-        </thead>
+        <thead><tr><th>Data</th><th>Treino</th><th>Tipo</th><th>Duração</th><th>Carga / Séries</th><th>Cardio</th></tr></thead>
         <tbody>${linhas}</tbody>
     </table>`;
+} else {
+    tabelaEl.innerHTML = `<section class="evo-empty">
+        <i class="fas fa-table"></i>
+        Nenhum treino registrado ainda.
+    </section>`;
 }
 
 // ─── TIMELINE COMPLETA ─────────────────────────────────

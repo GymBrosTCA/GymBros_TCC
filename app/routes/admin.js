@@ -5,9 +5,14 @@
 
 const express   = require('express');
 const router    = express.Router();
-const bcrypt    = require('bcrypt');
-const adminAuth = require('../middleware/adminAuth');
-const db        = require('../config/db');
+const bcrypt         = require('bcrypt');
+const adminAuth      = require('../middleware/adminAuth');
+const db             = require('../config/db');
+const User           = require('../models/User');
+const Plan           = require('../models/Plan');
+const Gym            = require('../models/Gym');
+const SupportTicket  = require('../models/SupportTicket');
+const Notification   = require('../models/Notification');
 
 // ── Helper: constrói adminConfig a partir de res.locals.config ───────────────
 function buildAdminConfig(config = {}) {
@@ -17,14 +22,6 @@ function buildAdminConfig(config = {}) {
         version:              config.version              || '1.0.0',
         notifThresholdHours:  parseInt(config.notifThresholdHours) || 24,
     };
-}
-
-// ── Helper: conta tickets abertos no banco ───────────────────────────────────
-async function getTicketCount() {
-    const [[row]] = await db.execute(
-        "SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'"
-    );
-    return row.cnt;
 }
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
@@ -141,33 +138,21 @@ router.get('/usuarios', async (req, res) => {
     const { busca = '', plano = '', status = '' } = req.query;
     const perPage = 15;
     const pagina  = Math.floor(Number(req.query.page)) || 1;
-    const offset  = (pagina - 1) * perPage;
+    const filters = { status: status || null, busca: busca || null, plano: plano || null };
     try {
-        let where = 'WHERE 1=1';
-        const params = [];
-        if (busca)  { where += ' AND (u.nome LIKE ? OR u.cpf LIKE ?)'; params.push(`%${busca}%`, `%${busca}%`); }
-        if (plano)  { where += ' AND p.slug = ?'; params.push(plano); }
-        if (status) { where += ' AND u.status = ?'; params.push(status); }
-
-        const countSql = `SELECT COUNT(*) AS total FROM user u LEFT JOIN user_plan up ON up.user_id=u.id AND up.status='ativo' LEFT JOIN plan p ON p.id=up.plan_id ${where}`;
-        const [[{ total }]] = await db.execute(countSql, params);
-
-        const listSql = `SELECT u.id, u.nome, u.email, u.cpf, u.status, u.created_at AS createdAt, p.nome AS plano, p.id AS planoId, p.slug AS planoSlug
-            FROM user u
-            LEFT JOIN user_plan up ON up.user_id=u.id AND up.status='ativo'
-            LEFT JOIN plan p ON p.id=up.plan_id
-            ${where} ORDER BY u.created_at DESC LIMIT ${perPage} OFFSET ${offset}`;
-        const [items] = await db.execute(listSql, params);
-
-        const [planos] = await db.execute('SELECT id, nome, slug FROM plan WHERE status = "ativo"');
-        const pages     = Math.ceil(total / perPage);
-        const [ticketCount] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
-        const adminConfig   = buildAdminConfig(res.locals.config);
+        const [items, total, planos, ticketCount] = await Promise.all([
+            User.findAll({ page: pagina, limit: perPage, ...filters }),
+            User.count(filters),
+            Plan.findAll({ activeOnly: true }),
+            SupportTicket.countOpen(),
+        ]);
+        const pages       = Math.ceil(total / perPage);
+        const adminConfig = buildAdminConfig(res.locals.config);
 
         res.render('pages/admin-usuarios', {
-            ticketCount: ticketCount[0].cnt, adminConfig,
+            ticketCount, adminConfig,
             title: 'Usuários', page: 'usuarios', admin: req.session.admin,
-            items, total: Number(total), pages, currentPage: pagina,
+            items, total, pages, currentPage: pagina,
             busca, plano, status, planos,
         });
     } catch (err) {
@@ -210,11 +195,13 @@ router.get('/usuarios/:id', async (req, res) => {
 // ── ACADEMIAS ─────────────────────────────────────────────────────────────────
 router.get('/academias', async (req, res) => {
     try {
-        const [academias] = await db.execute('SELECT * FROM gym ORDER BY nome ASC');
-        const [tc] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const [academias, ticketCount] = await Promise.all([
+            Gym.findAll(),
+            SupportTicket.countOpen(),
+        ]);
         const adminConfig = buildAdminConfig(res.locals.config);
         res.render('pages/admin-academias', {
-            ticketCount: tc[0].cnt, adminConfig,
+            ticketCount, adminConfig,
             title: 'Academias', page: 'academias', admin: req.session.admin,
             academias,
         });
@@ -227,18 +214,15 @@ router.get('/academias', async (req, res) => {
 // ── PLANOS ───────────────────────────────────────────────────────────────────
 router.get('/planos', async (req, res) => {
     try {
-        const [rows] = await db.execute(
-            `SELECT p.*, COUNT(up.id) AS totalAssinantes
-             FROM plan p
-             LEFT JOIN user_plan up ON up.plan_id = p.id AND up.status = 'ativo'
-             GROUP BY p.id ORDER BY p.preco ASC`
-        );
-        const [tc] = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const [planos, ticketCount] = await Promise.all([
+            Plan.findAllWithSubscriberCount(),
+            SupportTicket.countOpen(),
+        ]);
         const adminConfig = buildAdminConfig(res.locals.config);
         res.render('pages/admin-planos', {
-            ticketCount: tc[0].cnt, adminConfig,
+            ticketCount, adminConfig,
             title: 'Planos', page: 'planos', admin: req.session.admin,
-            planos: rows,
+            planos,
         });
     } catch (err) {
         console.error('[admin/planos]', err);
@@ -393,28 +377,14 @@ router.get('/financeiro/inadimplentes', async (req, res) => {
 router.get('/suporte', async (req, res) => {
     const { status = '' } = req.query;
     try {
-        const params = [];
-        let where = 'WHERE 1=1';
-        if (status) { where += ' AND st.status = ?'; params.push(status); }
-
-        const [lista] = await db.execute(
-            `SELECT st.*, u.nome AS userName, u.email AS userEmail, u.cpf AS userCpf
-             FROM support_ticket st
-             LEFT JOIN user u ON u.id=st.user_id
-             ${where} ORDER BY st.updated_at DESC`,
-            params
-        );
-
-        const [[{ total }]]         = await db.execute('SELECT COUNT(*) AS total FROM support_ticket');
-        const [[{ aberto }]]        = await db.execute("SELECT COUNT(*) AS aberto FROM support_ticket WHERE status='aberto'");
-        const [[{ em_atendimento }]]= await db.execute("SELECT COUNT(*) AS em_atendimento FROM support_ticket WHERE status='em_atendimento'");
-        const [[{ resolvido }]]     = await db.execute("SELECT COUNT(*) AS resolvido FROM support_ticket WHERE status='resolvido'");
-
-        const counts = { todos: Number(total), aberto: Number(aberto), em_atendimento: Number(em_atendimento), resolvido: Number(resolvido) };
+        const [lista, counts] = await Promise.all([
+            SupportTicket.findAll({ status: status || null }),
+            SupportTicket.counts(),
+        ]);
         const adminConfig = buildAdminConfig(res.locals.config);
 
         res.render('pages/admin-suporte', {
-            ticketCount: Number(aberto) + Number(em_atendimento), adminConfig,
+            ticketCount: counts.aberto + counts.em_atendimento, adminConfig,
             title: 'Suporte', page: 'suporte', admin: req.session.admin,
             lista, status, counts,
         });
@@ -451,12 +421,14 @@ router.get('/suporte/:ticketId', async (req, res) => {
 // ── NOTIFICAÇÕES ─────────────────────────────────────────────────────────────
 router.get('/notificacoes', async (req, res) => {
     try {
-        const [lista]  = await db.execute('SELECT * FROM notification ORDER BY created_at DESC');
-        const [planos] = await db.execute('SELECT id, nome, slug FROM plan WHERE status = "ativo"');
-        const [tc]     = await db.execute("SELECT COUNT(*) AS cnt FROM support_ticket WHERE status != 'resolvido'");
+        const [lista, planos, ticketCount] = await Promise.all([
+            Notification.findAll(),
+            Plan.findAll({ activeOnly: true }),
+            SupportTicket.countOpen(),
+        ]);
         const adminConfig = buildAdminConfig(res.locals.config);
         res.render('pages/admin-notificacoes', {
-            ticketCount: tc[0].cnt, adminConfig,
+            ticketCount, adminConfig,
             title: 'Notificações', page: 'notificacoes', admin: req.session.admin,
             lista, planos,
         });

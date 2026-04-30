@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include('../partials/seo') %>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/legal.css">
+    <link rel="stylesheet" href="/css/footer.css">
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+
+    <section class="side-menu" id="sideMenu">
+        <span class="close-menu" id="closeMenu"><i class="fas fa-times"></i></span>
+        <ul class="menu-items">
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/academias"><i class="fas fa-dumbbell"></i> Academias</a></li>
+            <li><a href="/about"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
+            <li><a href="/planos"><i class="fas fa-tags"></i> Planos e Preços</a></li>
+        </ul>
+    </section>
+
+    <section class="menu-overlay" id="menuOverlay"></section>
+
+    <main>
+        <section class="legal-hero">
+            <h1>Política de Privacidade</h1>
+            <p>Última atualização: 30 de abril de 2026</p>
+        </section>
+
+        <section class="legal-content">
+
+            <section class="legal-section">
+                <h2>1. Quem somos</h2>
+                <p>O GymBros é uma plataforma digital de gestão fitness que conecta alunos a academias parceiras e oferece ferramentas de saúde personalizadas. Somos responsáveis pelo tratamento dos seus dados pessoais conforme descrito nesta política.</p>
+                <p>Contato do responsável pela proteção de dados: <a href="mailto:privacidade@gymbros.app.br">privacidade@gymbros.app.br</a></p>
+            </section>
+
+            <section class="legal-section">
+                <h2>2. Quais dados coletamos</h2>
+                <ul>
+                    <li><strong>Dados de cadastro:</strong> nome completo, CPF, e-mail, endereço (CEP, logradouro, bairro, cidade, estado) e telefone.</li>
+                    <li><strong>Dados de saúde:</strong> peso, altura, medidas corporais e fotos de evolução — fornecidos voluntariamente por você.</li>
+                    <li><strong>Dados de uso:</strong> histórico de treinos, check-ins em academias e interações com a IA.</li>
+                    <li><strong>Dados de pagamento:</strong> método de pagamento e histórico de transações. Não armazenamos dados de cartão; o processamento é feito por parceiros certificados PCI-DSS.</li>
+                    <li><strong>Dados técnicos:</strong> endereço IP, tipo de dispositivo, navegador e logs de acesso, coletados automaticamente para segurança e desempenho.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section">
+                <h2>3. Como usamos seus dados</h2>
+                <ul>
+                    <li>Criar e gerenciar sua conta e plano de assinatura.</li>
+                    <li>Personalizar recomendações de treinos e sugestões da IA.</li>
+                    <li>Processar pagamentos e emitir comprovantes.</li>
+                    <li>Enviar notificações sobre seu plano, treinos e atualizações do serviço.</li>
+                    <li>Cumprir obrigações legais e regulatórias.</li>
+                    <li>Melhorar continuamente nossa plataforma com base em dados agregados e anonimizados.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section">
+                <h2>4. Base legal para o tratamento</h2>
+                <p>Tratamos seus dados com base nas seguintes hipóteses legais previstas na LGPD (Lei 13.709/2018):</p>
+                <ul>
+                    <li><strong>Execução de contrato</strong> — para prestação dos serviços contratados.</li>
+                    <li><strong>Consentimento</strong> — para dados de saúde e envio de comunicações de marketing.</li>
+                    <li><strong>Legítimo interesse</strong> — para segurança, prevenção de fraudes e melhoria do serviço.</li>
+                    <li><strong>Cumprimento de obrigação legal</strong> — para atender exigências fiscais e regulatórias.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section">
+                <h2>5. Compartilhamento de dados</h2>
+                <p>Não vendemos seus dados pessoais. Podemos compartilhá-los com:</p>
+                <ul>
+                    <li><strong>Academias parceiras</strong> — para validação de check-in, limitado ao necessário.</li>
+                    <li><strong>Processadores de pagamento</strong> — para liquidação financeira das assinaturas.</li>
+                    <li><strong>Provedores de infraestrutura</strong> — hospedagem em servidores seguros.</li>
+                    <li><strong>Autoridades governamentais</strong> — quando exigido por lei ou ordem judicial.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section">
+                <h2>6. Retenção de dados</h2>
+                <p>Mantemos seus dados enquanto sua conta estiver ativa. Após o cancelamento, retemos dados pelo prazo mínimo exigido pela legislação fiscal e trabalhista (geralmente 5 anos). Dados de saúde são excluídos em até 90 dias após a solicitação de exclusão da conta.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>7. Seus direitos (LGPD)</h2>
+                <p>Você tem os seguintes direitos sobre seus dados pessoais:</p>
+                <ul>
+                    <li><strong>Acesso:</strong> solicitar confirmação e cópia dos dados que tratamos sobre você.</li>
+                    <li><strong>Correção:</strong> corrigir dados incompletos, inexatos ou desatualizados.</li>
+                    <li><strong>Eliminação:</strong> solicitar a exclusão dos dados tratados com base em consentimento.</li>
+                    <li><strong>Portabilidade:</strong> receber seus dados em formato estruturado e interoperável.</li>
+                    <li><strong>Revogação do consentimento:</strong> retirar consentimento a qualquer momento.</li>
+                    <li><strong>Oposição:</strong> opor-se a tratamentos realizados com base em legítimo interesse.</li>
+                </ul>
+                <p>Para exercer seus direitos, envie uma solicitação para <a href="mailto:privacidade@gymbros.app.br">privacidade@gymbros.app.br</a>. Responderemos em até 15 dias úteis.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>8. Segurança</h2>
+                <p>Adotamos medidas técnicas e organizacionais para proteger seus dados, incluindo criptografia em trânsito (TLS), armazenamento seguro de senhas com hash bcrypt, controles de acesso e monitoramento de segurança. Em caso de incidente que possa afetar seus direitos, notificaremos você e a ANPD conforme exigido pela LGPD.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>9. Cookies</h2>
+                <p>Utilizamos cookies de sessão (necessários para o funcionamento do login) e cookies de preferência (idioma). Não utilizamos cookies de rastreamento de terceiros para publicidade.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>10. Alterações desta política</h2>
+                <p>Podemos atualizar esta política periodicamente. Alterações relevantes serão comunicadas por e-mail com antecedência mínima de 15 dias. O uso continuado da plataforma após a data de vigência das alterações implica aceitação das novas condições.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>11. Contato</h2>
+                <p>Dúvidas sobre esta política? Entre em contato:</p>
+                <p><strong>E-mail:</strong> <a href="mailto:privacidade@gymbros.app.br">privacidade@gymbros.app.br</a></p>
+                <p><strong>Telefone:</strong> (11) 4002-8922</p>
+            </section>
+
+        </section>
+    </main>
+
+    <%- include('../partials/footer') %>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="/js/menu.js"></script>
+    <script src="/js/header.js"></script>
+
+</body>
+
+</html>

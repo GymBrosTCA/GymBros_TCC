@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include('../partials/seo') %>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/legal.css">
+    <link rel="stylesheet" href="/css/footer.css">
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+
+    <section class="side-menu" id="sideMenu">
+        <span class="close-menu" id="closeMenu"><i class="fas fa-times"></i></span>
+        <ul class="menu-items">
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/academias"><i class="fas fa-dumbbell"></i> Academias</a></li>
+            <li><a href="/about"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
+            <li><a href="/planos"><i class="fas fa-tags"></i> Planos e Preços</a></li>
+        </ul>
+    </section>
+
+    <section class="menu-overlay" id="menuOverlay"></section>
+
+    <main>
+        <section class="legal-hero">
+            <h1>Termos de Serviço</h1>
+            <p>Última atualização: 30 de abril de 2026</p>
+        </section>
+
+        <section class="legal-content">
+
+            <section class="legal-section">
+                <h2>1. Aceitação dos Termos</h2>
+                <p>Ao criar uma conta ou utilizar qualquer recurso do GymBros, você declara que leu, compreendeu e concorda com estes Termos de Serviço e com nossa <a href="/privacidade">Política de Privacidade</a>. Se você não concordar com alguma cláusula, não utilize a plataforma.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>2. Descrição do Serviço</h2>
+                <p>O GymBros é uma plataforma digital de gestão fitness que oferece:</p>
+                <ul>
+                    <li>Acesso a uma rede de academias parceiras mediante plano de assinatura.</li>
+                    <li>Ferramentas de acompanhamento de treinos, IMC e evolução corporal.</li>
+                    <li>Assistente de IA para recomendações personalizadas de exercícios e nutrição (planos Premium e Superior).</li>
+                    <li>Avaliação corporal assistida por IA (plano Superior).</li>
+                    <li>Suporte via sistema de tickets.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section">
+                <h2>3. Elegibilidade</h2>
+                <p>Para utilizar o GymBros você deve:</p>
+                <ul>
+                    <li>Ter pelo menos 18 anos de idade, ou 16 anos com autorização expressa dos responsáveis legais.</li>
+                    <li>Fornecer informações verdadeiras e atualizadas no cadastro.</li>
+                    <li>Não ter tido conta cancelada por violação destes termos anteriormente.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section">
+                <h2>4. Planos e Pagamentos</h2>
+                <p><strong>4.1 Assinatura:</strong> O acesso aos serviços está condicionado à adesão a um plano pago. Os planos disponíveis, preços e benefícios estão listados em <a href="/planos">/planos</a>.</p>
+                <p><strong>4.2 Cobrança:</strong> O valor é cobrado no ato da contratação para planos mensais. Aceitamos cartão de crédito, PIX e boleto bancário.</p>
+                <p><strong>4.3 Renovação:</strong> Planos mensais são renovados automaticamente ao final de cada ciclo, salvo cancelamento pelo usuário com antecedência mínima de 3 dias úteis.</p>
+                <p><strong>4.4 Reembolso:</strong> Você pode solicitar cancelamento e reembolso integral em até 7 dias corridos após a contratação, conforme o Código de Defesa do Consumidor (art. 49, CDC). Após esse prazo, não há reembolso proporcional pelo período não utilizado.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>5. Cancelamento</h2>
+                <p>Você pode cancelar sua assinatura a qualquer momento pela seção "Meu Plano" na sua área do aluno ou entrando em contato em <a href="mailto:contato@gymbros.app.br">contato@gymbros.app.br</a>. O acesso permanece ativo até o fim do período já pago.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>6. Uso Aceitável</h2>
+                <p>É proibido utilizar o GymBros para:</p>
+                <ul>
+                    <li>Compartilhar sua conta com terceiros ou usar credenciais de outro usuário.</li>
+                    <li>Fazer check-in em academias sem presença física no local.</li>
+                    <li>Enviar conteúdo ofensivo, spam ou informações falsas via suporte.</li>
+                    <li>Tentar contornar, desabilitar ou interferir nos sistemas de segurança da plataforma.</li>
+                    <li>Usar a IA para obter aconselhamento médico substitutivo — as recomendações são complementares e não substituem profissional de saúde habilitado.</li>
+                </ul>
+                <p>Violações podem resultar em suspensão ou cancelamento imediato da conta, sem direito a reembolso.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>7. Academias Parceiras</h2>
+                <p>O GymBros atua como intermediário entre alunos e academias independentes. Não somos responsáveis por:</p>
+                <ul>
+                    <li>Qualidade das instalações, equipamentos ou serviços das academias parceiras.</li>
+                    <li>Lesões ou acidentes ocorridos nas academias.</li>
+                    <li>Alterações de horário, fechamento temporário ou encerramento de atividades de academias parceiras.</li>
+                </ul>
+                <p>Em caso de problemas com uma academia parceira, entre em contato conosco pelo suporte para mediarmos a situação.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>8. Propriedade Intelectual</h2>
+                <p>Todo o conteúdo da plataforma (textos, imagens, código, marca GymBros) é protegido por direitos autorais e pertence ao GymBros ou a seus licenciadores. É vedada a reprodução, distribuição ou criação de obras derivadas sem autorização prévia e escrita.</p>
+                <p>Ao enviar conteúdo (fotos de evolução, mensagens de suporte), você concede ao GymBros licença limitada, não exclusiva e revogável para uso interno na prestação dos serviços.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>9. Limitação de Responsabilidade</h2>
+                <p>Na máxima extensão permitida pela lei, o GymBros não se responsabiliza por danos indiretos, incidentais ou consequenciais decorrentes do uso ou incapacidade de uso da plataforma. Nossa responsabilidade total está limitada ao valor pago pelo usuário nos últimos 3 meses de assinatura.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>10. Modificações nos Termos</h2>
+                <p>Podemos atualizar estes Termos periodicamente. Notificaremos você por e-mail com pelo menos 15 dias de antecedência para alterações materiais. O uso continuado após a data de vigência constitui aceitação dos novos termos.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>11. Legislação Aplicável e Foro</h2>
+                <p>Estes Termos são regidos pelas leis da República Federativa do Brasil. Fica eleito o foro da Comarca de São Paulo/SP para dirimir eventuais controvérsias, sem prejuízo de outros foros de eleição facultativa do consumidor.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>12. Contato</h2>
+                <p><strong>E-mail:</strong> <a href="mailto:contato@gymbros.app.br">contato@gymbros.app.br</a></p>
+                <p><strong>Telefone:</strong> (11) 4002-8922</p>
+            </section>
+
+        </section>
+    </main>
+
+    <%- include('../partials/footer') %>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="/js/menu.js"></script>
+    <script src="/js/header.js"></script>
+
+</body>
+
+</html>

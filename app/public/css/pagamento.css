@@ -314,7 +314,12 @@ main {
     text-align: center;
 }
 
-.pix-qr-section { margin-bottom: 2.5rem; }
+.pix-qr-section {
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
 .pix-qr {
     width: 17rem;
@@ -410,21 +415,30 @@ main {
     display: inline-block;
 }
 
-.pix-acoes { display: flex; justify-content: center; }
+.pix-acoes {
+    display: flex;
+    gap: 1.2rem;
+    justify-content: center;
+    width: 100%;
+}
 
 .btn-ja-paguei {
-    padding: 1.4rem 4rem;
+    flex: 1;
+    max-width: 18rem;
+    padding: 1.2rem 1.6rem;
     background: linear-gradient(135deg, #C98B1D, #E0A835);
     color: #fff;
     border: none;
-    border-radius: 1rem;
-    font-size: 1.6rem;
+    border-radius: 0.8rem;
+    font-size: 1.4rem;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.8rem;
     transition: all 0.2s;
+    white-space: nowrap;
 }
 .btn-ja-paguei:not(:disabled):hover {
     filter: brightness(1.08);
@@ -914,10 +928,13 @@ body.pagamento-page .btn-secundario:hover i { color: #C98B1D; }
 
 /* ── Regenerar button ── */
 .btn-regenerar {
+    flex: 1;
+    max-width: 18rem;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.8rem;
-    padding: 1rem 2.2rem;
+    padding: 1.2rem 1.6rem;
     background: transparent;
     border: 2px solid #C98B1D;
     color: #C98B1D;
@@ -926,7 +943,7 @@ body.pagamento-page .btn-secundario:hover i { color: #C98B1D; }
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
-    margin-top: 1rem;
+    white-space: nowrap;
 }
 
 .btn-regenerar:hover {
@@ -963,6 +980,8 @@ body.pagamento-page .btn-secundario:hover i { color: #C98B1D; }
     .pix-codigo-wrap,
     .boleto-codigo-wrap { flex-direction: column; }
     .btn-copiar { width: 100%; justify-content: center; }
-    .btn-ja-paguei { width: 100%; justify-content: center; }
+    .pix-acoes { flex-direction: column; align-items: stretch; }
+    .btn-ja-paguei,
+    .btn-regenerar { max-width: none; }
     .confirmacao-titulo { font-size: 2.6rem; }
 }

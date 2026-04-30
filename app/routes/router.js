@@ -8,8 +8,13 @@ const bcrypt     = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const { enviarBoleto }   = require('../services/email');
 const { gerarBoletoPDF } = require('../services/pdf');
-const db         = require('../config/db');
-const i18n       = require('../config/i18n');
+const db          = require('../config/db');
+const User        = require('../models/User');
+const Plan        = require('../models/Plan');
+const Payment     = require('../models/Payment');
+const ImcProfile  = require('../models/ImcProfile');
+const BodyPhoto   = require('../models/BodyPhoto');
+const i18n        = require('../config/i18n');
 const { broadcast, onlineUsers } = require('../events');
 const cloudinary = require('../config/cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -190,11 +195,8 @@ router.get('/pagamento', async (req, res) => {
     }
     const slug = (req.query.plano || 'gymbro').toLowerCase();
     try {
-        const [rows] = await db.execute(
-            'SELECT * FROM plan WHERE slug = ? AND status = "ativo" LIMIT 1', [slug]
-        );
-        const plano = rows[0];
-        if (!plano) return res.redirect('/planos');
+        const plano = await Plan.findBySlug(slug);
+        if (!plano || plano.status !== 'ativo') return res.redirect('/planos');
         res.render('pages/pagamento', {
             user: req.session.user,
             plano,
@@ -211,8 +213,16 @@ router.get('/pagamento', async (req, res) => {
     }
 });
 
-router.post('/api/pagamento', async (req, res) => {
+router.post('/api/pagamento',
+  [
+    body('planoId').notEmpty().withMessage('Plano obrigatório.'),
+    body('valor').isFloat({ min: 0.01 }).withMessage('Valor inválido.'),
+    body('metodo').isIn(['cartao', 'pix', 'boleto']).withMessage('Método de pagamento inválido.'),
+  ],
+  async (req, res) => {
     if (!req.session.user) return res.status(401).json({ erro: 'Não autorizado.' });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ erros: errors.array() });
 
     const { planoId, planoNome, valor, metodo, parcelas, cartaoFinal, bandeira } = req.body;
     const user   = req.session.user;
@@ -220,21 +230,20 @@ router.post('/api/pagamento', async (req, res) => {
     const valorN = Number(valor);
 
     try {
-        // 1. Buscar id numérico do plano no banco
-        const [planRows] = await db.execute('SELECT id, nome, slug FROM plan WHERE slug = ? OR nome = ? LIMIT 1', [planoId, planoNome]);
-        const plan = planRows[0];
+        const plan = await Plan.findBySlugOrName(planoId, planoNome);
         if (!plan) return res.status(400).json({ erro: 'Plano não encontrado.' });
 
-        // 2. Inserir pagamento
-        const [payResult] = await db.execute(
-            `INSERT INTO payment
-             (user_id, plan_id, valor_bruto, valor_final, metodo, parcelas,
-              cartao_final, cartao_bandeira, status)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [user.id, plan.id, valorN, valorN, metodo, Number(parcelas) || 1,
-             cartaoFinal || null, bandeira || null, status]
-        );
-        const paymentId = payResult.insertId;
+        const paymentId = await Payment.create({
+            user_id:         user.id,
+            plan_id:         plan.id,
+            valor_bruto:     valorN,
+            valor_final:     valorN,
+            metodo,
+            parcelas:        Number(parcelas) || 1,
+            cartao_final:    cartaoFinal || null,
+            cartao_bandeira: bandeira || null,
+            status,
+        });
 
         // 3. Ativar plano via procedure
         if (status === 'pago') {
@@ -356,6 +365,33 @@ router.get('/about', (req, res) => res.render('pages/about', { seo: {
     ogDescription: 'Nossa missão: democratizar o acesso à saúde e ao fitness no Brasil.',
 }}));
 
+router.get('/privacidade', (req, res) => res.render('pages/privacidade', { user: req.session.user || null, seo: {
+    title:         'Política de Privacidade — GymBros',
+    description:   'Saiba como o GymBros coleta, usa e protege seus dados pessoais em conformidade com a LGPD.',
+    keywords:      'política de privacidade gymbros, lgpd gymbros, proteção de dados gymbros',
+    canonical:     '/privacidade',
+    ogTitle:       'Política de Privacidade — GymBros',
+    ogDescription: 'Transparência total sobre como tratamos seus dados pessoais.',
+}}));
+
+router.get('/termos', (req, res) => res.render('pages/termos', { user: req.session.user || null, seo: {
+    title:         'Termos de Serviço — GymBros',
+    description:   'Leia os termos e condições de uso da plataforma GymBros: planos, pagamentos, cancelamento e uso aceitável.',
+    keywords:      'termos de serviço gymbros, termos de uso gymbros, condições gymbros',
+    canonical:     '/termos',
+    ogTitle:       'Termos de Serviço — GymBros',
+    ogDescription: 'Conheça as regras e condições para uso da plataforma GymBros.',
+}}));
+
+router.get('/faq', (req, res) => res.render('pages/faq', { user: req.session.user || null, seo: {
+    title:         'FAQ — Perguntas Frequentes | GymBros',
+    description:   'Respostas para as dúvidas mais comuns sobre o GymBros: acesso a academias, planos, pagamentos, IA e suporte.',
+    keywords:      'faq gymbros, dúvidas gymbros, perguntas frequentes gymbros',
+    canonical:     '/faq',
+    ogTitle:       'Perguntas Frequentes — GymBros',
+    ogDescription: 'Tire suas dúvidas sobre o GymBros: planos, academias, pagamentos e mais.',
+}}));
+
 // Área do Aluno (protegida — requer plano ativo)
 router.get('/area-aluno', requirePlano, async (req, res) => {
     try {
@@ -394,47 +430,87 @@ router.post('/config/notificacao-intervalo', requireAuth, async (req, res) => {
 });
 
 //Treinos
-router.get('/treinos', requirePlano, (req, res) => {
+const SUGESTOES_TREINO = [
+    { id: 1, nome: 'Treino de Peito',      duracao: 50, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Supino reto', 'Crucifixo', 'Peck deck', 'Flexão'] },
+    { id: 2, nome: 'Treino de Pernas',      duracao: 60, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Agachamento', 'Leg press', 'Cadeira extensora', 'Panturrilha'] },
+    { id: 3, nome: 'Yoga Relaxamento',      duracao: 40, tipo: 'Alongamento', icone: 'fa-leaf',       exercicios: ['Saudação ao sol', 'Postura da criança', 'Torção espinhal'] },
+    { id: 4, nome: 'Treino de Costas',      duracao: 55, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Remada curvada', 'Puxada frontal', 'Remada unilateral'] },
+    { id: 5, nome: 'Treino de Ombros',      duracao: 45, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Desenvolvimento', 'Elevação lateral', 'Elevação frontal'] },
+    { id: 6, nome: 'Cardio Intenso',        duracao: 35, tipo: 'Cardio',      icone: 'fa-running',    exercicios: ['Esteira 20min', 'Bicicleta 15min'] },
+    { id: 7, nome: 'Pilates',               duracao: 50, tipo: 'Alongamento', icone: 'fa-leaf',       exercicios: ['Controle respiratório', 'Fortalecimento core'] },
+    { id: 8, nome: 'Treino Abdominal',      duracao: 30, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Crunch', 'Prancha', 'Abdominal oblíquo'] },
+    { id: 9, nome: 'HIIT',                  duracao: 25, tipo: 'Cardio',      icone: 'fa-fire',       exercicios: ['Burpee', 'Mountain climber', 'Jumping jack', 'Sprint'] }
+];
+
+router.get('/treinos', requirePlano, async (req, res) => {
+    let workouts = [];
+    try {
+        [workouts] = await db.execute(
+            `SELECT w.*, GROUP_CONCAT(e.nome ORDER BY we.ordem SEPARATOR ', ') AS exercicios_nomes
+             FROM workout w
+             LEFT JOIN workout_exercise we ON we.workout_id = w.id
+             LEFT JOIN exercise e ON e.id = we.exercise_id
+             WHERE w.user_id = ? AND w.ativo = 1
+             GROUP BY w.id
+             ORDER BY w.created_at DESC`,
+            [req.session.user.id]
+        );
+    } catch (err) {
+        console.error('[treinos]', err);
+    }
     res.render('pages/treinos', {
         user: req.session.user,
+        workouts,
+        sugestoes: SUGESTOES_TREINO,
         seo: { title: 'Meus Treinos — GymBros', canonical: '/treinos', robots: 'noindex, nofollow', description: 'Gerencie seus treinos no GymBros.' },
-        sugestoes: [
-            { id: 1, nome: 'Treino de Peito',      duracao: 50, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Supino reto', 'Crucifixo', 'Peck deck', 'Flexão'] },
-            { id: 2, nome: 'Treino de Pernas',      duracao: 60, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Agachamento', 'Leg press', 'Cadeira extensora', 'Panturrilha'] },
-            { id: 3, nome: 'Yoga Relaxamento',      duracao: 40, tipo: 'Alongamento', icone: 'fa-leaf',       exercicios: ['Saudação ao sol', 'Postura da criança', 'Torção espinhal'] },
-            { id: 4, nome: 'Treino de Costas',      duracao: 55, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Remada curvada', 'Puxada frontal', 'Remada unilateral'] },
-            { id: 5, nome: 'Treino de Ombros',      duracao: 45, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Desenvolvimento', 'Elevação lateral', 'Elevação frontal'] },
-            { id: 6, nome: 'Cardio Intenso',        duracao: 35, tipo: 'Cardio',      icone: 'fa-running',    exercicios: ['Esteira 20min', 'Bicicleta 15min'] },
-            { id: 7, nome: 'Pilates',               duracao: 50, tipo: 'Alongamento', icone: 'fa-leaf',       exercicios: ['Controle respiratório', 'Fortalecimento core'] },
-            { id: 8, nome: 'Treino Abdominal',      duracao: 30, tipo: 'Força',       icone: 'fa-dumbbell',   exercicios: ['Crunch', 'Prancha', 'Abdominal oblíquo'] },
-            { id: 9, nome: 'HIIT',                  duracao: 25, tipo: 'Cardio',      icone: 'fa-fire',       exercicios: ['Burpee', 'Mountain climber', 'Jumping jack', 'Sprint'] }
-        ]
     });
 });
 
 //Evolução
-router.get('/evolucao', requirePlano, (req, res) => {
+router.get('/evolucao', requirePlano, async (req, res) => {
+    const uid = req.session.user.id;
+    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    let checkins = [], workoutLogs = [], measurements = [];
+    try {
+        [[checkins], [workoutLogs], [measurements]] = await Promise.all([
+            db.execute(
+                `SELECT data, dia_semana, COUNT(*) as total
+                 FROM checkin
+                 WHERE user_id = ? AND data >= CURDATE() - INTERVAL 30 DAY
+                 GROUP BY data, dia_semana
+                 ORDER BY data ASC`,
+                [uid]
+            ),
+            db.execute(
+                `SELECT wl.*, w.nome as workout_nome
+                 FROM workout_log wl
+                 LEFT JOIN workout w ON w.id = wl.workout_id
+                 WHERE wl.user_id = ? AND wl.data >= CURDATE() - INTERVAL 30 DAY
+                 ORDER BY wl.data DESC`,
+                [uid]
+            ),
+            db.execute(
+                `SELECT * FROM measurement WHERE user_id = ? ORDER BY data DESC LIMIT 10`,
+                [uid]
+            ),
+        ]);
+    } catch (err) {
+        console.error('[evolucao]', err);
+    }
 
-    const evolucao = {
-        treinosConcluidos: 7,
-        treinosTotais: 9,
-        consistencia: 78,
-        labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-        data: [1, 1, 2, 1, 1, 1, 0],
-        detalhes: [
-            { nome: 'Treino de Peito', peso: 50, repeticoes: 12 },
-            { nome: 'Treino de Pernas', peso: 60, repeticoes: 10 },
-            { nome: 'Yoga leve', peso: 0, repeticoes: 0 },
-            { nome: 'Treino de Costas', peso: 55, repeticoes: 12 },
-            { nome: 'Treino de Ombros', peso: 45, repeticoes: 12 },
-            { nome: 'Treino Cardio', peso: 0, repeticoes: 0 },
-            { nome: 'Treino Abdominal', peso: 0, repeticoes: 20 }
-        ]
-    };
+    const contPorDia = [0, 0, 0, 0, 0, 0, 0];
+    checkins.forEach(c => {
+        const d = new Date(c.data);
+        contPorDia[d.getDay()] += Number(c.total) || 0;
+    });
 
     res.render('pages/evolucao', {
         user: req.session.user,
-        evolucao,
+        checkins,
+        workoutLogs,
+        measurements,
+        graficoLabels: JSON.stringify(diasSemana),
+        graficoData:   JSON.stringify(contPorDia),
         seo: { title: 'Minha Evolução — GymBros', canonical: '/evolucao', robots: 'noindex, nofollow', description: 'Acompanhe sua evolução física no GymBros.' },
     });
 });
@@ -443,18 +519,10 @@ router.get('/evolucao', requirePlano, (req, res) => {
 router.get('/meu-plano', requirePlano, async (req, res) => {
     const user = req.session.user;
     try {
-        const [planoRows] = await db.execute(
-            `SELECT p.* FROM plan p
-             JOIN user_plan up ON up.plan_id = p.id
-             WHERE up.user_id = ? AND up.status = 'ativo'
-             LIMIT 1`,
-            [user.id]
-        );
-        const [todosPlanos] = await db.execute(
-            `SELECT * FROM plan WHERE status = 'ativo' ORDER BY preco ASC`
-        );
+        const planoRows  = await User.getActivePlan(user.id);
+        const todosPlanos = await Plan.findAll({ activeOnly: true });
+        const planoBase   = planoRows || todosPlanos[1] || todosPlanos[0];
 
-        const planoBase = planoRows[0] || todosPlanos[1] || todosPlanos[0];
         const beneficios = (() => { try { return JSON.parse(planoBase.beneficios || '[]'); } catch { return []; } })();
 
         const renovacao = new Date();
@@ -513,34 +581,78 @@ router.get('/config', requireAuth, async (req, res) => {
 });
 
 //Perfil IMC
-router.get('/imc-form', requirePlano, (req, res) => {
-
-    res.render('pages/imc-form', { user: req.session.user,
+router.get('/imc-form', requirePlano, async (req, res) => {
+    let ultimoImc = null;
+    try {
+        const [imcRows] = await db.execute(
+            `SELECT * FROM imc_profile WHERE user_id = ? ORDER BY id DESC LIMIT 1`,
+            [req.session.user.id]
+        );
+        if (imcRows[0]) {
+            const r = imcRows[0];
+            ultimoImc = {
+                peso:                  r.peso,
+                altura:                r.altura,
+                imcValor:              r.imc_valor,
+                idade:                 r.idade,
+                sexo:                  r.sexo,
+                objetivo:              r.objetivo,
+                experiencia:           r.experiencia,
+                diasSemana:            r.dias_semana,
+                tempoPorSessao:        r.tempo_por_sessao,
+                localTreino:           r.local_treino,
+                lesoes:                safeJson(r.lesoes, []),
+                restricoesAlimentares: safeJson(r.restricoes_alimentares, []),
+                suplementacao:         safeJson(r.suplementacao, []),
+                hidratacao:            r.hidratacao,
+                seletividade:          r.seletividade,
+                alimentosSeletividade: r.alimentos_seletividade || '',
+            };
+        }
+    } catch (err) {
+        console.error('[imc-form]', err);
+    }
+    res.render('pages/imc-form', { user: req.session.user, ultimoImc,
         seo: { title: 'Meu Perfil IMC — GymBros', canonical: '/imc-form', robots: 'noindex, nofollow', description: 'Perfil IMC personalizado GymBros.' },
     });
 });
 
 //Avaliação Corporal
-router.get('/ai/avaliacao', requirePlano, (req, res) => {
-
-    res.render('pages/ai-avaliacao', { user: req.session.user });
+router.get('/ai/avaliacao', requirePlano, async (req, res) => {
+    let avaliacoes = [];
+    try {
+        const [rows] = await db.execute(
+            `SELECT * FROM body_photo WHERE user_id = ? ORDER BY created_at DESC LIMIT 5`,
+            [req.session.user.id]
+        );
+        avaliacoes = rows.map(r => ({
+            ...r,
+            analise: safeJson(r.analise_raw, null),
+            data_fmt: new Date(r.created_at).toLocaleDateString('pt-BR'),
+        }));
+    } catch (err) {
+        console.error('[ai/avaliacao GET]', err);
+    }
+    res.render('pages/ai-avaliacao', { user: req.session.user, avaliacoes });
 });
 
 // Atualizar dados pessoais (nome e e-mail)
-router.post('/config/atualizar-dados', requireAuth, async (req, res) => {
+router.post('/config/atualizar-dados', requireAuth,
+  [
+    body('nome').trim().notEmpty().withMessage('Nome obrigatório.').isLength({ min: 3 }).withMessage('Nome muito curto.'),
+    body('email').isEmail().withMessage('E-mail inválido.').normalizeEmail(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ erros: errors.array() });
+
     const { nome, email, cep } = req.body;
     const user = req.session.user;
     try {
-        const [dup] = await db.execute(
-            'SELECT id FROM user WHERE email = ? AND id != ?',
-            [email, user.id]
-        );
-        if (dup.length > 0) return res.status(400).json({ erro: 'E-mail já cadastrado.' });
+        const dup = await User.findByEmail(email);
+        if (dup && dup.id !== user.id) return res.status(400).json({ erro: 'E-mail já cadastrado.' });
 
-        await db.execute(
-            'UPDATE user SET nome = ?, email = ?, cep = ? WHERE id = ?',
-            [nome, email, cep || user.cep, user.id]
-        );
+        await User.update(user.id, { nome, email, cep: cep || user.cep });
         req.session.user = { ...user, nome, email };
         return res.json({ mensagem: 'Dados atualizados com sucesso!' });
     } catch (err) {
@@ -550,16 +662,24 @@ router.post('/config/atualizar-dados', requireAuth, async (req, res) => {
 });
 
 // Alterar senha
-router.post('/config/alterar-senha', requireAuth, async (req, res) => {
+router.post('/config/alterar-senha', requireAuth,
+  [
+    body('senhaAtual').notEmpty().withMessage('Senha atual obrigatória.'),
+    body('novaSenha').isLength({ min: 6 }).withMessage('A nova senha deve ter pelo menos 6 caracteres.'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ erros: errors.array() });
+
     const { senhaAtual, novaSenha } = req.body;
     const user = req.session.user;
     try {
-        const [rows] = await db.execute('SELECT senha_hash FROM user WHERE id = ?', [user.id]);
-        if (!rows[0]) return res.status(404).json({ erro: 'Usuário não encontrado.' });
-        const ok = await bcrypt.compare(senhaAtual, rows[0].senha_hash);
+        const userRow = await User.findById(user.id);
+        if (!userRow) return res.status(404).json({ erro: 'Usuário não encontrado.' });
+        const ok = await bcrypt.compare(senhaAtual, userRow.senha_hash);
         if (!ok) return res.status(400).json({ erro: 'Senha atual incorreta.' });
         const novaHash = await bcrypt.hash(novaSenha, 10);
-        await db.execute('UPDATE user SET senha_hash = ? WHERE id = ?', [novaHash, user.id]);
+        await User.update(user.id, { senha_hash: novaHash });
         return res.json({ mensagem: 'Senha alterada com sucesso!' });
     } catch (err) {
         console.error('[config/alterar-senha]', err);
@@ -805,17 +925,11 @@ router.post('/register',
     const cpf = req.body.cpf.replace(/\D/g, '');
 
     try {
-        const [cpfRows]   = await db.execute('SELECT id FROM user WHERE cpf = ?', [cpf]);
-        const [emailRows] = await db.execute('SELECT id FROM user WHERE email = ?', [email]);
-
-        if (cpfRows.length > 0)   return res.status(400).json({ erros: [{ param: 'cpf',   msg: 'CPF já cadastrado.' }] });
-        if (emailRows.length > 0) return res.status(400).json({ erros: [{ param: 'email', msg: 'E-mail já cadastrado.' }] });
+        if (await User.findByCpf(cpf))    return res.status(400).json({ erros: [{ param: 'cpf',   msg: 'CPF já cadastrado.' }] });
+        if (await User.findByEmail(email)) return res.status(400).json({ erros: [{ param: 'email', msg: 'E-mail já cadastrado.' }] });
 
         const senha_hash = await bcrypt.hash(password, 10);
-        await db.execute(
-            'INSERT INTO user (nome, cpf, email, senha_hash, cep, logradouro, numero, complemento, bairro, cidade, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [nome, cpf, email, senha_hash, cep, logradouro || null, numero || null, complemento || null, bairro || null, cidade || null, estado || null]
-        );
+        await User.create({ nome, cpf, email, senha_hash, cep, logradouro, numero, complemento, bairro, cidade, estado });
         return res.status(200).json({ mensagem: 'Cadastro realizado com sucesso! Redirecionando para o login...' });
     } catch (err) {
         console.error('[register]', err);
@@ -839,28 +953,7 @@ router.post('/login',
     const cpfNorm    = identifier.replace(/\D/g, '');
 
     try {
-        // Busca por CPF (digits only) ou por e-mail
-        let userRows;
-        if (/^\d{11}$/.test(cpfNorm)) {
-            [userRows] = await db.execute(
-                "SELECT * FROM user WHERE cpf = ? AND status = 'ativo'",
-                [cpfNorm]
-            );
-        }
-        if (!userRows || userRows.length === 0) {
-            [userRows] = await db.execute(
-                "SELECT * FROM user WHERE email = ? AND status = 'ativo'",
-                [identifier.toLowerCase()]
-            );
-        }
-        if (!userRows || userRows.length === 0) {
-            [userRows] = await db.execute(
-                "SELECT * FROM user WHERE nome = ? AND status = 'ativo'",
-                [identifier]
-            );
-        }
-
-        const user = userRows[0];
+        const user = await User.findActiveByIdentifier(identifier);
         if (!user || !(await bcrypt.compare(password, user.senha_hash))) {
             await db.execute(
                 'INSERT INTO login_attempt (identificador, ip, sucesso) VALUES (?, ?, 0)',
@@ -869,58 +962,35 @@ router.post('/login',
             return res.status(401).json({ erros: [{ param: 'password', msg: 'Usuário ou senha incorretos.' }] });
         }
 
-        // Busca plano ativo
-        const [planoRows] = await db.execute(
-            `SELECT p.* FROM plan p
-             JOIN user_plan up ON up.plan_id = p.id
-             WHERE up.user_id = ? AND up.status = 'ativo'
-             LIMIT 1`,
-            [user.id]
-        );
-        const plano = planoRows[0] || null;
+        const [plano, imcRow, avalRow] = await Promise.all([
+            User.getActivePlan(user.id),
+            ImcProfile.findLatestByUser(user.id),
+            BodyPhoto.findLatestByUser(user.id),
+        ]);
 
-        // Busca último perfil IMC
-        const [imcRows] = await db.execute(
-            `SELECT * FROM imc_profile WHERE user_id = ? ORDER BY id DESC LIMIT 1`,
-            [user.id]
-        );
-
-        // Busca última avaliação corporal
-        const [avalRows] = await db.execute(
-            `SELECT * FROM body_photo WHERE user_id = ? ORDER BY id DESC LIMIT 1`,
-            [user.id]
-        );
-
-        // Busca dados extras do user
-        const [userExtra] = await db.execute(
-            `SELECT last_imc_update, last_avaliacao_update, notification_interval_days FROM user WHERE id = ?`,
-            [user.id]
-        );
-        const extra = userExtra[0] || {};
-
-        const imcData = imcRows[0] ? {
-            peso:                  imcRows[0].peso,
-            altura:                imcRows[0].altura,
-            imcValor:              imcRows[0].imc_valor,
-            idade:                 imcRows[0].idade,
-            sexo:                  imcRows[0].sexo,
-            objetivo:              imcRows[0].objetivo,
-            experiencia:           imcRows[0].experiencia,
-            diasSemana:            imcRows[0].dias_semana,
-            tempoPorSessao:        imcRows[0].tempo_por_sessao,
-            localTreino:           imcRows[0].local_treino,
-            lesoes:                safeJson(imcRows[0].lesoes, []),
-            restricoesAlimentares: safeJson(imcRows[0].restricoes_alimentares, []),
-            suplementacao:         safeJson(imcRows[0].suplementacao, []),
-            hidratacao:            imcRows[0].hidratacao,
-            seletividade:          imcRows[0].seletividade,
-            alimentosSeletividade: imcRows[0].alimentos_seletividade,
+        const imcData = imcRow ? {
+            peso:                  imcRow.peso,
+            altura:                imcRow.altura,
+            imcValor:              imcRow.imc_valor,
+            idade:                 imcRow.idade,
+            sexo:                  imcRow.sexo,
+            objetivo:              imcRow.objetivo,
+            experiencia:           imcRow.experiencia,
+            diasSemana:            imcRow.dias_semana,
+            tempoPorSessao:        imcRow.tempo_por_sessao,
+            localTreino:           imcRow.local_treino,
+            lesoes:                safeJson(imcRow.lesoes, []),
+            restricoesAlimentares: safeJson(imcRow.restricoes_alimentares, []),
+            suplementacao:         safeJson(imcRow.suplementacao, []),
+            hidratacao:            imcRow.hidratacao,
+            seletividade:          imcRow.seletividade,
+            alimentosSeletividade: imcRow.alimentos_seletividade,
         } : null;
 
-        const avalRaw = avalRows[0] ? safeJson(avalRows[0].analise_raw, null) : null;
+        const avalRaw  = avalRow ? safeJson(avalRow.analise_raw, null) : null;
         const avalData = avalRaw ? {
             ...avalRaw,
-            data: new Date(avalRows[0].created_at).toLocaleDateString('pt-BR'),
+            data: new Date(avalRow.created_at).toLocaleDateString('pt-BR'),
         } : null;
 
         req.session.user = {
@@ -933,9 +1003,9 @@ router.post('/login',
             planoSlug:                  plano?.slug  || null,
             profile_photo:              user.profile_photo || null,
             status:                     user.status,
-            last_imc_update:            extra.last_imc_update || null,
-            last_avaliacao_update:      extra.last_avaliacao_update || null,
-            notification_interval_days: extra.notification_interval_days || 7,
+            last_imc_update:            user.last_imc_update            || null,
+            last_avaliacao_update:      user.last_avaliacao_update      || null,
+            notification_interval_days: user.notification_interval_days || 7,
             imc:                        imcData,
             avaliacaoCorporal:          avalData,
         };

@@ -177,6 +177,50 @@
 
     </section>
 
+    <!-- HISTÓRICO DE AVALIAÇÕES -->
+    <% if (typeof avaliacoes !== 'undefined' && avaliacoes.length > 0) { %>
+    <section class="imc-form-card" style="margin-top:2rem">
+        <section class="imc-step-header">
+            <i class="fas fa-history imc-step-icon"></i>
+            <section>
+                <h2>Avaliações Anteriores</h2>
+                <p><%= avaliacoes.length %> avaliação(ões) registrada(s)</p>
+            </section>
+        </section>
+
+        <% avaliacoes.forEach(a => { %>
+        <% const c = a.analise?.composicao || {}; %>
+        <section style="border:1px solid #2a2a2a; border-radius:8px; padding:1rem; margin-top:1rem">
+            <p style="color:#888; font-size:0.85rem; margin-bottom:0.6rem">
+                <i class="fas fa-calendar-alt"></i> <%= a.data_fmt %>
+            </p>
+            <section style="display:flex; gap:1rem; flex-wrap:wrap">
+                <% if (c.percentual_gordura_estimado) { %>
+                <span style="background:#1a1a1a; padding:0.3rem 0.7rem; border-radius:4px; font-size:0.85rem">
+                    Gordura: <strong style="color:#FFD700"><%= c.percentual_gordura_estimado %></strong>
+                </span>
+                <% } %>
+                <% if (c.massa_muscular_aparente) { %>
+                <span style="background:#1a1a1a; padding:0.3rem 0.7rem; border-radius:4px; font-size:0.85rem">
+                    Músculo: <strong style="color:#4fc3f7"><%= c.massa_muscular_aparente %></strong>
+                </span>
+                <% } %>
+                <% if (c.regiao_predominante) { %>
+                <span style="background:#1a1a1a; padding:0.3rem 0.7rem; border-radius:4px; font-size:0.85rem">
+                    Região: <strong><%= c.regiao_predominante %></strong>
+                </span>
+                <% } %>
+                <% if (a.analise?.classificacao_imc_visual) { %>
+                <span style="background:#1a1a1a; padding:0.3rem 0.7rem; border-radius:4px; font-size:0.85rem">
+                    IMC visual: <strong><%= a.analise.classificacao_imc_visual %></strong>
+                </span>
+                <% } %>
+            </section>
+        </section>
+        <% }) %>
+    </section>
+    <% } %>
+
 </section>
 
 <%- include('../partials/footer') %>

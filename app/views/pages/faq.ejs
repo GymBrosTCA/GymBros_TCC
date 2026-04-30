@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include('../partials/seo') %>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/legal.css">
+    <link rel="stylesheet" href="/css/footer.css">
+</head>
+
+<body>
+    <%- include('../partials/header') %>
+
+    <section class="side-menu" id="sideMenu">
+        <span class="close-menu" id="closeMenu"><i class="fas fa-times"></i></span>
+        <ul class="menu-items">
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/academias"><i class="fas fa-dumbbell"></i> Academias</a></li>
+            <li><a href="/about"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
+            <li><a href="/planos"><i class="fas fa-tags"></i> Planos e Preços</a></li>
+        </ul>
+    </section>
+
+    <section class="menu-overlay" id="menuOverlay"></section>
+
+    <main>
+        <section class="legal-hero">
+            <h1>Perguntas Frequentes</h1>
+            <p>Encontre respostas para as dúvidas mais comuns sobre o GymBros.</p>
+        </section>
+
+        <section class="legal-content">
+
+            <section class="faq-list">
+
+                <section class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        Como funciona o acesso às academias parceiras?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <section class="faq-answer">
+                        <p>Após assinar um plano, você pode visitar qualquer academia da nossa rede e fazer check-in pelo aplicativo. Basta acessar a seção "Academias" no app, localizar a academia onde você está e confirmar sua presença. O check-in registra sua visita e libera o acesso.</p>
+                    </section>
+                </section>
+
+                <section class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        Posso cancelar meu plano a qualquer momento?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <section class="faq-answer">
+                        <p>Sim. Você pode cancelar quando quiser pela seção "Meu Plano" na sua área do aluno. O acesso ao plano permanece ativo até o final do período já pago. Se ainda estiver dentro de 7 dias corridos após a contratação, você tem direito a reembolso integral, conforme o Código de Defesa do Consumidor.</p>
+                    </section>
+                </section>
+
+                <section class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        O que é a IA do GymBros e para quem está disponível?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <section class="faq-answer">
+                        <p>A IA do GymBros é um assistente personalizado que responde dúvidas sobre treinos, nutrição e bem-estar com base no seu perfil. Está disponível nos planos <strong>Premium</strong> e <strong>Superior</strong>. No plano Superior, a IA também realiza avaliação corporal inteligente com base nas suas fotos de evolução e medidas cadastradas.</p>
+                    </section>
+                </section>
+
+                <section class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        Quais formas de pagamento são aceitas?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <section class="faq-answer">
+                        <p>Aceitamos <strong>cartão de crédito</strong> (Visa, Mastercard, Elo e Amex), <strong>PIX</strong> com QR Code gerado na hora e <strong>boleto bancário</strong> com vencimento em 3 dias úteis. Os dados de cartão são processados por nosso parceiro certificado e nunca ficam armazenados em nossos servidores.</p>
+                    </section>
+                </section>
+
+                <section class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        Como atualizo meu treino ou registro minha evolução?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <section class="faq-answer">
+                        <p>Na sua área do aluno, acesse "Treinos" para visualizar e registrar seus treinos semanais. Na seção "Evolução", você pode cadastrar medidas corporais, peso e fotos de progresso. O GymBros exibe gráficos comparativos para que você acompanhe sua evolução ao longo do tempo.</p>
+                    </section>
+                </section>
+
+                <section class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        Como entro em contato com o suporte do GymBros?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <section class="faq-answer">
+                        <p>Você pode abrir um ticket de suporte diretamente pela seção "Suporte" na sua área do aluno. Nossa equipe responde em até 48 horas úteis. Para assuntos urgentes, também estamos disponíveis por e-mail em <a href="mailto:contato@gymbros.app.br">contato@gymbros.app.br</a> ou pelo telefone (11) 4002-8922.</p>
+                    </section>
+                </section>
+
+            </section>
+
+            <section class="faq-cta">
+                <p>Não encontrou o que procurava?</p>
+                <a href="/suporte" class="btn-faq-suporte">Abrir ticket de suporte</a>
+            </section>
+
+        </section>
+    </main>
+
+    <%- include('../partials/footer') %>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="/js/menu.js"></script>
+    <script src="/js/header.js"></script>
+    <script>
+    document.querySelectorAll('.faq-question').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const expanded = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', String(!expanded));
+            btn.nextElementSibling.classList.toggle('open', !expanded);
+        });
+    });
+    </script>
+
+</body>
+
+</html>
